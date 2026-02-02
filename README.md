@@ -89,7 +89,7 @@ After building the project, launch `True Motion Fidelity Engine.exe` from the `b
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit issues, fork the repository, and create pull requests (THIS IS VERY IMPORTANT PLEASE IF YOU HAVE SKILLS OR KNOWLIDGE OR EVEN  IF YOU USE AI TO HELP PLEASE WE NEED HELP).
+Contributions are welcome! Please feel free to submit issues, fork the repository, and create pull requests (THIS IS VERY IMPORTANT PLEASE IF YOU HAVE SKILLS OR KNOWLIDGE OR EVEN  IF YOU USE AI  FOR CODING ).
 
 ### How to Contribute
 
