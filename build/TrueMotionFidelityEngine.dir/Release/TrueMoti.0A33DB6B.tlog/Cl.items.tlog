@@ -1,0 +1,17 @@
+C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\app.cpp;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\TrueMotionFidelityEngine.dir\Release\app.obj
+C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\d3d11_device.cpp;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\TrueMotionFidelityEngine.dir\Release\d3d11_device.obj
+C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\dll_injector.cpp;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\TrueMotionFidelityEngine.dir\Release\dll_injector.obj
+C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\dup_capture.cpp;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\TrueMotionFidelityEngine.dir\Release\dup_capture.obj
+C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\game_capture.cpp;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\TrueMotionFidelityEngine.dir\Release\game_capture.obj
+C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\interpolator.cpp;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\TrueMotionFidelityEngine.dir\Release\interpolator.obj
+C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\main.cpp;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\TrueMotionFidelityEngine.dir\Release\main.obj
+C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\shader_utils.cpp;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\TrueMotionFidelityEngine.dir\Release\shader_utils.obj
+C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\ui.cpp;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\TrueMotionFidelityEngine.dir\Release\ui.obj
+C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\wgc_capture.cpp;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\TrueMotionFidelityEngine.dir\Release\wgc_capture.obj
+C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\window_list.cpp;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\TrueMotionFidelityEngine.dir\Release\window_list.obj
+C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\imgui.cpp;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\TrueMotionFidelityEngine.dir\Release\imgui.obj
+C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\imgui_draw.cpp;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\TrueMotionFidelityEngine.dir\Release\imgui_draw.obj
+C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\imgui_tables.cpp;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\TrueMotionFidelityEngine.dir\Release\imgui_tables.obj
+C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\imgui_widgets.cpp;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\TrueMotionFidelityEngine.dir\Release\imgui_widgets.obj
+C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\backends\imgui_impl_win32.cpp;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\TrueMotionFidelityEngine.dir\Release\imgui_impl_win32.obj
+C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\backends\imgui_impl_dx11.cpp;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\TrueMotionFidelityEngine.dir\Release\imgui_impl_dx11.obj

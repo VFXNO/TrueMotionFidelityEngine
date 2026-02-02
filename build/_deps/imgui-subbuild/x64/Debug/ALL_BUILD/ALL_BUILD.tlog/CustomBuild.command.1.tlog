@@ -1,0 +1,10 @@
+^C:\USERS\VFXNO\DOWNLOADS\2\FRAME_INTERPOLATION (GAMING)\BUILD\_DEPS\IMGUI-SUBBUILD\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/_deps/imgui-subbuild" "-BC:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/_deps/imgui-subbuild" --check-stamp-file "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/_deps/imgui-subbuild/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

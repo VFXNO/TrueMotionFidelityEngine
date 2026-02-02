@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/_deps/imgui-subbuild/CMakeFiles/imgui-populate"
+		},
+		{
+			"file" : "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/_deps/imgui-subbuild/CMakeFiles/d03d73c90827d784f843835b25943fa2/imgui-populate.rule"
+		},
+		{
+			"file" : "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/_deps/imgui-subbuild/CMakeFiles/52fd0dca96b456075140e619fabf0b71/imgui-populate-complete.rule"
+		},
+		{
+			"file" : "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/_deps/imgui-subbuild/CMakeFiles/009435e402d64e4b7db94d18b398d7dc/imgui-populate-build.rule"
+		},
+		{
+			"file" : "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/_deps/imgui-subbuild/CMakeFiles/009435e402d64e4b7db94d18b398d7dc/imgui-populate-configure.rule"
+		},
+		{
+			"file" : "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/_deps/imgui-subbuild/CMakeFiles/009435e402d64e4b7db94d18b398d7dc/imgui-populate-download.rule"
+		},
+		{
+			"file" : "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/_deps/imgui-subbuild/CMakeFiles/009435e402d64e4b7db94d18b398d7dc/imgui-populate-install.rule"
+		},
+		{
+			"file" : "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/_deps/imgui-subbuild/CMakeFiles/009435e402d64e4b7db94d18b398d7dc/imgui-populate-mkdir.rule"
+		},
+		{
+			"file" : "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/_deps/imgui-subbuild/CMakeFiles/009435e402d64e4b7db94d18b398d7dc/imgui-populate-patch.rule"
+		},
+		{
+			"file" : "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/_deps/imgui-subbuild/CMakeFiles/009435e402d64e4b7db94d18b398d7dc/imgui-populate-test.rule"
+		},
+		{
+			"file" : "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/_deps/imgui-subbuild/CMakeFiles/009435e402d64e4b7db94d18b398d7dc/imgui-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"imgui-populate"
+		],
+		"name" : "imgui-populate"
+	}
+}

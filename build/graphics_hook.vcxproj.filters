@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\graphics_hook\graphics_hook.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\graphics_hook_info.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{80B5D483-2B92-316E-B6FB-5DFF743B8AF6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{13241CDD-5081-352D-BEDE-6F765F69A251}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
