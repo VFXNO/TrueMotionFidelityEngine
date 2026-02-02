@@ -1,3 +1,4 @@
+![TRUE_MOTION_ICON](https://github.com/user-attachments/assets/eae8b0ec-b36b-436d-a3aa-aa897b3dda4c)
 # True Motion Fidelity Engine (TMFE)
 
 <div align="center">
