@@ -1,9 +1,13 @@
+<div align="center">
 
 ![TRUE_MOTION_ICON](https://github.com/user-attachments/assets/eae8b0ec-b36b-436d-a3aa-aa897b3dda4c)
+
+</div>
 
 # True Motion Fidelity Engine (TMFE)
 
 <div align="center">
+
 **A high-performance frame generation engine for Windows 11**
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
@@ -85,7 +89,7 @@ After building the project, launch `True Motion Fidelity Engine.exe` from the `b
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit issues, fork the repository, and create pull requests (THIS IS VERY IMPORTANT PLEASE IF YOU HAVE SKILLS OR KNOWLIDGE OR EVEN  IF YOU USE AI TO CODE TRY TO PULL REQUEST SO WE COULD IMPROVE IT AND BE FREE FOR ALL ).
+Contributions are welcome! Please feel free to submit issues, fork the repository, and create pull requests (THIS IS VERY IMPORTANT PLEASE IF YOU HAVE SKILLS OR KNOWLIDGE OR EVEN  IF YOU USE AI TO HELP PLEASE WE NEED HELP).
 
 ### How to Contribute
 
@@ -119,7 +123,6 @@ The name **"True Motion Fidelity Engine"** is a trademark of **VFXNO**.
 - 📝 You **must include** the `NOTICE` file in your distribution, keeping the attribution "Powered by VFXNO"
 
 ---
-
 
 
 <div align="center">
