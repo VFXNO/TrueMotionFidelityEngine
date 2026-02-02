@@ -14,7 +14,7 @@
 
 ## 📋 Overview
 
-True Motion Fidelity Engine (TMFE) is an advanced frame generation prototype that leverages Windows Graphics Capture API, Direct3D 11 compute shaders, and ImGui to deliver smooth motion interpolation on Windows 11. The engine uses shader-based interpolation techniques to generate intermediate frames, enhancing visual fluidity in real-time applications.
+True Motion Fidelity Engine (TMFE) is an advanced frame generation project that leverages Windows Graphics Capture API, Direct3D 11 compute shaders, and ImGui to deliver smooth motion interpolation on Windows 11. The engine uses shader-based interpolation techniques to generate intermediate frames, enhancing visual fluidity in real-time applications.
 
 ### ✨ Key Features
 
@@ -83,7 +83,7 @@ After building the project, launch `True Motion Fidelity Engine.exe` from the `b
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit issues, fork the repository, and create pull requests.
+Contributions are welcome! Please feel free to submit issues, fork the repository, and create pull requests (THIS IS VERY IMPORTANT PLEASE IF YOU HAVE SKILLS OR KNOWLIDGE OR EVEN  IF YOU USE AI TO CODE TRY TO PULL REQUEST SO WE COULD IMPROVE IT AND BE FREE FOR ALL ).
 
 ### How to Contribute
 
