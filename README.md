@@ -1,10 +1,9 @@
-<div align="center">
+
 ![TRUE_MOTION_ICON](https://github.com/user-attachments/assets/eae8b0ec-b36b-436d-a3aa-aa897b3dda4c)
-</div>
+
 # True Motion Fidelity Engine (TMFE)
 
 <div align="center">
-
 **A high-performance frame generation engine for Windows 11**
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
