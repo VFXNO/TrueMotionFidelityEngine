@@ -66,8 +66,11 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
     // ------------------------------------------------------------------------
     // 1. Fetch Motion Vector & Confidence
     // ------------------------------------------------------------------------
-    float2 mv = Motion.SampleLevel(LinearClamp, inputUv, 0);
-    float conf = Confidence.SampleLevel(LinearClamp, inputUv, 0);
+    // FIXED: Use Point Sampling (Load) to avoid interpolating motion vectors at edges.
+    // Linear sampling causes "halos" by averaging opposing vectors (e.g. -100 vs +10 becomes -45).
+    int3 loadPos = int3(inputPos * (mvSize / inSize), 0);
+    float2 mv = Motion.Load(loadPos).xy;
+    float conf = Confidence.Load(loadPos).x;
     
     mv *= (inSize / mvSize); // Scale to pixels
     

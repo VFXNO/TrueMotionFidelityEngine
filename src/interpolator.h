@@ -20,10 +20,6 @@ public:
   bool Initialize(ID3D11Device* device, ID3D11DeviceContext* context);
   bool Resize(int inputWidth, int inputHeight, int outputWidth, int outputHeight);
   void SetRadius(int radius) { m_radius = radius; }
-  void SetBlendTuning(float diffScale, float confPower) {
-    m_diffScale = diffScale;
-    m_confPower = confPower;
-  }
   void SetMotionSmoothing(float edgeScale, float confPower) {
     m_smoothEdgeScale = edgeScale;
     m_smoothConfPower = confPower;
@@ -43,10 +39,6 @@ public:
   }
 
   void Execute(
-      ID3D11ShaderResourceView* prev,
-      ID3D11ShaderResourceView* curr,
-      float alpha);
-  void Blend(
       ID3D11ShaderResourceView* prev,
       ID3D11ShaderResourceView* curr,
       float alpha);
@@ -79,7 +71,6 @@ private:
   Microsoft::WRL::ComPtr<ID3D11ComputeShader> m_motionSmoothCs;
   Microsoft::WRL::ComPtr<ID3D11ComputeShader> m_motionTemporalCs;
   Microsoft::WRL::ComPtr<ID3D11ComputeShader> m_interpolateCs;
-  Microsoft::WRL::ComPtr<ID3D11ComputeShader> m_blendCs;
   Microsoft::WRL::ComPtr<ID3D11ComputeShader> m_copyCs;
   Microsoft::WRL::ComPtr<ID3D11ComputeShader> m_debugCs;
 
@@ -143,7 +134,6 @@ private:
   Microsoft::WRL::ComPtr<ID3D11Buffer> m_smoothConstants;
   Microsoft::WRL::ComPtr<ID3D11Buffer> m_temporalConstants;
   Microsoft::WRL::ComPtr<ID3D11Buffer> m_interpConstants;
-  Microsoft::WRL::ComPtr<ID3D11Buffer> m_blendConstants;
   Microsoft::WRL::ComPtr<ID3D11Buffer> m_debugConstants;
   Microsoft::WRL::ComPtr<ID3D11SamplerState> m_linearSampler;
 
@@ -159,7 +149,6 @@ private:
   int m_smallWidth = 0;
   int m_smallHeight = 0;
   int m_radius = 3;
-  float m_diffScale = 2.0f;
   float m_confPower = 1.0f;
   float m_smoothEdgeScale = 6.0f;
   float m_smoothConfPower = 1.0f;

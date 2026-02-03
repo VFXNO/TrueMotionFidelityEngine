@@ -24,9 +24,9 @@ events:
       The output was:
       0
       MSBuild version 17.14.23+b0019275e for .NET Framework
-      Build started 2/2/2026 8:15:29 PM.
+      Build started 2/3/2026 5:09:25 PM.
       
-      Project "C:\\Users\\vfxno\\Downloads\\2\\Frame_interpolation (gaming)\\build\\CMakeFiles\\4.0.2\\CompilerIdCXX\\CompilerIdCXX.vcxproj" on node 1 (default targets).
+      Project "C:\\Users\\vfxno\\Downloads\\2\\TrueMotionFidelityEngine\\build\\CMakeFiles\\4.0.2\\CompilerIdCXX\\CompilerIdCXX.vcxproj" on node 1 (default targets).
       PrepareForBuild:
         Creating directory "Debug\\".
         Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
@@ -39,7 +39,7 @@ events:
         CMakeCXXCompilerId.cpp
       Link:
         C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdCXX.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdCXX.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdCXX.lib" /MACHINE:X64 Debug\\CMakeCXXCompilerId.obj
-        CompilerIdCXX.vcxproj -> C:\\Users\\vfxno\\Downloads\\2\\Frame_interpolation (gaming)\\build\\CMakeFiles\\4.0.2\\CompilerIdCXX\\CompilerIdCXX.exe
+        CompilerIdCXX.vcxproj -> C:\\Users\\vfxno\\Downloads\\2\\TrueMotionFidelityEngine\\build\\CMakeFiles\\4.0.2\\CompilerIdCXX\\CompilerIdCXX.exe
       PostBuildEvent:
         for %%i in (cl.exe) do @echo CMAKE_CXX_COMPILER=%%~$PATH:i
         :VCEnd
@@ -47,13 +47,13 @@ events:
       FinalizeBuildStatus:
         Deleting file "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild".
         Touching "Debug\\CompilerIdCXX.tlog\\CompilerIdCXX.lastbuildstate".
-      Done Building Project "C:\\Users\\vfxno\\Downloads\\2\\Frame_interpolation (gaming)\\build\\CMakeFiles\\4.0.2\\CompilerIdCXX\\CompilerIdCXX.vcxproj" (default targets).
+      Done Building Project "C:\\Users\\vfxno\\Downloads\\2\\TrueMotionFidelityEngine\\build\\CMakeFiles\\4.0.2\\CompilerIdCXX\\CompilerIdCXX.vcxproj" (default targets).
       
       Build succeeded.
           0 Warning(s)
           0 Error(s)
       
-      Time Elapsed 00:00:02.34
+      Time Elapsed 00:00:02.31
       
       
       Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
@@ -61,7 +61,7 @@ events:
       Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.vcxproj"
       
       The CXX compiler identification is MSVC, found in:
-        C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/CMakeFiles/4.0.2/CompilerIdCXX/CompilerIdCXX.exe
+        C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/CMakeFiles/4.0.2/CompilerIdCXX/CompilerIdCXX.exe
       
   -
     kind: "try_compile-v1"
@@ -72,8 +72,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/CMakeFiles/CMakeScratch/TryCompile-jmhb3o"
-      binary: "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/CMakeFiles/CMakeScratch/TryCompile-jmhb3o"
+      source: "C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/CMakeFiles/CMakeScratch/TryCompile-fgky52"
+      binary: "C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/CMakeFiles/CMakeScratch/TryCompile-fgky52"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
       CMAKE_CXX_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
@@ -83,40 +83,40 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: 'C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/CMakeFiles/CMakeScratch/TryCompile-jmhb3o'
+        Change Dir: 'C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/CMakeFiles/CMakeScratch/TryCompile-fgky52'
         
-        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_11024.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_62279.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
         MSBuild version 17.14.23+b0019275e for .NET Framework
-        Build started 2/2/2026 8:15:33 PM.
+        Build started 2/3/2026 5:09:28 PM.
         
-        Project "C:\\Users\\vfxno\\Downloads\\2\\Frame_interpolation (gaming)\\build\\CMakeFiles\\CMakeScratch\\TryCompile-jmhb3o\\cmTC_11024.vcxproj" on node 1 (default targets).
+        Project "C:\\Users\\vfxno\\Downloads\\2\\TrueMotionFidelityEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fgky52\\cmTC_62279.vcxproj" on node 1 (default targets).
         PrepareForBuild:
-          Creating directory "cmTC_11024.dir\\Debug\\".
+          Creating directory "cmTC_62279.dir\\Debug\\".
           Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
-          Creating directory "C:\\Users\\vfxno\\Downloads\\2\\Frame_interpolation (gaming)\\build\\CMakeFiles\\CMakeScratch\\TryCompile-jmhb3o\\Debug\\".
-          Creating directory "cmTC_11024.dir\\Debug\\cmTC_11024.tlog\\".
+          Creating directory "C:\\Users\\vfxno\\Downloads\\2\\TrueMotionFidelityEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fgky52\\Debug\\".
+          Creating directory "cmTC_62279.dir\\Debug\\cmTC_62279.tlog\\".
         InitializeBuildStatus:
-          Creating "cmTC_11024.dir\\Debug\\cmTC_11024.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
-          Touching "cmTC_11024.dir\\Debug\\cmTC_11024.tlog\\unsuccessfulbuild".
+          Creating "cmTC_62279.dir\\Debug\\cmTC_62279.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_62279.dir\\Debug\\cmTC_62279.tlog\\unsuccessfulbuild".
         ClCompile:
-          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_11024.dir\\Debug\\\\" /Fd"cmTC_11024.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCXXCompilerABI.cpp"
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_62279.dir\\Debug\\\\" /Fd"cmTC_62279.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCXXCompilerABI.cpp"
           Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35222 for x64
           Copyright (C) Microsoft Corporation.  All rights reserved.
-          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_11024.dir\\Debug\\\\" /Fd"cmTC_11024.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCXXCompilerABI.cpp"
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_62279.dir\\Debug\\\\" /Fd"cmTC_62279.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCXXCompilerABI.cpp"
           CMakeCXXCompilerABI.cpp
         Link:
-          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\vfxno\\Downloads\\2\\Frame_interpolation (gaming)\\build\\CMakeFiles\\CMakeScratch\\TryCompile-jmhb3o\\Debug\\cmTC_11024.exe" /INCREMENTAL /ILK:"cmTC_11024.dir\\Debug\\cmTC_11024.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/CMakeFiles/CMakeScratch/TryCompile-jmhb3o/Debug/cmTC_11024.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/CMakeFiles/CMakeScratch/TryCompile-jmhb3o/Debug/cmTC_11024.lib" /MACHINE:X64  /machine:x64 cmTC_11024.dir\\Debug\\CMakeCXXCompilerABI.obj
-          cmTC_11024.vcxproj -> C:\\Users\\vfxno\\Downloads\\2\\Frame_interpolation (gaming)\\build\\CMakeFiles\\CMakeScratch\\TryCompile-jmhb3o\\Debug\\cmTC_11024.exe
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\vfxno\\Downloads\\2\\TrueMotionFidelityEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fgky52\\Debug\\cmTC_62279.exe" /INCREMENTAL /ILK:"cmTC_62279.dir\\Debug\\cmTC_62279.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/CMakeFiles/CMakeScratch/TryCompile-fgky52/Debug/cmTC_62279.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/CMakeFiles/CMakeScratch/TryCompile-fgky52/Debug/cmTC_62279.lib" /MACHINE:X64  /machine:x64 cmTC_62279.dir\\Debug\\CMakeCXXCompilerABI.obj
+          cmTC_62279.vcxproj -> C:\\Users\\vfxno\\Downloads\\2\\TrueMotionFidelityEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fgky52\\Debug\\cmTC_62279.exe
         FinalizeBuildStatus:
-          Deleting file "cmTC_11024.dir\\Debug\\cmTC_11024.tlog\\unsuccessfulbuild".
-          Touching "cmTC_11024.dir\\Debug\\cmTC_11024.tlog\\cmTC_11024.lastbuildstate".
-        Done Building Project "C:\\Users\\vfxno\\Downloads\\2\\Frame_interpolation (gaming)\\build\\CMakeFiles\\CMakeScratch\\TryCompile-jmhb3o\\cmTC_11024.vcxproj" (default targets).
+          Deleting file "cmTC_62279.dir\\Debug\\cmTC_62279.tlog\\unsuccessfulbuild".
+          Touching "cmTC_62279.dir\\Debug\\cmTC_62279.tlog\\cmTC_62279.lastbuildstate".
+        Done Building Project "C:\\Users\\vfxno\\Downloads\\2\\TrueMotionFidelityEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fgky52\\cmTC_62279.vcxproj" (default targets).
         
         Build succeeded.
             0 Warning(s)
             0 Error(s)
         
-        Time Elapsed 00:00:01.69
+        Time Elapsed 00:00:01.57
         
       exitCode: 0
   -

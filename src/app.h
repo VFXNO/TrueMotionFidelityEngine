@@ -101,7 +101,6 @@ private:
   float m_temporalConfInfluence = 0.6f;
   int m_temporalNeighborhoodSize = 2;
   bool m_useMotionPrediction = true;
-  bool m_forceSmoothBlend = false;
   bool m_limitOutputFps = true;
   bool m_useVsync = false;
   bool m_fullscreenWindowOutput = false;
@@ -129,7 +128,6 @@ private:
   int m_debugView = 0;
   float m_debugMotionScale = 0.03f;
   float m_debugDiffScale = 2.0f;
-  float m_blendDiffScale = 1.5f;
   float m_confidencePower = 1.5f;
   float m_motionEdgeScale = 6.0f;
   int m_refineRadius = 2;

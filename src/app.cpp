@@ -1104,8 +1104,8 @@ void App::Update() {
 void App::UpdateCapture() {
   int processed = 0;
   constexpr int kMaxFramesPerUpdate = 180;
-  int maxFramesPerUpdate = m_forceSmoothBlend ? 2 : kMaxFramesPerUpdate;
-  bool neverDropMode = m_neverDropFrames && !m_forceSmoothBlend;
+  int maxFramesPerUpdate = kMaxFramesPerUpdate;
+  bool neverDropMode = m_neverDropFrames;
   int maxQueueSize = neverDropMode ? m_maxQueueSize : 3;
   if (maxQueueSize < 2) {
     maxQueueSize = 2;
@@ -1156,8 +1156,7 @@ void App::UpdateCapture() {
     bool gotFrame = false;
     if (m_captureMode == 0) {
       if (m_windowCaptureUsingWgc) {
-        gotFrame = m_forceSmoothBlend ? m_capture.AcquireLatestFrame(frame)
-                                       : m_capture.AcquireNextFrame(frame);
+        gotFrame = m_capture.AcquireNextFrame(frame);
       } else {
         gotFrame = m_dupCapture.AcquireNextFrame(frame);
       }
@@ -1169,8 +1168,7 @@ void App::UpdateCapture() {
       gotFrame = m_dupCapture.AcquireNextFrame(frame);
       // Cropping will be done later after we verify we got a frame
     } else {
-      gotFrame = m_forceSmoothBlend ? m_capture.AcquireLatestFrame(frame)
-                                     : m_capture.AcquireNextFrame(frame);
+      gotFrame = m_capture.AcquireNextFrame(frame);
     }
     if (!gotFrame) {
       // In high-FPS mode with spin-wait, keep trying to get frames
@@ -1464,9 +1462,6 @@ void App::Render() {
   } else {
     m_targetFps = 0.0f;
   }
-  if (m_forceSmoothBlend && monitorHz > 0.0f) {
-    m_targetFps = monitorHz;
-  }
 
   LARGE_INTEGER now = {};
   QueryPerformanceCounter(&now);
@@ -1482,7 +1477,7 @@ void App::Render() {
   }
   int64_t intervalQpc = 0;
   
-  bool limitOutput = (m_limitOutputFps || m_forceSmoothBlend) && !useMonitorSync;
+  bool limitOutput = m_limitOutputFps && !useMonitorSync;
   if (limitOutput && m_targetFps > 0.0f && freq > 0.0) {
     // Use precise floating point interval from target FPS (do not snap to integer)
     double targetFps = static_cast<double>(m_targetFps);
@@ -1532,7 +1527,7 @@ void App::Render() {
     m_nextOutputQpc = 0;
   }
 
-  bool neverDropMode = m_neverDropFrames && !m_forceSmoothBlend;
+  bool neverDropMode = m_neverDropFrames;
   int maxQueueSize = neverDropMode ? m_maxQueueSize : 3;
   if (maxQueueSize < 2) {
     maxQueueSize = 2;
@@ -1640,7 +1635,6 @@ void App::Render() {
     bool hasPrevSrv = (m_frameSrvs[prevSlot] != nullptr);
     bool hasCurrSrv = (m_frameSrvs[currSlot] != nullptr);
     bool canInterpolate = m_interpolationEnabled && hasPair && hasPrevSrv && hasCurrSrv;
-    bool forceBlend = m_forceSmoothBlend && hasPair && hasPrevSrv && hasCurrSrv;
     if (useMonitorSync) {
       if (captureFps <= 0.0 || monitorHz <= 0.0f) {
         canInterpolate = false;
@@ -1658,7 +1652,7 @@ void App::Render() {
     float alpha = 1.0f;
     double intervalSec = 0.0;
     double useInterval = 0.0;
-    int stepCount = ((canInterpolate || forceBlend) && multiplier > 0) ? multiplier : 1;
+    int stepCount = (canInterpolate && multiplier > 0) ? multiplier : 1;
     if (stepCount < 1) {
       stepCount = 1;
     }
@@ -1689,7 +1683,7 @@ void App::Render() {
           if (t < 0.0) {
             t = 0.0;
           }
-          if (canInterpolate || forceBlend) {
+          if (canInterpolate) {
             // UNLOCKED SMOOTHNESS:
             // Instead of stepping (0.0, 0.5, 1.0), calculate exact alpha based on time.
             // This eliminates judder when Monitor Hz != Target Hz.
@@ -1736,9 +1730,7 @@ void App::Render() {
     }
 
     bool allowInterpolation = canInterpolate && (!unstable || neverDropMode);
-    if (forceBlend) {
-      allowInterpolation = true;
-    }
+
     m_lastUnstable = unstable;
     m_lastAlpha = alpha;
     
@@ -1787,7 +1779,6 @@ void App::Render() {
         if (alpha > 1.0f) alpha = 1.0f;
         
         m_interpolator.SetRadius(m_motionRadius);
-        m_interpolator.SetBlendTuning(m_blendDiffScale, m_confidencePower);
         m_interpolator.SetRefineRadius(m_refineRadius);
         m_interpolator.SetMotionSmoothing(m_motionEdgeScale, m_confidencePower);
         m_interpolator.SetTemporalStabilization(m_temporalStabilization,
@@ -1799,11 +1790,8 @@ void App::Render() {
         // ALWAYS EXECUTE if allowInterpolation is true.
         // Even if alpha is 0.0 or 1.0, we want the GPU to do the work.
         // This ensures the pipeline (including motion history) stays valid and hot.
-        if (forceBlend) {
-          m_interpolator.Blend(m_frameSrvs[prevSlot].Get(), m_frameSrvs[currSlot].Get(), alpha);
-        } else {
-          m_interpolator.Execute(m_frameSrvs[prevSlot].Get(), m_frameSrvs[currSlot].Get(), alpha);
-        }
+        m_interpolator.Execute(m_frameSrvs[prevSlot].Get(), m_frameSrvs[currSlot].Get(), alpha);
+        
         output = m_interpolator.OutputTexture();
     } else {
       if (needScale && hasCurrSrv) {
@@ -2541,14 +2529,14 @@ void App::RenderUi() {
   if (ImGui::IsItemHovered()) ImGui::SetTooltip("Blend motion vectors across frames for stability.\nReduces flickering in motion estimation.\nSlightly increases smoothness at cost of responsiveness.");
   
   if (m_temporalStabilization) {
-    ImGui::SliderFloat("Temporal History", &m_temporalHistoryWeight, 0.0f, 0.6f, "%.2f");
+    ImGui::SliderFloat("Temporal History", &m_temporalHistoryWeight, 0.0f, 0.99f, "%.2f");
     if (ImGui::IsItemHovered()) ImGui::SetTooltip("How much to blend with previous frame's motion.\n0 = No history (current only)\nHigher = More stable but less responsive to changes.");
     
     ImGui::SliderFloat("Temporal Conf Influence", &m_temporalConfInfluence, 0.0f, 1.0f, "%.2f");
     if (ImGui::IsItemHovered()) ImGui::SetTooltip("How much confidence affects temporal blending.\nHigher = Only trust history when confident.\nLower = Always blend with history.");
 
-    ImGui::SliderInt("Neighbor Size", &m_temporalNeighborhoodSize, 1, 4);
-    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Size of the clamping box (Kernel Radius).\n1 = 3x3 (Sharpest)\n2 = 5x5 (Balanced)\n3 = 7x7 (Smoother)\n4 = 9x9 (Very Stable)");
+    ImGui::SliderInt("Neighbor Size", &m_temporalNeighborhoodSize, 1, 5);
+    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Size of the clamping box (Kernel Radius).\n1 = 3x3 (Sharpest)\n2 = 5x5 (Balanced)\n3 = 7x7 (Smoother)\n4 = 9x9 (Very Stable)\n5 = 11x11 (Maximum Stability)");
   }
   
   ImGui::Checkbox("Motion Prediction (Multi-Frame)", &m_useMotionPrediction);
@@ -2563,8 +2551,8 @@ void App::RenderUi() {
   
   ImGui::Checkbox("VSync (Monitor Sync)", &m_useVsync);
   if (ImGui::IsItemHovered()) ImGui::SetTooltip("Synchronize output with monitor refresh rate.\nPrevents tearing but may add latency.\nDisable for lowest latency with possible tearing.");
-  ImGui::SliderInt("Search Radius", &m_motionRadius, 1, 8);
-  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Pixel search radius for motion estimation.\nHigher = Better for fast motion but slower.\nLower = Faster but may miss large movements.\nRecommended: 3-4 for games, 6-8 for video.");
+  ImGui::SliderInt("Search Radius", &m_motionRadius, 1, 16);
+  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Pixel search radius for motion estimation.\nHigher = Better for fast motion but slower.\nLower = Faster but may miss large movements.\nRecommended: 4-8 for games, 8-12 for fast action.");
   
   ImGui::SliderInt("Refine Radius", &m_refineRadius, 1, 4);
   if (ImGui::IsItemHovered()) ImGui::SetTooltip("Sub-pixel refinement search radius.\nHigher = More accurate motion but slower.\nRecommended: 2 for balance.");
@@ -2586,8 +2574,6 @@ void App::RenderUi() {
     ImGui::SliderInt("Target Queue Depth", &m_targetQueueDepth, 2, kFrameQueueSize);
     if (ImGui::IsItemHovered()) ImGui::SetTooltip("Target number of frames to keep buffered.\nHigher = Smoother but more latency.\nLower = Less latency but may stutter.");
   }
-  ImGui::SliderFloat("Blend Diff", &m_blendDiffScale, 0.0f, 6.0f, "%.2f");
-  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Sensitivity for occlusion detection.\nHigher = More tolerant of warping errors (smoother but ghosty)\nLower = Stricter matching (less ghosting but more fallback)\nRecommended: 1.5-2.0");
   
   ImGui::SliderFloat("Conf Power", &m_confidencePower, 0.5f, 3.0f, "%.2f");
   if (ImGui::IsItemHovered()) ImGui::SetTooltip("Confidence curve power for motion reliability.\nHigher = Only trust very confident motion estimates\nLower = Trust motion more liberally\nRecommended: 1.0-1.5");

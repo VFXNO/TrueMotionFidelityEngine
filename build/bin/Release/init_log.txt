@@ -1,5 +1,5 @@
 Interpolator::Initialize started
-Shader path: C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\bin\Release\shaders\DownsampleLuma.hlsl
+Shader path: C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\bin\Release\shaders\DownsampleLuma.hlsl
 Calling LoadShaders...
 LoadShaders succeeded
 Creating MotionConstants buffer...

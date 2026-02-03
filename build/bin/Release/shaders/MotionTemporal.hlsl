@@ -83,15 +83,36 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
     float historyConf = ConfHistory.SampleLevel(LinearClamp, historyUV, 0);
     
     // The Magic Fix: Clamp history to the current neighborhood range.
+    // STRICT CLAMP RESTORED: This is essential to prevent ghosting.
     float2 clampedHistory = clamp(historyMotion, minMotion, maxMotion);
     
     // ------------------------------------------------------------------------
     // 4. Blend
     // ------------------------------------------------------------------------
-    float alpha = 0.94f; 
+    float alpha = historyWeight;
+    
+    // INTELLIGENT FALLOFF:
+    // Only drop history if the change is large AND we are confident in the new data.
+    // This prevents flickering when the camera moves fast (high dist) but the
+    // estimation is noisy (low conf).
+    float dist = length(currMotion - clampedHistory);
+    
+    if (dist > 2.0) { // Threshold for "Significant Change"
+        // If confidence is high (1.0), we allow alpha to drop (accept change).
+        // If confidence is low (0.0), we keep alpha high (reject noise).
+        // The factor 0.3 means we drop alpha by up to 70% if confident.
+        float changeCredibility = smoothstep(0.2, 0.8, currConf);
+        alpha *= lerp(1.0, 0.3, changeCredibility);
+    }
+    
+    // Confidence Influence:
+    // If we are highly confident in the NEW data, we need less history.
+    // If the NEW data is garbage (low conf), stick to history.
+    float trustCurrent = currConf * confInfluence;
+    alpha = clamp(alpha * (1.0 - trustCurrent * 0.5), 0.0, 0.99); // *0.5 to keep it stable
     
     MotionOut[id.xy] = lerp(currMotion, clampedHistory, alpha);
     
     // Confidence accumulates slowly
-    ConfOut[id.xy] = lerp(currConf, historyConf, 0.90f);
+    ConfOut[id.xy] = lerp(currConf, historyConf, alpha);
 }

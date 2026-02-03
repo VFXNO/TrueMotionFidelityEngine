@@ -22,7 +22,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{0A33DB6B-16B2-3E5D-B736-C8F201BF58E0}</ProjectGuid>
+    <ProjectGuid>{C4D46A09-C36A-3FF5-A5C7-F4532A48CDC8}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
     <Platform>x64</Platform>
@@ -59,25 +59,25 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\bin\Debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\bin\Debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">TrueMotionFidelityEngine.dir\Debug\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">True Motion Fidelity Engine</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\bin\Release\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\bin\Release\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">TrueMotionFidelityEngine.dir\Release\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">True Motion Fidelity Engine</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\bin\MinSizeRel\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\bin\MinSizeRel\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">TrueMotionFidelityEngine.dir\MinSizeRel\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">True Motion Fidelity Engine</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\bin\RelWithDebInfo\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\bin\RelWithDebInfo\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">TrueMotionFidelityEngine.dir\RelWithDebInfo\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">True Motion Fidelity Engine</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.exe</TargetExt>
@@ -86,7 +86,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -105,10 +105,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;WINRT_NO_COROUTINES;NOMINMAX;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -116,20 +116,11 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <PostBuildEvent>
-      <Message>Copying shader source files	Compiling Blend.hlsl	Compiling CopyScale.hlsl	Compiling DebugView.hlsl	Compiling DownsampleLuma.hlsl	Compiling DownsampleLumaR.hlsl	Compiling Interpolate.hlsl	Compiling MotionEst.hlsl	Compiling MotionRefine.hlsl	Compiling MotionSmooth.hlsl	Compiling MotionTemporal.hlsl</Message>
+      <Message>Copying shader source files	Compiling CopyScale.hlsl	Compiling DebugView.hlsl	Compiling DownsampleLuma.hlsl	Compiling DownsampleLumaR.hlsl	Compiling Interpolate.hlsl	Compiling MotionEst.hlsl	Compiling MotionRefine.hlsl	Compiling MotionSmooth.hlsl	Compiling MotionTemporal.hlsl</Message>
       <Command>setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -E make_directory "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Debug/shaders"
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders
 if %errorlevel% neq 0 goto :cmEnd
-"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Debug/shaders"
-if %errorlevel% neq 0 goto :cmEnd
-:cmEnd
-endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
-:cmErrorLevel
-exit /b %1
-:cmDone
-if %errorlevel% neq 0 goto :VCEnd
-setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Debug/shaders/Blend.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/Blend.hlsl" || echo "Warning: Blend compilation failed, will use runtime compilation"
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -138,7 +129,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Debug/shaders/CopyScale.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/CopyScale.hlsl" || echo "Warning: CopyScale compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders/CopyScale.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/CopyScale.hlsl || echo "Warning: CopyScale compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -147,7 +138,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Debug/shaders/DebugView.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/DebugView.hlsl" || echo "Warning: DebugView compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders/DebugView.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DebugView.hlsl || echo "Warning: DebugView compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -156,7 +147,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Debug/shaders/DownsampleLuma.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/DownsampleLuma.hlsl" || echo "Warning: DownsampleLuma compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders/DownsampleLuma.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DownsampleLuma.hlsl || echo "Warning: DownsampleLuma compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -165,7 +156,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Debug/shaders/DownsampleLumaR.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/DownsampleLumaR.hlsl" || echo "Warning: DownsampleLumaR compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders/DownsampleLumaR.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DownsampleLumaR.hlsl || echo "Warning: DownsampleLumaR compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -174,7 +165,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Debug/shaders/Interpolate.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/Interpolate.hlsl" || echo "Warning: Interpolate compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders/Interpolate.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/Interpolate.hlsl || echo "Warning: Interpolate compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -183,7 +174,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Debug/shaders/MotionEst.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/MotionEst.hlsl" || echo "Warning: MotionEst compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders/MotionEst.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionEst.hlsl || echo "Warning: MotionEst compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -192,7 +183,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Debug/shaders/MotionRefine.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/MotionRefine.hlsl" || echo "Warning: MotionRefine compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders/MotionRefine.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionRefine.hlsl || echo "Warning: MotionRefine compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -201,7 +192,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Debug/shaders/MotionSmooth.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/MotionSmooth.hlsl" || echo "Warning: MotionSmooth compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders/MotionSmooth.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionSmooth.hlsl || echo "Warning: MotionSmooth compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -210,7 +201,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Debug/shaders/MotionTemporal.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/MotionTemporal.hlsl" || echo "Warning: MotionTemporal compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders/MotionTemporal.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionTemporal.hlsl || echo "Warning: MotionTemporal compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -225,8 +216,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/Debug/True Motion Fidelity Engine.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Debug/True Motion Fidelity Engine.pdb</ProgramDataBaseFile>
+      <ImportLibrary>C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/Debug/True Motion Fidelity Engine.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/True Motion Fidelity Engine.pdb</ProgramDataBaseFile>
       <SubSystem>Windows</SubSystem>
     </Link>
     <ProjectReference>
@@ -235,7 +226,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -255,10 +246,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;WINRT_NO_COROUTINES;NOMINMAX;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -266,20 +257,11 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <PostBuildEvent>
-      <Message>Copying shader source files	Compiling Blend.hlsl	Compiling CopyScale.hlsl	Compiling DebugView.hlsl	Compiling DownsampleLuma.hlsl	Compiling DownsampleLumaR.hlsl	Compiling Interpolate.hlsl	Compiling MotionEst.hlsl	Compiling MotionRefine.hlsl	Compiling MotionSmooth.hlsl	Compiling MotionTemporal.hlsl</Message>
+      <Message>Copying shader source files	Compiling CopyScale.hlsl	Compiling DebugView.hlsl	Compiling DownsampleLuma.hlsl	Compiling DownsampleLumaR.hlsl	Compiling Interpolate.hlsl	Compiling MotionEst.hlsl	Compiling MotionRefine.hlsl	Compiling MotionSmooth.hlsl	Compiling MotionTemporal.hlsl</Message>
       <Command>setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -E make_directory "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Release/shaders"
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders
 if %errorlevel% neq 0 goto :cmEnd
-"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Release/shaders"
-if %errorlevel% neq 0 goto :cmEnd
-:cmEnd
-endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
-:cmErrorLevel
-exit /b %1
-:cmDone
-if %errorlevel% neq 0 goto :VCEnd
-setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Release/shaders/Blend.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/Blend.hlsl" || echo "Warning: Blend compilation failed, will use runtime compilation"
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -288,7 +270,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Release/shaders/CopyScale.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/CopyScale.hlsl" || echo "Warning: CopyScale compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders/CopyScale.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/CopyScale.hlsl || echo "Warning: CopyScale compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -297,7 +279,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Release/shaders/DebugView.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/DebugView.hlsl" || echo "Warning: DebugView compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders/DebugView.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DebugView.hlsl || echo "Warning: DebugView compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -306,7 +288,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Release/shaders/DownsampleLuma.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/DownsampleLuma.hlsl" || echo "Warning: DownsampleLuma compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders/DownsampleLuma.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DownsampleLuma.hlsl || echo "Warning: DownsampleLuma compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -315,7 +297,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Release/shaders/DownsampleLumaR.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/DownsampleLumaR.hlsl" || echo "Warning: DownsampleLumaR compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders/DownsampleLumaR.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DownsampleLumaR.hlsl || echo "Warning: DownsampleLumaR compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -324,7 +306,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Release/shaders/Interpolate.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/Interpolate.hlsl" || echo "Warning: Interpolate compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders/Interpolate.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/Interpolate.hlsl || echo "Warning: Interpolate compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -333,7 +315,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Release/shaders/MotionEst.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/MotionEst.hlsl" || echo "Warning: MotionEst compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders/MotionEst.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionEst.hlsl || echo "Warning: MotionEst compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -342,7 +324,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Release/shaders/MotionRefine.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/MotionRefine.hlsl" || echo "Warning: MotionRefine compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders/MotionRefine.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionRefine.hlsl || echo "Warning: MotionRefine compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -351,7 +333,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Release/shaders/MotionSmooth.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/MotionSmooth.hlsl" || echo "Warning: MotionSmooth compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders/MotionSmooth.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionSmooth.hlsl || echo "Warning: MotionSmooth compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -360,7 +342,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Release/shaders/MotionTemporal.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/MotionTemporal.hlsl" || echo "Warning: MotionTemporal compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders/MotionTemporal.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionTemporal.hlsl || echo "Warning: MotionTemporal compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -375,8 +357,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/Release/True Motion Fidelity Engine.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/Release/True Motion Fidelity Engine.pdb</ProgramDataBaseFile>
+      <ImportLibrary>C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/Release/True Motion Fidelity Engine.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/True Motion Fidelity Engine.pdb</ProgramDataBaseFile>
       <SubSystem>Windows</SubSystem>
     </Link>
     <ProjectReference>
@@ -385,7 +367,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -405,10 +387,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;WINRT_NO_COROUTINES;NOMINMAX;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -416,20 +398,11 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <PostBuildEvent>
-      <Message>Copying shader source files	Compiling Blend.hlsl	Compiling CopyScale.hlsl	Compiling DebugView.hlsl	Compiling DownsampleLuma.hlsl	Compiling DownsampleLumaR.hlsl	Compiling Interpolate.hlsl	Compiling MotionEst.hlsl	Compiling MotionRefine.hlsl	Compiling MotionSmooth.hlsl	Compiling MotionTemporal.hlsl</Message>
+      <Message>Copying shader source files	Compiling CopyScale.hlsl	Compiling DebugView.hlsl	Compiling DownsampleLuma.hlsl	Compiling DownsampleLumaR.hlsl	Compiling Interpolate.hlsl	Compiling MotionEst.hlsl	Compiling MotionRefine.hlsl	Compiling MotionSmooth.hlsl	Compiling MotionTemporal.hlsl</Message>
       <Command>setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -E make_directory "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/MinSizeRel/shaders"
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders
 if %errorlevel% neq 0 goto :cmEnd
-"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/MinSizeRel/shaders"
-if %errorlevel% neq 0 goto :cmEnd
-:cmEnd
-endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
-:cmErrorLevel
-exit /b %1
-:cmDone
-if %errorlevel% neq 0 goto :VCEnd
-setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/MinSizeRel/shaders/Blend.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/Blend.hlsl" || echo "Warning: Blend compilation failed, will use runtime compilation"
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -438,7 +411,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/MinSizeRel/shaders/CopyScale.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/CopyScale.hlsl" || echo "Warning: CopyScale compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders/CopyScale.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/CopyScale.hlsl || echo "Warning: CopyScale compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -447,7 +420,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/MinSizeRel/shaders/DebugView.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/DebugView.hlsl" || echo "Warning: DebugView compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders/DebugView.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DebugView.hlsl || echo "Warning: DebugView compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -456,7 +429,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/MinSizeRel/shaders/DownsampleLuma.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/DownsampleLuma.hlsl" || echo "Warning: DownsampleLuma compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders/DownsampleLuma.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DownsampleLuma.hlsl || echo "Warning: DownsampleLuma compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -465,7 +438,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/MinSizeRel/shaders/DownsampleLumaR.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/DownsampleLumaR.hlsl" || echo "Warning: DownsampleLumaR compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders/DownsampleLumaR.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DownsampleLumaR.hlsl || echo "Warning: DownsampleLumaR compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -474,7 +447,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/MinSizeRel/shaders/Interpolate.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/Interpolate.hlsl" || echo "Warning: Interpolate compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders/Interpolate.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/Interpolate.hlsl || echo "Warning: Interpolate compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -483,7 +456,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/MinSizeRel/shaders/MotionEst.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/MotionEst.hlsl" || echo "Warning: MotionEst compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders/MotionEst.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionEst.hlsl || echo "Warning: MotionEst compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -492,7 +465,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/MinSizeRel/shaders/MotionRefine.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/MotionRefine.hlsl" || echo "Warning: MotionRefine compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders/MotionRefine.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionRefine.hlsl || echo "Warning: MotionRefine compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -501,7 +474,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/MinSizeRel/shaders/MotionSmooth.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/MotionSmooth.hlsl" || echo "Warning: MotionSmooth compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders/MotionSmooth.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionSmooth.hlsl || echo "Warning: MotionSmooth compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -510,7 +483,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/MinSizeRel/shaders/MotionTemporal.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/MotionTemporal.hlsl" || echo "Warning: MotionTemporal compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders/MotionTemporal.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionTemporal.hlsl || echo "Warning: MotionTemporal compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -525,8 +498,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/MinSizeRel/True Motion Fidelity Engine.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/MinSizeRel/True Motion Fidelity Engine.pdb</ProgramDataBaseFile>
+      <ImportLibrary>C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/MinSizeRel/True Motion Fidelity Engine.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/True Motion Fidelity Engine.pdb</ProgramDataBaseFile>
       <SubSystem>Windows</SubSystem>
     </Link>
     <ProjectReference>
@@ -535,7 +508,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -554,10 +527,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;WINRT_NO_COROUTINES;NOMINMAX;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -565,20 +538,11 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <PostBuildEvent>
-      <Message>Copying shader source files	Compiling Blend.hlsl	Compiling CopyScale.hlsl	Compiling DebugView.hlsl	Compiling DownsampleLuma.hlsl	Compiling DownsampleLumaR.hlsl	Compiling Interpolate.hlsl	Compiling MotionEst.hlsl	Compiling MotionRefine.hlsl	Compiling MotionSmooth.hlsl	Compiling MotionTemporal.hlsl</Message>
+      <Message>Copying shader source files	Compiling CopyScale.hlsl	Compiling DebugView.hlsl	Compiling DownsampleLuma.hlsl	Compiling DownsampleLumaR.hlsl	Compiling Interpolate.hlsl	Compiling MotionEst.hlsl	Compiling MotionRefine.hlsl	Compiling MotionSmooth.hlsl	Compiling MotionTemporal.hlsl</Message>
       <Command>setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -E make_directory "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/RelWithDebInfo/shaders"
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders
 if %errorlevel% neq 0 goto :cmEnd
-"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/RelWithDebInfo/shaders"
-if %errorlevel% neq 0 goto :cmEnd
-:cmEnd
-endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
-:cmErrorLevel
-exit /b %1
-:cmDone
-if %errorlevel% neq 0 goto :VCEnd
-setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/RelWithDebInfo/shaders/Blend.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/Blend.hlsl" || echo "Warning: Blend compilation failed, will use runtime compilation"
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -587,7 +551,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/RelWithDebInfo/shaders/CopyScale.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/CopyScale.hlsl" || echo "Warning: CopyScale compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders/CopyScale.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/CopyScale.hlsl || echo "Warning: CopyScale compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -596,7 +560,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/RelWithDebInfo/shaders/DebugView.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/DebugView.hlsl" || echo "Warning: DebugView compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders/DebugView.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DebugView.hlsl || echo "Warning: DebugView compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -605,7 +569,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/RelWithDebInfo/shaders/DownsampleLuma.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/DownsampleLuma.hlsl" || echo "Warning: DownsampleLuma compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders/DownsampleLuma.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DownsampleLuma.hlsl || echo "Warning: DownsampleLuma compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -614,7 +578,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/RelWithDebInfo/shaders/DownsampleLumaR.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/DownsampleLumaR.hlsl" || echo "Warning: DownsampleLumaR compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders/DownsampleLumaR.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DownsampleLumaR.hlsl || echo "Warning: DownsampleLumaR compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -623,7 +587,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/RelWithDebInfo/shaders/Interpolate.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/Interpolate.hlsl" || echo "Warning: Interpolate compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders/Interpolate.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/Interpolate.hlsl || echo "Warning: Interpolate compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -632,7 +596,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/RelWithDebInfo/shaders/MotionEst.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/MotionEst.hlsl" || echo "Warning: MotionEst compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders/MotionEst.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionEst.hlsl || echo "Warning: MotionEst compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -641,7 +605,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/RelWithDebInfo/shaders/MotionRefine.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/MotionRefine.hlsl" || echo "Warning: MotionRefine compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders/MotionRefine.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionRefine.hlsl || echo "Warning: MotionRefine compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -650,7 +614,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/RelWithDebInfo/shaders/MotionSmooth.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/MotionSmooth.hlsl" || echo "Warning: MotionSmooth compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders/MotionSmooth.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionSmooth.hlsl || echo "Warning: MotionSmooth compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -659,7 +623,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/RelWithDebInfo/shaders/MotionTemporal.cso" "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/src/shaders/MotionTemporal.hlsl" || echo "Warning: MotionTemporal compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders/MotionTemporal.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionTemporal.hlsl || echo "Warning: MotionTemporal compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -674,8 +638,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/RelWithDebInfo/True Motion Fidelity Engine.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/bin/RelWithDebInfo/True Motion Fidelity Engine.pdb</ProgramDataBaseFile>
+      <ImportLibrary>C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/RelWithDebInfo/True Motion Fidelity Engine.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/True Motion Fidelity Engine.pdb</ProgramDataBaseFile>
       <SubSystem>Windows</SubSystem>
     </Link>
     <ProjectReference>
@@ -683,11 +647,11 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\CMakeLists.txt">
+    <CustomBuild Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\CMakeLists.txt">
       <UseUtf8Encoding>Always</UseUtf8Encoding>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)" "-BC:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build" --check-stamp-file "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/CMakeFiles/generate.stamp"
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine -BC:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build --check-stamp-file C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -695,12 +659,12 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent\CMakeLists.cmake.in;C:\Program Files\CMake\share\cmake-4.0\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\WindowsPaths.cmake;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\CMakeFiles\4.0.2\CMakeCXXCompiler.cmake;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\CMakeFiles\4.0.2\CMakeRCCompiler.cmake;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\CMakeFiles\4.0.2\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent\CMakeLists.cmake.in;C:\Program Files\CMake\share\cmake-4.0\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\WindowsPaths.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeCXXCompiler.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeRCCompiler.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)" "-BC:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build" --check-stamp-file "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/CMakeFiles/generate.stamp"
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine -BC:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build --check-stamp-file C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -708,12 +672,12 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent\CMakeLists.cmake.in;C:\Program Files\CMake\share\cmake-4.0\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\WindowsPaths.cmake;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\CMakeFiles\4.0.2\CMakeCXXCompiler.cmake;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\CMakeFiles\4.0.2\CMakeRCCompiler.cmake;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\CMakeFiles\4.0.2\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent\CMakeLists.cmake.in;C:\Program Files\CMake\share\cmake-4.0\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\WindowsPaths.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeCXXCompiler.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeRCCompiler.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)" "-BC:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build" --check-stamp-file "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/CMakeFiles/generate.stamp"
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine -BC:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build --check-stamp-file C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -721,12 +685,12 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent\CMakeLists.cmake.in;C:\Program Files\CMake\share\cmake-4.0\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\WindowsPaths.cmake;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\CMakeFiles\4.0.2\CMakeCXXCompiler.cmake;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\CMakeFiles\4.0.2\CMakeRCCompiler.cmake;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\CMakeFiles\4.0.2\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent\CMakeLists.cmake.in;C:\Program Files\CMake\share\cmake-4.0\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\WindowsPaths.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeCXXCompiler.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeRCCompiler.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)" "-BC:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build" --check-stamp-file "C:/Users/vfxno/Downloads/2/Frame_interpolation (gaming)/build/CMakeFiles/generate.stamp"
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine -BC:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build --check-stamp-file C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -734,53 +698,53 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent\CMakeLists.cmake.in;C:\Program Files\CMake\share\cmake-4.0\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\WindowsPaths.cmake;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\CMakeFiles\4.0.2\CMakeCXXCompiler.cmake;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\CMakeFiles\4.0.2\CMakeRCCompiler.cmake;C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\CMakeFiles\4.0.2\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent\CMakeLists.cmake.in;C:\Program Files\CMake\share\cmake-4.0\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\WindowsPaths.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeCXXCompiler.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeRCCompiler.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\app.cpp" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\app.h" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\capture_frame.h" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\d3d11_device.cpp" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\d3d11_device.h" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\dll_injector.cpp" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\dll_injector.h" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\dup_capture.cpp" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\dup_capture.h" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\game_capture.cpp" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\game_capture.h" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\graphics_hook_info.h" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\interpolator.cpp" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\interpolator.h" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\main.cpp" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\shader_utils.cpp" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\shader_utils.h" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\ui.cpp" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\ui.h" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\wgc_capture.cpp" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\wgc_capture.h" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\window_list.cpp" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\window_list.h" />
-    <ResourceCompile Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\src\resources.rc" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\imgui.cpp" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\imgui_draw.cpp" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\imgui_tables.cpp" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\imgui_widgets.cpp" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\backends\imgui_impl_win32.cpp" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\_deps\imgui-src\backends\imgui_impl_dx11.cpp" />
+    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\app.cpp" />
+    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\app.h" />
+    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\capture_frame.h" />
+    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\d3d11_device.cpp" />
+    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\d3d11_device.h" />
+    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\dll_injector.cpp" />
+    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\dll_injector.h" />
+    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\dup_capture.cpp" />
+    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\dup_capture.h" />
+    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\game_capture.cpp" />
+    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\game_capture.h" />
+    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\graphics_hook_info.h" />
+    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\interpolator.cpp" />
+    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\interpolator.h" />
+    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\main.cpp" />
+    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\shader_utils.cpp" />
+    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\shader_utils.h" />
+    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\ui.cpp" />
+    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\ui.h" />
+    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\wgc_capture.cpp" />
+    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\wgc_capture.h" />
+    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\window_list.cpp" />
+    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\window_list.h" />
+    <ResourceCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\resources.rc" />
+    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\imgui.cpp" />
+    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\imgui_draw.cpp" />
+    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\imgui_tables.cpp" />
+    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\imgui_widgets.cpp" />
+    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends\imgui_impl_dx11.cpp" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <ProjectReference Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\ZERO_CHECK.vcxproj">
-      <Project>{FBCA2D25-1091-3FE8-8203-1063323C66F2}</Project>
+    <ProjectReference Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\ZERO_CHECK.vcxproj">
+      <Project>{CB3EA15C-EDC1-30BD-9F3A-9BE7835AFD0C}</Project>
       <Name>ZERO_CHECK</Name>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </ProjectReference>
-    <ProjectReference Include="C:\Users\vfxno\Downloads\2\Frame_interpolation (gaming)\build\graphics_hook.vcxproj">
-      <Project>{86D8E4A7-0C82-373F-B7D5-C8611462392B}</Project>
+    <ProjectReference Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\graphics_hook.vcxproj">
+      <Project>{AF56D1BF-AF35-3138-98FA-5523D28667EB}</Project>
       <Name>graphics_hook</Name>
     </ProjectReference>
   </ItemGroup>

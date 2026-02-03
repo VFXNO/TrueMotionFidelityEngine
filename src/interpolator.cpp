@@ -41,11 +41,6 @@ struct InterpConstants {
   float pad = 0.0f;
 };
 
-struct BlendConstants {
-  float alpha = 0.5f;
-  float pad[3] = {};
-};
-
 struct DebugConstants {
   int mode = 0;
   float motionScale = 0.03f;
@@ -138,16 +133,6 @@ bool Interpolator::Initialize(ID3D11Device* device, ID3D11DeviceContext* context
     return false;
   }
 
-  D3D11_BUFFER_DESC blendDesc = {};
-  blendDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-  blendDesc.ByteWidth = sizeof(BlendConstants);
-  blendDesc.Usage = D3D11_USAGE_DEFAULT;
-  if (FAILED(m_device->CreateBuffer(&blendDesc, nullptr, &m_blendConstants))) {
-    log << "Failed to create BlendConstants buffer\n";
-    log.close();
-    return false;
-  }
-
   D3D11_BUFFER_DESC debugDesc = {};
   debugDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
   debugDesc.ByteWidth = sizeof(DebugConstants);
@@ -225,8 +210,8 @@ void Interpolator::Execute(
   int radius = m_radius;
   if (radius < 1) {
     radius = 1;
-  } else if (radius > 8) {
-    radius = 8;
+  } else if (radius > 16) {
+    radius = 16;
   }
   motionConstants.radius = radius;
   m_context->UpdateSubresource(m_motionConstants.Get(), 0, nullptr, &motionConstants, 0, 0);
@@ -240,12 +225,8 @@ void Interpolator::Execute(
   }
   interpConstants.alpha = clampedAlpha;
 
-  float diffScale = m_diffScale;
-  if (diffScale < 0.0f) {
-    diffScale = 0.0f;
-  } else if (diffScale > 8.0f) {
-    diffScale = 8.0f;
-  }
+  // DiffScale unused by shader but kept structurally
+  float diffScale = 2.0f;
   interpConstants.diffScale = diffScale;
 
   float confPower = m_confPower;
@@ -284,51 +265,6 @@ void Interpolator::Execute(
   m_context->CSSetShader(nullptr, nullptr, 0);
 }
 
-void Interpolator::Blend(
-    ID3D11ShaderResourceView* prev,
-    ID3D11ShaderResourceView* curr,
-    float alpha) {
-  if (!prev || !curr || !m_outputUav) {
-    return;
-  }
-  if (!m_blendCs || !m_blendConstants) {
-    return;
-  }
-  if (m_outputWidth <= 0 || m_outputHeight <= 0) {
-    return;
-  }
-
-  float clampedAlpha = alpha;
-  if (clampedAlpha < 0.0f) {
-    clampedAlpha = 0.0f;
-  } else if (clampedAlpha > 1.0f) {
-    clampedAlpha = 1.0f;
-  }
-
-  BlendConstants blendConstants = {};
-  blendConstants.alpha = clampedAlpha;
-  m_context->UpdateSubresource(m_blendConstants.Get(), 0, nullptr, &blendConstants, 0, 0);
-
-  ID3D11ShaderResourceView* srvs[] = {prev, curr};
-  ID3D11UnorderedAccessView* uavs[] = {m_outputUav.Get()};
-  ID3D11Buffer* cbs[] = {m_blendConstants.Get()};
-  ID3D11SamplerState* samplers[] = {m_linearSampler.Get()};
-
-  m_context->CSSetShader(m_blendCs.Get(), nullptr, 0);
-  m_context->CSSetShaderResources(0, 2, srvs);
-  m_context->CSSetUnorderedAccessViews(0, 1, uavs, nullptr);
-  m_context->CSSetConstantBuffers(0, 1, cbs);
-  m_context->CSSetSamplers(0, 1, samplers);
-  m_context->Dispatch(DispatchSize(m_outputWidth), DispatchSize(m_outputHeight), 1);
-
-  ID3D11ShaderResourceView* nullSrvs[2] = {};
-  ID3D11UnorderedAccessView* nullUavs[1] = {};
-  ID3D11SamplerState* nullSamplers[1] = {};
-  m_context->CSSetShaderResources(0, 2, nullSrvs);
-  m_context->CSSetUnorderedAccessViews(0, 1, nullUavs, nullptr);
-  m_context->CSSetSamplers(0, 1, nullSamplers);
-  m_context->CSSetShader(nullptr, nullptr, 0);
-}
 
 void Interpolator::Blit(ID3D11ShaderResourceView* src) {
   if (!src || !m_outputUav) {
@@ -516,16 +452,6 @@ bool Interpolator::LoadShaders() {
   }
   if (FAILED(m_device->CreateComputeShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, &m_interpolateCs))) {
     OutputDebugStringA("CreateComputeShader Interpolate failed\n");
-    return false;
-  }
-
-  blob.Reset();
-  if (!CompileShaderFromFile(ShaderPath(L"Blend.hlsl"), "CSMain", "cs_5_0", blob, &error)) {
-    OutputDebugStringA(("Shader Blend.hlsl failed: " + error + "\n").c_str());
-    return false;
-  }
-  if (FAILED(m_device->CreateComputeShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, &m_blendCs))) {
-    OutputDebugStringA("CreateComputeShader Blend failed\n");
     return false;
   }
 
@@ -833,10 +759,11 @@ bool Interpolator::ComputeMotion(
   if (m_temporalEnabled && m_motionTemporalCs && m_temporalConstants) {
     TemporalConstants temporalConstants = {};
     float historyWeight = m_temporalHistoryWeight;
+    // Allow full range as requested by user (up to 0.99)
     if (historyWeight < 0.0f) {
       historyWeight = 0.0f;
-    } else if (historyWeight > 0.85f) {
-      historyWeight = 0.85f;
+    } else if (historyWeight > 0.99f) {
+      historyWeight = 0.99f;
     }
     float confInfluence = m_temporalConfInfluence;
     if (confInfluence < 0.0f) {

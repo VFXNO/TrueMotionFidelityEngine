@@ -228,24 +228,39 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
     
     // TEMPORAL PREDICTION (SAFE)
     if (usePrediction) {
+        // 1. Center Prediction - Moderate trust to avoid "sticking"
         float2 pred = MotionPred.Load(int3(base, 0));
-        int2 prevVec = int2(pred);
+        int2 prevVec = int2(round(pred));
         prevVec = clamp(prevVec, int2(-maxMag, -maxMag), int2(maxMag, maxMag));
         
-        // Only test if it's significant
         if (any(prevVec != int2(0, 0))) {
-            // Apply slight bonus to encourage temporal coherence, but not blindly
-            // 0.96 bonus means it must be almost as good as the zero vector
-            EVAL_CANDIDATE(prevVec, 0.96);
+            EVAL_CANDIDATE(prevVec, 0.94); // Restored to safe value (was 0.85)
+        }
+
+        // 2. Neighborhood Prediction (catch incoming objects)
+        // WEAKENED: Only trust neighbor vectors if they are an EXCELLENT match.
+        // Prevents motion bleeding from moving foreground to static background.
+        int2 nbOffsets[4] = { int2(-4, -4), int2(4, -4), int2(-4, 4), int2(4, 4) };
+        [unroll]
+        for(int i=0; i<4; ++i) {
+            int2 samplePos = clamp(base + nbOffsets[i], int2(0,0), int2(width-1, height-1));
+            float2 nbPred = MotionPred.Load(int3(samplePos, 0));
+            int2 nbVec = int2(round(nbPred));
+            nbVec = clamp(nbVec, int2(-maxMag, -maxMag), int2(maxMag, maxMag));
+            
+            if (any(nbVec != int2(0, 0)) && any(nbVec != prevVec)) {
+                EVAL_CANDIDATE(nbVec, 0.98); // Very slight bias
+            }
         }
     }
 
     // ========================================================================
     // STEP 6: Local search refinement
     // ========================================================================
-    int searchRadius = clamp(radius, 2, 8);
+    int searchRadius = clamp(radius, 2, 16);
     int2 searchCenter = bestOffset;
-    int step = (searchRadius > 4) ? 2 : 1;
+    int step = 1;
+    if (searchRadius > 6) step = 2; // Capped at Step 2 to avoid aliasing artifacts
     
     // Regularization constant - higher = cleaner field
     float lambdaDist = 0.005; 
