@@ -241,3 +241,453 @@ useWgc: 1
 Trying WGC capture...
 WGC capture started successfully
 StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000030632
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000030450
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000030632
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000030632
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000030632
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000030632
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000030632
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000030632
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000030632
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000030450
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000030450
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000030632
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000030632
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000030632
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000030632
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000030632
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000030632
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000030632
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000030632
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000030632
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 00000000000401BA
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 00000000000401BA
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 00000000000401BA
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 00000000001A05E4
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 00000000001A05E4
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 00000000001A05E4
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 0000000000020392
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true

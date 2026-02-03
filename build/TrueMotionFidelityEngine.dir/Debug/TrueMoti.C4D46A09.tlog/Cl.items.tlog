@@ -1,0 +1,17 @@
+C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\app.cpp;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\TrueMotionFidelityEngine.dir\Debug\app.obj
+C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\d3d11_device.cpp;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\TrueMotionFidelityEngine.dir\Debug\d3d11_device.obj
+C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\dll_injector.cpp;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\TrueMotionFidelityEngine.dir\Debug\dll_injector.obj
+C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\dup_capture.cpp;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\TrueMotionFidelityEngine.dir\Debug\dup_capture.obj
+C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\game_capture.cpp;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\TrueMotionFidelityEngine.dir\Debug\game_capture.obj
+C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\interpolator.cpp;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\TrueMotionFidelityEngine.dir\Debug\interpolator.obj
+C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\main.cpp;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\TrueMotionFidelityEngine.dir\Debug\main.obj
+C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\shader_utils.cpp;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\TrueMotionFidelityEngine.dir\Debug\shader_utils.obj
+C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\ui.cpp;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\TrueMotionFidelityEngine.dir\Debug\ui.obj
+C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\wgc_capture.cpp;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\TrueMotionFidelityEngine.dir\Debug\wgc_capture.obj
+C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\window_list.cpp;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\TrueMotionFidelityEngine.dir\Debug\window_list.obj
+C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\imgui.cpp;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\TrueMotionFidelityEngine.dir\Debug\imgui.obj
+C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\imgui_draw.cpp;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\TrueMotionFidelityEngine.dir\Debug\imgui_draw.obj
+C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\imgui_tables.cpp;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\TrueMotionFidelityEngine.dir\Debug\imgui_tables.obj
+C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\imgui_widgets.cpp;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\TrueMotionFidelityEngine.dir\Debug\imgui_widgets.obj
+C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends\imgui_impl_win32.cpp;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\TrueMotionFidelityEngine.dir\Debug\imgui_impl_win32.obj
+C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends\imgui_impl_dx11.cpp;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\TrueMotionFidelityEngine.dir\Debug\imgui_impl_dx11.obj

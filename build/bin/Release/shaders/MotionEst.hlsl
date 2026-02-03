@@ -21,9 +21,10 @@ cbuffer MotionCB : register(b0) {
 // ============================================================================
 
 // Cost function weights
-static const float WEIGHT_SAD = 0.45;          // Sum of Absolute Differences
-static const float WEIGHT_SSD = 0.35;          // Sum of Squared Differences  
-static const float WEIGHT_CENSUS = 0.20;       // Census transform (illumination invariant)
+static const float WEIGHT_SAD = 0.40;          // Sum of Absolute Differences
+static const float WEIGHT_SSD = 0.30;          // Sum of Squared Differences  
+static const float WEIGHT_CENSUS = 0.15;       // Census transform
+static const float WEIGHT_GRADIENT = 2.0;      // Structure/Edge Alignment (Gradient Cost)
 
 // Region classification thresholds
 static const float VARIANCE_FLAT = 0.012;      // Below = flat region (aperture problem)
@@ -51,11 +52,32 @@ static const float kGaussian5x5[25] = {
 };
 
 // ============================================================================
+// HELPER: Compute Gradient at arbitrary position
+// ============================================================================
+float2 GetGradient(Texture2D<float> tex, int2 pos) {
+    // 3x3 Sobel kernel
+    float v00 = tex.Load(int3(pos + int2(-1, -1), 0));
+    float v10 = tex.Load(int3(pos + int2( 0, -1), 0));
+    float v20 = tex.Load(int3(pos + int2( 1, -1), 0));
+    float v01 = tex.Load(int3(pos + int2(-1,  0), 0));
+    float v21 = tex.Load(int3(pos + int2( 1,  0), 0));
+    float v02 = tex.Load(int3(pos + int2(-1,  1), 0));
+    float v12 = tex.Load(int3(pos + int2( 0,  1), 0));
+    float v22 = tex.Load(int3(pos + int2( 1,  1), 0));
+    
+    float gx = -v00 + v20 - 2.0 * v01 + 2.0 * v21 - v02 + v22;
+    float gy = -v00 - 2.0 * v10 - v20 + v02 + 2.0 * v12 + v22;
+    
+    return float2(gx, gy) / 8.0;
+}
+
+// ============================================================================
 // HELPER: Robust Multi-Metric Cost Function
-// Combines SAD, SSD, and Census for robustness across different scenarios
+// Combines SAD, SSD, Census, and GRADIENT for robustness
 // ============================================================================
 float ComputeBlockCost(int2 currBase, int2 offset, float centerLuma,
-                       float cachedBlock[25], uint width, uint height)
+                       float cachedBlock[25], uint width, uint height,
+                       float2 targetGrad)
 {
     // Sample center of previous frame at offset position
     int2 prevCenter = clamp(currBase + offset, int2(0, 0), int2(width - 1, height - 1));
@@ -102,6 +124,10 @@ float ComputeBlockCost(int2 currBase, int2 offset, float centerLuma,
         }
     }
     
+    // Gradient Cost: Compare structural orientation
+    float2 candGrad = GetGradient(PrevLuma, prevCenter);
+    float gradCost = length(targetGrad - candGrad); 
+
     // Normalize
     float invWeight = 1.0 / max(weightSum, 0.001);
     sadSum *= invWeight;
@@ -109,7 +135,10 @@ float ComputeBlockCost(int2 currBase, int2 offset, float centerLuma,
     censusSum *= invWeight;
     
     // Combine metrics (SSD is already squared, take sqrt for consistency)
-    return sadSum * WEIGHT_SAD + sqrt(ssdSum) * WEIGHT_SSD + censusSum * WEIGHT_CENSUS;
+    return sadSum * WEIGHT_SAD + 
+           sqrt(ssdSum) * WEIGHT_SSD + 
+           censusSum * WEIGHT_CENSUS + 
+           gradCost * WEIGHT_GRADIENT;
 }
 
 // ============================================================================
@@ -216,7 +245,7 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
     // ========================================================================
     
     #define EVAL_CANDIDATE(offset, bonus) { \
-        float cost = ComputeBlockCost(base, offset, centerLuma, cachedBlock, width, height); \
+        float cost = ComputeBlockCost(base, offset, centerLuma, cachedBlock, width, height, gradient); \
         cost *= bonus; \
         if (cost < bestCost) { bestCost = cost; bestOffset = offset; } \
     }
@@ -270,7 +299,7 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
             int2 testOffset = searchCenter + int2(dx, dy);
             testOffset = clamp(testOffset, int2(-maxMag, -maxMag), int2(maxMag, maxMag));
             
-            float cost = ComputeBlockCost(base, testOffset, centerLuma, cachedBlock, width, height);
+            float cost = ComputeBlockCost(base, testOffset, centerLuma, cachedBlock, width, height, gradient);
             
             float dist = length(float2(dx, dy));
             // Apply distance penalty (regularization)
@@ -296,7 +325,7 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
                 if (dx == 0 && dy == 0) continue;
                 
                 int2 testOffset = searchCenter + int2(dx, dy);
-                float cost = ComputeBlockCost(base, testOffset, centerLuma, cachedBlock, width, height);
+                float cost = ComputeBlockCost(base, testOffset, centerLuma, cachedBlock, width, height, gradient);
                 
                 // Consistency: Apply same regularization in fine search
                 float dist = length(float2(testOffset));

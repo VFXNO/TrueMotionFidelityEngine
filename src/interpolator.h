@@ -14,7 +14,9 @@ public:
     MotionNeedles = 3,
     ResidualError = 4,
     SplitScreen = 5,
-    Occlusion = 6
+    Occlusion = 6,
+    AiDisocclusion = 7,
+    StructureGradient = 8
   };
 
   bool Initialize(ID3D11Device* device, ID3D11DeviceContext* context);
@@ -24,6 +26,7 @@ public:
     m_smoothEdgeScale = edgeScale;
     m_smoothConfPower = confPower;
   }
+  void SetQualityMode(int qualityMode) { m_qualityMode = qualityMode; }
   void SetRefineRadius(int radius) { m_refineRadius = radius; }
   void SetTemporalStabilization(bool enabled, float historyWeight, float confInfluence, int neighborhoodSize) {
     m_temporalEnabled = enabled;
@@ -41,7 +44,9 @@ public:
   void Execute(
       ID3D11ShaderResourceView* prev,
       ID3D11ShaderResourceView* curr,
-      float alpha);
+      float alpha,
+      ID3D11ShaderResourceView* prevDepth = nullptr,
+      ID3D11ShaderResourceView* currDepth = nullptr);
   void Blit(ID3D11ShaderResourceView* src);
   void Debug(
       ID3D11ShaderResourceView* prev,
@@ -145,6 +150,7 @@ private:
   int m_outputWidth = 0;
   int m_outputHeight = 0;
   int m_lumaWidth = 0;
+  int m_qualityMode = 0;
   int m_lumaHeight = 0;
   int m_smallWidth = 0;
   int m_smallHeight = 0;

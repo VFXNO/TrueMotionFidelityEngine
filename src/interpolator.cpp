@@ -38,7 +38,15 @@ struct InterpConstants {
   float alpha = 0.5f;
   float diffScale = 2.0f;
   float confPower = 1.0f;
-  float pad = 0.0f;
+  int qualityMode = 0;
+  int useDepth = 0;
+  float depthScale = 1.0f;
+  float depthThreshold = 0.02f;
+  float motionSampleScale = 1.5f;
+  int useHistory = 0;
+  float historyWeight = 0.2f;
+  float pad0 = 0.0f;
+  float pad1 = 0.0f;
 };
 
 struct DebugConstants {
@@ -190,7 +198,9 @@ bool Interpolator::Resize(int inputWidth, int inputHeight, int outputWidth, int 
 void Interpolator::Execute(
     ID3D11ShaderResourceView* prev,
     ID3D11ShaderResourceView* curr,
-    float alpha) {
+    float alpha,
+    ID3D11ShaderResourceView* prevDepth,
+    ID3D11ShaderResourceView* currDepth) {
   if (!prev || !curr || !m_outputUav) {
     return;
   }
@@ -236,6 +246,19 @@ void Interpolator::Execute(
     confPower = 4.0f;
   }
   interpConstants.confPower = confPower;
+  interpConstants.qualityMode = m_qualityMode;
+  interpConstants.useDepth = (prevDepth && currDepth) ? 1 : 0;
+  interpConstants.depthScale = 1.0f;
+  interpConstants.depthThreshold = 0.02f;
+  interpConstants.motionSampleScale = 1.5f;
+  float historyWeight = m_temporalHistoryWeight;
+  if (historyWeight < 0.0f) {
+    historyWeight = 0.0f;
+  } else if (historyWeight > 0.99f) {
+    historyWeight = 0.99f;
+  }
+  interpConstants.useHistory = m_historyValid ? 1 : 0;
+  interpConstants.historyWeight = historyWeight;
   m_context->UpdateSubresource(m_interpConstants.Get(), 0, nullptr, &interpConstants, 0, 0);
 
   ID3D11ShaderResourceView* motionSrv = m_motionSmoothSrv ? m_motionSmoothSrv.Get() : m_motionSrv.Get();
@@ -245,24 +268,36 @@ void Interpolator::Execute(
     motionSrv = m_motionTemporalSrv[m_temporalIndex].Get();
     confSrv = m_confidenceTemporalSrv[m_temporalIndex].Get();
   }
-  ID3D11ShaderResourceView* interpSrvs[] = {prev, curr, motionSrv, confSrv};
+  int historyReadIndex = m_historyIndex;
+  ID3D11ShaderResourceView* historySrv =
+      (m_historyValid && m_historyColorSrv[historyReadIndex]) ? m_historyColorSrv[historyReadIndex].Get() : nullptr;
+  ID3D11ShaderResourceView* interpSrvs[] = {prev, curr, motionSrv, confSrv, prevDepth, currDepth, historySrv};
   ID3D11UnorderedAccessView* interpUavs[] = {m_outputUav.Get()};
   ID3D11Buffer* interpCbs[] = {m_interpConstants.Get()};
   ID3D11SamplerState* samplers[] = {m_linearSampler.Get()};
   m_context->CSSetShader(m_interpolateCs.Get(), nullptr, 0);
-  m_context->CSSetShaderResources(0, 4, interpSrvs);
+  m_context->CSSetShaderResources(0, 7, interpSrvs);
   m_context->CSSetUnorderedAccessViews(0, 1, interpUavs, nullptr);
   m_context->CSSetConstantBuffers(0, 1, interpCbs);
   m_context->CSSetSamplers(0, 1, samplers);
   m_context->Dispatch(DispatchSize(m_outputWidth), DispatchSize(m_outputHeight), 1);
 
-  ID3D11ShaderResourceView* nullSrvs[4] = {};
+  ID3D11ShaderResourceView* nullSrvs[7] = {};
   ID3D11UnorderedAccessView* nullUavs[2] = {};
   ID3D11SamplerState* nullSamplers[1] = {};
-  m_context->CSSetShaderResources(0, 4, nullSrvs);
+  m_context->CSSetShaderResources(0, 7, nullSrvs);
   m_context->CSSetUnorderedAccessViews(0, 2, nullUavs, nullptr);
   m_context->CSSetSamplers(0, 1, nullSamplers);
   m_context->CSSetShader(nullptr, nullptr, 0);
+
+  if (m_outputTexture && m_historyColor[0]) {
+    int writeIndex = (m_historyIndex + 1) % kHistorySize;
+    if (m_historyColor[writeIndex]) {
+      m_context->CopyResource(m_historyColor[writeIndex].Get(), m_outputTexture.Get());
+      m_historyIndex = writeIndex;
+      m_historyValid = true;
+    }
+  }
 }
 
 
@@ -294,6 +329,15 @@ void Interpolator::Blit(ID3D11ShaderResourceView* src) {
   m_context->CSSetUnorderedAccessViews(0, 1, nullUavs, nullptr);
   m_context->CSSetSamplers(0, 1, nullSamplers);
   m_context->CSSetShader(nullptr, nullptr, 0);
+
+  if (m_outputTexture && m_historyColor[0]) {
+    int writeIndex = (m_historyIndex + 1) % kHistorySize;
+    if (m_historyColor[writeIndex]) {
+      m_context->CopyResource(m_historyColor[writeIndex].Get(), m_outputTexture.Get());
+      m_historyIndex = writeIndex;
+      m_historyValid = true;
+    }
+  }
 }
 
 void Interpolator::Debug(
@@ -495,6 +539,11 @@ void Interpolator::CreateResources() {
     m_motionTemporal[i].Reset();
     m_confidenceTemporal[i].Reset();
   }
+  for (int i = 0; i < kHistorySize; ++i) {
+    m_historyColor[i].Reset();
+    m_historyColorSrv[i].Reset();
+    m_historyColorUav[i].Reset();
+  }
   m_outputTexture.Reset();
   m_prevLumaSrv.Reset();
   m_currLumaSrv.Reset();
@@ -573,6 +622,10 @@ void Interpolator::CreateResources() {
     createTexture(m_lumaWidth, m_lumaHeight, DXGI_FORMAT_R16_FLOAT, m_confidenceTemporal[i],
                   m_confidenceTemporalSrv[i], m_confidenceTemporalUav[i]);
   }
+  for (int i = 0; i < kHistorySize; ++i) {
+    createTexture(m_outputWidth, m_outputHeight, DXGI_FORMAT_B8G8R8A8_UNORM, m_historyColor[i],
+                  m_historyColorSrv[i], m_historyColorUav[i]);
+  }
   createTexture(m_outputWidth, m_outputHeight, DXGI_FORMAT_B8G8R8A8_UNORM, m_outputTexture, m_outputSrv, m_outputUav);
 
   if (!m_outputTexture || !m_outputSrv || !m_outputUav ||
@@ -586,6 +639,8 @@ void Interpolator::CreateResources() {
   m_prevMotionCoarseValid = false;
   m_temporalValid = false;
   m_temporalIndex = 0;
+  m_historyValid = false;
+  m_historyIndex = 0;
 }
 
 bool Interpolator::ComputeMotion(

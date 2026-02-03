@@ -130,9 +130,11 @@ private:
   float m_debugDiffScale = 2.0f;
   float m_confidencePower = 1.5f;
   float m_motionEdgeScale = 6.0f;
+  int m_interpolationQuality = 1; // 0=Standard, 1=High
   int m_refineRadius = 2;
   float m_delayScale = 1.0f;
   float m_jitterSuppression = 0.2f;
+  bool m_forceInterpolation = false;
   
   HANDLE m_waitTimer = nullptr;
   bool m_adaptiveDelay = true;

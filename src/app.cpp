@@ -1636,14 +1636,14 @@ void App::Render() {
     bool hasCurrSrv = (m_frameSrvs[currSlot] != nullptr);
     bool canInterpolate = m_interpolationEnabled && hasPair && hasPrevSrv && hasCurrSrv;
     if (useMonitorSync) {
-      if (captureFps <= 0.0 || monitorHz <= 0.0f) {
+      if (!m_forceInterpolation && (captureFps <= 0.0 || monitorHz <= 0.0f)) {
         canInterpolate = false;
       } else {
         float minInterpFps = captureFps * 1.2f;
-        canInterpolate = monitorHz > minInterpFps;
+        canInterpolate = m_forceInterpolation || (monitorHz > minInterpFps);
       }
     } else {
-      if (multiplier <= 1) {
+      if (multiplier <= 1 && !m_forceInterpolation) {
         canInterpolate = false;
       }
     }
@@ -1661,14 +1661,33 @@ void App::Render() {
       double currTime = static_cast<double>(m_frameTime100ns[currSlot]);
       intervalSec = (currTime - prevTime) * 1e-7;
       
-      // DE-JITTER: If the current interval is close to the running average,
-      // force the use of the average. This prevents capture timestamp noise
-      // from causing stuttery interpolation speed changes.
+      // IMPOROVED JITTER HANDLING:
+      // Instead of hard snapping (which causes stutters when hovering near the threshold),
+      // we now use a "Soft Knee" blend.
+      // - Inside threshold: Locked to Average (Butter Smooth)
+      // - Just outside: Blends smoothly to Real Time (Absorbs drift)
+      // - Way outside: Uses Real Time (Responding to lag spikes)
       useInterval = intervalSec;
-      if (m_avgFrameInterval > 0.0 && intervalSec > 0.0) {
-          double diff = std::abs(intervalSec - m_avgFrameInterval);
-          if (m_jitterSuppression > 0.0f && diff < m_avgFrameInterval * static_cast<double>(m_jitterSuppression)) {
+      
+      if (m_avgFrameInterval > 0.0) {
+          if (m_forceInterpolation) {
               useInterval = m_avgFrameInterval;
+          } else if (intervalSec > 0.0) {
+              double diff = std::abs(intervalSec - m_avgFrameInterval);
+              double errorRatio = diff / m_avgFrameInterval;
+              double limit = static_cast<double>(m_jitterSuppression);
+              
+              if (limit > 0.001) { // Avoid divide by zero
+                  if (errorRatio <= limit) {
+                      // Perfect Lock
+                      useInterval = m_avgFrameInterval;
+                  } else if (errorRatio < (limit * 2.0)) {
+                      // Soft Blend Zone: Fade from Average to Real
+                      // This eliminates the "Pop" artifact when jitter increases slightly
+                      double blendFactor = (errorRatio - limit) / limit;
+                      useInterval = m_avgFrameInterval * (1.0 - blendFactor) + intervalSec * blendFactor;
+                  }
+              }
           }
       }
 
@@ -1729,7 +1748,8 @@ void App::Render() {
       }
     }
 
-    bool allowInterpolation = canInterpolate && (!unstable || neverDropMode);
+    // Fix: Force Interpolation should also override the instability check
+    bool allowInterpolation = canInterpolate && (!unstable || neverDropMode || m_forceInterpolation);
 
     m_lastUnstable = unstable;
     m_lastAlpha = alpha;
@@ -1781,6 +1801,7 @@ void App::Render() {
         m_interpolator.SetRadius(m_motionRadius);
         m_interpolator.SetRefineRadius(m_refineRadius);
         m_interpolator.SetMotionSmoothing(m_motionEdgeScale, m_confidencePower);
+        m_interpolator.SetQualityMode(m_interpolationQuality);
         m_interpolator.SetTemporalStabilization(m_temporalStabilization,
                                                 m_temporalHistoryWeight,
                                                 m_temporalConfInfluence,
@@ -2471,6 +2492,9 @@ void App::RenderUi() {
     ImGui::Checkbox("Unlock App FPS (High CPU)", &m_unlockAppFps);
     if (ImGui::IsItemHovered()) ImGui::SetTooltip("Removes frame pacing limits.\nAllows the capture loop to run as fast as possible (1000+ FPS).\nEssential for capturing >60FPS on some systems.\nWARNING: Increases CPU usage.");
      
+    ImGui::Checkbox("Force Interpolation", &m_forceInterpolation);
+    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Bypass framerate safety checks.\nForces interpolation even if Capture FPS matches Monitor FPS (which normally disables it).\nEnable this if game looks like 'base fps'.");
+
     ImGui::Checkbox("Capture Low Latency Mode", &m_wgcLowLatencyMode);
     if (ImGui::IsItemHovered()) ImGui::SetTooltip("WGC: Use smaller frame pool (2 frames).\nDXGI: Use aggressive cleanup.\nDisable if you experience frame drops with high-FPS content.");
      
@@ -2557,8 +2581,8 @@ void App::RenderUi() {
   ImGui::SliderInt("Refine Radius", &m_refineRadius, 1, 4);
   if (ImGui::IsItemHovered()) ImGui::SetTooltip("Sub-pixel refinement search radius.\nHigher = More accurate motion but slower.\nRecommended: 2 for balance.");
   
-  ImGui::SliderInt("Output Multiplier", &m_outputMultiplier, 1, 4);
-  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Frame rate multiplier.\n1x = No interpolation (passthrough)\n2x = Double frame rate (60->120)\n3x = Triple (60->180)\n4x = Quadruple (60->240)");
+  ImGui::SliderInt("Output Multiplier", &m_outputMultiplier, 1, 20);
+  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Frame rate multiplier.\n1x = No interpolation (passthrough)\n2x = Double frame rate (60->120)\n3x = Triple (60->180)\n4x = Quadruple (60->240)\n5-20x = Extreme multipliers (quality/latency may degrade)");
   
   ImGui::SliderFloat("Delay Scale", &m_delayScale, 0.5f, 1.5f, "%.2f");
   if (ImGui::IsItemHovered()) ImGui::SetTooltip("Scale the timing delay for frame presentation.\n<1.0 = Show frames earlier (lower latency, may stutter)\n>1.0 = Show frames later (smoother, more latency)\n1.0 = Default timing.");
@@ -2581,10 +2605,14 @@ void App::RenderUi() {
   ImGui::SliderFloat("Motion Edge", &m_motionEdgeScale, 1.0f, 12.0f, "%.2f");
   if (ImGui::IsItemHovered()) ImGui::SetTooltip("Edge detection sensitivity for motion smoothing.\nHigher = Preserve sharp edges better (may be noisy)\nLower = Smoother motion field (may blur edges)\nRecommended: 6.0");
   
+  const char* qualityLabels[] = {"Standard (Fast)", "High (Sharp)"};
+  ImGui::Combo("Quality Mode", &m_interpolationQuality, qualityLabels, IM_ARRAYSIZE(qualityLabels));
+  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Standard: Bilinear sampling (Blurrier, less GPU usage)\nHigh: Bicubic + Linear Light (Sharper, brightness correct, more GPU usage)");
+
   ImGui::Text("Delay: %.2f ms", m_outputDelayMs);
-  const char* debugLabels[] = {"None", "Motion Flow", "Confidence Heatmap", "Motion Needles", "Residual Error", "Split Screen", "Occlusion"};
+  const char* debugLabels[] = {"None", "Motion Flow", "Confidence Heatmap", "Motion Needles", "Residual Error", "Split Screen", "Occlusion", "AI Ghost Mask", "Structure Gradient"};
   ImGui::Combo("Debug View", &m_debugView, debugLabels, IM_ARRAYSIZE(debugLabels));
-  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Debug visualization modes:\nNone: Final interpolated result\nFlow: Color-coded motion\nHeatmap: Confidence (Green=Good, Red=Bad)\nNeedles: Motion vectors\nResidual: Warping error check\nSplit: Compare Source vs Warped\nOcclusion: Disoccluded areas");
+  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Debug visualization modes:\nNone: Final interpolated result\nFlow: Color-coded motion\nHeatmap: Confidence (Green=Good, Red=Bad)\nNeedles: Motion vectors\nResidual: Warping error check\nSplit: Compare Source vs Warped\nOcclusion: Disoccluded areas\nAI Ghost Mask: Visualization of Disocclusion Logic\nStructure Gradient: Edges used for Motion Search");
   if (m_debugView == static_cast<int>(Interpolator::DebugViewMode::MotionFlow) || 
       m_debugView == static_cast<int>(Interpolator::DebugViewMode::MotionNeedles)) {
     ImGui::SliderFloat("Motion Scale", &m_debugMotionScale, 0.005f, 0.2f, "%.3f");

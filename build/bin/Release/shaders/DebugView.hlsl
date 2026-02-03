@@ -28,6 +28,15 @@ float3 HSVtoRGB(float h, float s, float v) {
     return c.z * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
+// Color Space for AI Mask
+float3 RGBToYCoCg(float3 c) {
+    return float3(
+        c.r/4.0 + c.g/2.0 + c.b/4.0,
+        c.r/2.0 - c.b/2.0,
+        -c.r/4.0 + c.g/2.0 - c.b/4.0
+    );
+}
+
 // Turbo Colormap for Heatmaps (Blue -> Green -> Red)
 float3 Turbo(float t) {
     t = saturate(t);
@@ -194,13 +203,71 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
     // MODE 6: OCCLUSION MASK
     // White = Visible. Black = Occluded.
     // ========================================================================
-    else if (mode >= 6) {
+    else if (mode == 6) {
         float2 warpUV = uv - (mv / inSize); 
         float4 warpedPrev = PrevColor.SampleLevel(LinearClamp, warpUV, 0);
         float3 diff = abs(curr.rgb - warpedPrev.rgb);
         float occlusion = (length(diff) > 0.25) ? 0.0 : 1.0;
         
         finalColor = float3(occlusion, occlusion, occlusion);
+    }
+    
+    // ========================================================================
+    // MODE 7: AI GHOST MASK (Visualize Disocclusion Logic)
+    // Red = Ghost Detected (Blending Disabled)
+    // Blue = Normal Interpolation
+    // ========================================================================
+    else if (mode == 7) {
+        // Replicate logic from Interpolate.hlsl
+        // Note: In Interpolate.hlsl we warp from both sides. 
+        // Here we just visualize the endpoint difference which triggers the logic.
+        
+        float3 prev = PrevColor.SampleLevel(LinearClamp, uv, 0).rgb;
+        float3 cur = CurrColor.SampleLevel(LinearClamp, uv, 0).rgb;
+        
+        float3 yPrev = RGBToYCoCg(prev);
+        float3 yCurr = RGBToYCoCg(cur);
+        float patchDiff = length(yPrev - yCurr);
+        
+        // Use diffScale from UI to match interpolator settings
+        float ghostFactor = smoothstep(0.05 * diffScale, 0.25 * diffScale, patchDiff);
+        
+        // Visualization:
+        // Blue background = Safe
+        // Red overlay = Danger/Cut
+        finalColor = lerp(float3(0,0,0.5), float3(1,0,0), ghostFactor);
+        
+        // Add structure for context
+        finalColor += cur * 0.2; 
+    }
+    
+    // ========================================================================
+    // MODE 8: STRUCTURE GRADIENT
+    // Visualize the edges that MotionEst locked onto.
+    // ========================================================================
+    else if (mode == 8) {
+        // 3x3 Sobel on Current Frame Luma
+        float v00 = RGBToYCoCg(CurrColor.SampleLevel(LinearClamp, uv, 0, int2(-1,-1)).rgb).x;
+        float v10 = RGBToYCoCg(CurrColor.SampleLevel(LinearClamp, uv, 0, int2( 0,-1)).rgb).x;
+        float v20 = RGBToYCoCg(CurrColor.SampleLevel(LinearClamp, uv, 0, int2( 1,-1)).rgb).x;
+        float v01 = RGBToYCoCg(CurrColor.SampleLevel(LinearClamp, uv, 0, int2(-1, 0)).rgb).x;
+        float v21 = RGBToYCoCg(CurrColor.SampleLevel(LinearClamp, uv, 0, int2( 1, 0)).rgb).x;
+        float v02 = RGBToYCoCg(CurrColor.SampleLevel(LinearClamp, uv, 0, int2(-1, 1)).rgb).x;
+        float v12 = RGBToYCoCg(CurrColor.SampleLevel(LinearClamp, uv, 0, int2( 0, 1)).rgb).x;
+        float v22 = RGBToYCoCg(CurrColor.SampleLevel(LinearClamp, uv, 0, int2( 1, 1)).rgb).x;
+        
+        float gx = -v00 + v20 - 2.0 * v01 + 2.0 * v21 - v02 + v22;
+        float gy = -v00 - 2.0 * v10 - v20 + v02 + 2.0 * v12 + v22;
+        
+        float mag = length(float2(gx, gy));
+        
+        // Boost visibility
+        mag *= 4.0;
+        
+        finalColor = float3(mag, mag, mag);
+        
+        // Highlight strong edges in Green
+        if (mag > 0.5) finalColor = float3(0, mag, 0);
     }
 
     OutColor[id.xy] = float4(finalColor, 1.0);
