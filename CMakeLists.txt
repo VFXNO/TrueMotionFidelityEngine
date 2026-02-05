@@ -133,7 +133,7 @@ if(FXC_EXECUTABLE)
   
   # Compile each shader at build time
   # Use /O1 (less aggressive optimization) to avoid timeouts on complex shaders
-  set(SHADER_NAMES Blend CopyScale DebugView DownsampleLuma DownsampleLumaR Interpolate MotionEst MotionRefine MotionSmooth MotionTemporal)
+  set(SHADER_NAMES CopyScale DebugView DownsampleLuma DownsampleLumaR Interpolate MotionEst MotionRefine MotionSmooth MotionTemporal)
   
   foreach(SHADER_NAME ${SHADER_NAMES})
     add_custom_command(TARGET TrueMotionFidelityEngine POST_BUILD
