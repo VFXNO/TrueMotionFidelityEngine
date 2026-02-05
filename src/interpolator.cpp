@@ -45,8 +45,8 @@ struct InterpConstants {
   float motionSampleScale = 1.5f;
   int useHistory = 0;
   float historyWeight = 0.2f;
-  float pad0 = 0.0f;
-  float pad1 = 0.0f;
+  float textProtect = 0.0f;
+  float edgeThreshold = 0.0f;
 };
 
 struct DebugConstants {
@@ -190,6 +190,12 @@ bool Interpolator::Resize(int inputWidth, int inputHeight, int outputWidth, int 
   if (m_smallHeight < 1) {
     m_smallHeight = 1;
   }
+  
+  // Tiny buffers are 1/8th resolution (1/4 of Small)
+  m_tinyWidth = (m_smallWidth + 1) / 2;
+  m_tinyHeight = (m_smallHeight + 1) / 2;
+  if (m_tinyWidth < 1) m_tinyWidth = 1;
+  if (m_tinyHeight < 1) m_tinyHeight = 1;
 
   CreateResources();
   return true;
@@ -259,6 +265,20 @@ void Interpolator::Execute(
   }
   interpConstants.useHistory = m_historyValid ? 1 : 0;
   interpConstants.historyWeight = historyWeight;
+  float textProtect = m_textProtectStrength;
+  if (textProtect < 0.0f) {
+    textProtect = 0.0f;
+  } else if (textProtect > 1.0f) {
+    textProtect = 1.0f;
+  }
+  float edgeThreshold = m_textEdgeThreshold;
+  if (edgeThreshold < 0.0f) {
+    edgeThreshold = 0.0f;
+  } else if (edgeThreshold > 1.0f) {
+    edgeThreshold = 1.0f;
+  }
+  interpConstants.textProtect = textProtect;
+  interpConstants.edgeThreshold = edgeThreshold;
   m_context->UpdateSubresource(m_interpConstants.Get(), 0, nullptr, &interpConstants, 0, 0);
 
   ID3D11ShaderResourceView* motionSrv = m_motionSmoothSrv ? m_motionSmoothSrv.Get() : m_motionSrv.Get();
@@ -524,64 +544,44 @@ bool Interpolator::LoadShaders() {
 }
 
 void Interpolator::CreateResources() {
-  m_prevLuma.Reset();
-  m_currLuma.Reset();
-  m_prevLumaSmall.Reset();
-  m_currLumaSmall.Reset();
-  m_motion.Reset();
-  m_confidence.Reset();
-  m_motionCoarse.Reset();
-  m_prevMotionCoarse.Reset();
-  m_confidenceCoarse.Reset();
-  m_motionSmooth.Reset();
-  m_confidenceSmooth.Reset();
+  m_prevLuma.Reset(); m_prevLumaSrv.Reset(); m_prevLumaUav.Reset();
+  m_currLuma.Reset(); m_currLumaSrv.Reset(); m_currLumaUav.Reset();
+  
+  m_prevLumaSmall.Reset(); m_prevLumaSmallSrv.Reset(); m_prevLumaSmallUav.Reset();
+  m_currLumaSmall.Reset(); m_currLumaSmallSrv.Reset(); m_currLumaSmallUav.Reset();
+  
+  m_prevLumaTiny.Reset(); m_prevLumaTinySrv.Reset(); m_prevLumaTinyUav.Reset();
+  m_currLumaTiny.Reset(); m_currLumaTinySrv.Reset(); m_currLumaTinyUav.Reset();
+  
+  m_motion.Reset(); m_motionSrv.Reset(); m_motionUav.Reset();
+  m_confidence.Reset(); m_confidenceSrv.Reset(); m_confidenceUav.Reset();
+  
+  m_motionCoarse.Reset(); m_motionCoarseSrv.Reset(); m_motionCoarseUav.Reset();
+  m_prevMotionCoarse.Reset(); m_prevMotionCoarseSrv.Reset(); m_prevMotionCoarseUav.Reset();
+  
+  m_motionTiny.Reset(); m_motionTinySrv.Reset(); m_motionTinyUav.Reset();
+  m_confidenceTiny.Reset(); m_confidenceTinySrv.Reset(); m_confidenceTinyUav.Reset();
+  m_confidenceCoarse.Reset(); m_confidenceCoarseSrv.Reset(); m_confidenceCoarseUav.Reset();
+  
+  m_motionSmooth.Reset(); m_motionSmoothSrv.Reset(); m_motionSmoothUav.Reset();
+  m_confidenceSmooth.Reset(); m_confidenceSmoothSrv.Reset(); m_confidenceSmoothUav.Reset();
+  
   for (int i = 0; i < 2; ++i) {
-    m_motionTemporal[i].Reset();
-    m_confidenceTemporal[i].Reset();
+    m_motionTemporal[i].Reset(); m_motionTemporalSrv[i].Reset(); m_motionTemporalUav[i].Reset();
+    m_confidenceTemporal[i].Reset(); m_confidenceTemporalSrv[i].Reset(); m_confidenceTemporalUav[i].Reset();
   }
+  
   for (int i = 0; i < kHistorySize; ++i) {
-    m_historyColor[i].Reset();
-    m_historyColorSrv[i].Reset();
-    m_historyColorUav[i].Reset();
+    m_historyColor[i].Reset(); m_historyColorSrv[i].Reset(); m_historyColorUav[i].Reset();
   }
-  m_outputTexture.Reset();
-  m_prevLumaSrv.Reset();
-  m_currLumaSrv.Reset();
-  m_prevLumaSmallSrv.Reset();
-  m_currLumaSmallSrv.Reset();
-  m_motionSrv.Reset();
-  m_confidenceSrv.Reset();
-  m_motionCoarseSrv.Reset();
-  m_prevMotionCoarseSrv.Reset();
-  m_confidenceCoarseSrv.Reset();
-  m_motionSmoothSrv.Reset();
-  m_confidenceSmoothSrv.Reset();
-  for (int i = 0; i < 2; ++i) {
-    m_motionTemporalSrv[i].Reset();
-    m_confidenceTemporalSrv[i].Reset();
-  }
-  m_outputSrv.Reset();
-  m_prevLumaUav.Reset();
-  m_currLumaUav.Reset();
-  m_prevLumaSmallUav.Reset();
-  m_currLumaSmallUav.Reset();
-  m_motionUav.Reset();
-  m_confidenceUav.Reset();
-  m_motionCoarseUav.Reset();
-  m_prevMotionCoarseUav.Reset();
-  m_confidenceCoarseUav.Reset();
-  m_motionSmoothUav.Reset();
-  m_confidenceSmoothUav.Reset();
-  for (int i = 0; i < 2; ++i) {
-    m_motionTemporalUav[i].Reset();
-    m_confidenceTemporalUav[i].Reset();
-  }
-  m_outputUav.Reset();
+  
+  m_outputTexture.Reset(); m_outputSrv.Reset(); m_outputUav.Reset();
 
   auto createTexture = [&](int width, int height, DXGI_FORMAT format,
                            Microsoft::WRL::ComPtr<ID3D11Texture2D>& tex,
                            Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& srv,
                            Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView>& uav) {
+    if (width <= 0 || height <= 0) return; 
     D3D11_TEXTURE2D_DESC desc = {};
     desc.Width = static_cast<UINT>(width);
     desc.Height = static_cast<UINT>(height);
@@ -591,40 +591,43 @@ void Interpolator::CreateResources() {
     desc.SampleDesc.Count = 1;
     desc.Usage = D3D11_USAGE_DEFAULT;
     desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
-    if (FAILED(m_device->CreateTexture2D(&desc, nullptr, &tex))) {
-      return;
-    }
-    if (FAILED(m_device->CreateShaderResourceView(tex.Get(), nullptr, &srv))) {
-      tex.Reset();
-      return;
-    }
-    if (FAILED(m_device->CreateUnorderedAccessView(tex.Get(), nullptr, &uav))) {
-      tex.Reset();
-      srv.Reset();
-      return;
-    }
+    if (FAILED(m_device->CreateTexture2D(&desc, nullptr, &tex))) return;
+    if (FAILED(m_device->CreateShaderResourceView(tex.Get(), nullptr, &srv))) { tex.Reset(); return; }
+    if (FAILED(m_device->CreateUnorderedAccessView(tex.Get(), nullptr, &uav))) { tex.Reset(); srv.Reset(); return; }
   };
 
+  // Luma (Half Resolution)
   createTexture(m_lumaWidth, m_lumaHeight, DXGI_FORMAT_R16_FLOAT, m_prevLuma, m_prevLumaSrv, m_prevLumaUav);
   createTexture(m_lumaWidth, m_lumaHeight, DXGI_FORMAT_R16_FLOAT, m_currLuma, m_currLumaSrv, m_currLumaUav);
+  
+  // Small (Quarter Resolution)
   createTexture(m_smallWidth, m_smallHeight, DXGI_FORMAT_R16_FLOAT, m_prevLumaSmall, m_prevLumaSmallSrv, m_prevLumaSmallUav);
   createTexture(m_smallWidth, m_smallHeight, DXGI_FORMAT_R16_FLOAT, m_currLumaSmall, m_currLumaSmallSrv, m_currLumaSmallUav);
+  
+  // Tiny (1/8th Resolution relative to Luma, or 1/16th relative to Output)
+  createTexture(m_tinyWidth, m_tinyHeight, DXGI_FORMAT_R16_FLOAT, m_prevLumaTiny, m_prevLumaTinySrv, m_prevLumaTinyUav);
+  createTexture(m_tinyWidth, m_tinyHeight, DXGI_FORMAT_R16_FLOAT, m_currLumaTiny, m_currLumaTinySrv, m_currLumaTinyUav);
+
+  // Motion Fields
   createTexture(m_lumaWidth, m_lumaHeight, DXGI_FORMAT_R16G16_FLOAT, m_motion, m_motionSrv, m_motionUav);
   createTexture(m_lumaWidth, m_lumaHeight, DXGI_FORMAT_R16_FLOAT, m_confidence, m_confidenceSrv, m_confidenceUav);
+  
   createTexture(m_smallWidth, m_smallHeight, DXGI_FORMAT_R16G16_FLOAT, m_motionCoarse, m_motionCoarseSrv, m_motionCoarseUav);
   createTexture(m_smallWidth, m_smallHeight, DXGI_FORMAT_R16G16_FLOAT, m_prevMotionCoarse, m_prevMotionCoarseSrv, m_prevMotionCoarseUav);
   createTexture(m_smallWidth, m_smallHeight, DXGI_FORMAT_R16_FLOAT, m_confidenceCoarse, m_confidenceCoarseSrv, m_confidenceCoarseUav);
+
+  createTexture(m_tinyWidth, m_tinyHeight, DXGI_FORMAT_R16G16_FLOAT, m_motionTiny, m_motionTinySrv, m_motionTinyUav);
+  createTexture(m_tinyWidth, m_tinyHeight, DXGI_FORMAT_R16_FLOAT, m_confidenceTiny, m_confidenceTinySrv, m_confidenceTinyUav);
+
   createTexture(m_lumaWidth, m_lumaHeight, DXGI_FORMAT_R16G16_FLOAT, m_motionSmooth, m_motionSmoothSrv, m_motionSmoothUav);
   createTexture(m_lumaWidth, m_lumaHeight, DXGI_FORMAT_R16_FLOAT, m_confidenceSmooth, m_confidenceSmoothSrv, m_confidenceSmoothUav);
+  
   for (int i = 0; i < 2; ++i) {
-    createTexture(m_lumaWidth, m_lumaHeight, DXGI_FORMAT_R16G16_FLOAT, m_motionTemporal[i],
-                  m_motionTemporalSrv[i], m_motionTemporalUav[i]);
-    createTexture(m_lumaWidth, m_lumaHeight, DXGI_FORMAT_R16_FLOAT, m_confidenceTemporal[i],
-                  m_confidenceTemporalSrv[i], m_confidenceTemporalUav[i]);
+    createTexture(m_lumaWidth, m_lumaHeight, DXGI_FORMAT_R16G16_FLOAT, m_motionTemporal[i], m_motionTemporalSrv[i], m_motionTemporalUav[i]);
+    createTexture(m_lumaWidth, m_lumaHeight, DXGI_FORMAT_R16_FLOAT, m_confidenceTemporal[i], m_confidenceTemporalSrv[i], m_confidenceTemporalUav[i]);
   }
   for (int i = 0; i < kHistorySize; ++i) {
-    createTexture(m_outputWidth, m_outputHeight, DXGI_FORMAT_B8G8R8A8_UNORM, m_historyColor[i],
-                  m_historyColorSrv[i], m_historyColorUav[i]);
+    createTexture(m_outputWidth, m_outputHeight, DXGI_FORMAT_B8G8R8A8_UNORM, m_historyColor[i], m_historyColorSrv[i], m_historyColorUav[i]);
   }
   createTexture(m_outputWidth, m_outputHeight, DXGI_FORMAT_B8G8R8A8_UNORM, m_outputTexture, m_outputSrv, m_outputUav);
 
@@ -632,6 +635,7 @@ void Interpolator::CreateResources() {
       !m_prevLumaUav || !m_currLumaUav ||
       !m_motionUav || !m_confidenceUav ||
       !m_motionCoarseUav || !m_confidenceCoarseUav ||
+      !m_motionTinyUav || !m_confidenceTinyUav ||
       !m_motionSmoothUav || !m_confidenceSmoothUav) {
     return;
   }
@@ -649,135 +653,216 @@ bool Interpolator::ComputeMotion(
   if (!prev || !curr) {
     return false;
   }
-  if (!m_downsampleCs || !m_downsampleLumaCs || !m_motionCs || !m_motionRefineCs ||
-      !m_motionSmoothCs || !m_motionConstants || !m_refineConstants || !m_smoothConstants) {
+  // Check all required views including new Pyramid resources
+  if (!m_prevLumaUav || !m_currLumaUav || 
+      !m_prevLumaSmallUav || !m_currLumaSmallUav ||
+      !m_prevLumaTinyUav || !m_currLumaTinyUav ||
+      !m_motionUav || !m_confidenceUav ||
+      !m_motionCoarseUav || !m_confidenceCoarseUav ||
+      !m_motionTinyUav || !m_confidenceTinyUav) {
     return false;
   }
-  if (!m_prevLumaUav || !m_currLumaUav || !m_prevLumaSmallUav || !m_currLumaSmallUav ||
-      !m_motionUav || !m_confidenceUav || !m_motionCoarseUav || !m_confidenceCoarseUav ||
-      !m_motionSmoothUav || !m_confidenceSmoothUav) {
+  if (!m_motionCs || !m_motionRefineCs || !m_motionSmoothCs || 
+      !m_motionConstants || !m_refineConstants || !m_smoothConstants) {
     return false;
   }
 
-  ID3D11ShaderResourceView* srv0[] = {prev};
-  ID3D11UnorderedAccessView* uav0[] = {m_prevLumaUav.Get()};
-  m_context->CSSetShader(m_downsampleCs.Get(), nullptr, 0);
-  m_context->CSSetShaderResources(0, 1, srv0);
-  m_context->CSSetUnorderedAccessViews(0, 1, uav0, nullptr);
-  m_context->Dispatch(DispatchSize(m_lumaWidth), DispatchSize(m_lumaHeight), 1);
-
-  ID3D11ShaderResourceView* nullSrv1[1] = {};
-  ID3D11UnorderedAccessView* nullUav1[1] = {};
-  m_context->CSSetShaderResources(0, 1, nullSrv1);
-  m_context->CSSetUnorderedAccessViews(0, 1, nullUav1, nullptr);
-
-  ID3D11ShaderResourceView* srv1[] = {curr};
-  ID3D11UnorderedAccessView* uav1[] = {m_currLumaUav.Get()};
-  m_context->CSSetShaderResources(0, 1, srv1);
-  m_context->CSSetUnorderedAccessViews(0, 1, uav1, nullptr);
-  m_context->Dispatch(DispatchSize(m_lumaWidth), DispatchSize(m_lumaHeight), 1);
-
-  m_context->CSSetShaderResources(0, 1, nullSrv1);
-  m_context->CSSetUnorderedAccessViews(0, 1, nullUav1, nullptr);
-
-  ID3D11ShaderResourceView* lumaSrv0[] = {m_prevLumaSrv.Get()};
-  ID3D11UnorderedAccessView* lumaUav0[] = {m_prevLumaSmallUav.Get()};
-  m_context->CSSetShader(m_downsampleLumaCs.Get(), nullptr, 0);
-  m_context->CSSetShaderResources(0, 1, lumaSrv0);
-  m_context->CSSetUnorderedAccessViews(0, 1, lumaUav0, nullptr);
-  m_context->Dispatch(DispatchSize(m_smallWidth), DispatchSize(m_smallHeight), 1);
-
-  m_context->CSSetShaderResources(0, 1, nullSrv1);
-  m_context->CSSetUnorderedAccessViews(0, 1, nullUav1, nullptr);
-
-  ID3D11ShaderResourceView* lumaSrv1[] = {m_currLumaSrv.Get()};
-  ID3D11UnorderedAccessView* lumaUav1[] = {m_currLumaSmallUav.Get()};
-  m_context->CSSetShaderResources(0, 1, lumaSrv1);
-  m_context->CSSetUnorderedAccessViews(0, 1, lumaUav1, nullptr);
-  m_context->Dispatch(DispatchSize(m_smallWidth), DispatchSize(m_smallHeight), 1);
-
-  m_context->CSSetShaderResources(0, 1, nullSrv1);
-  m_context->CSSetUnorderedAccessViews(0, 1, nullUav1, nullptr);
-
-  // FAST MOTION FIX: Unlock the search radius for the coarse pass.
-  // Since this runs on a 1/8th resolution buffer (m_small), we can afford a larger search.
-  // Previously capped at 6 (radius/2). Now we use minimal 4, max 12?
-  // Let's use m_radius directly. Max 8 means 8*4 = 32 pixel reach.
-  // We will handle the performance cost in the shader using adaptive stepping.
-  int coarseRadius = m_radius; 
-  if (coarseRadius < 4) {
-    coarseRadius = 4; // Ensure minimum search for stability
-  }
-  
-  if (m_useMotionPrediction && m_prevMotionCoarseValid && m_copyCs) {
-      // Backup current coarse motion to previous before overwriting
-      // But wait! m_motionCoarse contains "current" result after this shader runs.
-      // We must have copied it *before* or we just use double buffering?
-      // Actually we just need to save the result of *this* pass for *next* frame.
-      // So at the END of this function, we copy m_motionCoarse to m_prevMotionCoarse.
-      // Here, m_prevMotionCoarse contains the result from LAST frame.
-  }
-  
-  MotionConstants motionConstants = {};
-  motionConstants.radius = coarseRadius;
-  motionConstants.usePrediction = (m_useMotionPrediction && m_prevMotionCoarseValid) ? 1 : 0;
-  m_context->UpdateSubresource(m_motionConstants.Get(), 0, nullptr, &motionConstants, 0, 0);
-
-  ID3D11ShaderResourceView* motionSrvs[] = {m_currLumaSmallSrv.Get(), m_prevLumaSmallSrv.Get(), m_prevMotionCoarseSrv.Get()};
-  ID3D11UnorderedAccessView* motionUavs[] = {m_motionCoarseUav.Get(), m_confidenceCoarseUav.Get()};
-  ID3D11Buffer* motionCbs[] = {m_motionConstants.Get()};
-  m_context->CSSetShader(m_motionCs.Get(), nullptr, 0);
-  m_context->CSSetShaderResources(0, 3, motionSrvs);
-  m_context->CSSetUnorderedAccessViews(0, 2, motionUavs, nullptr);
-  m_context->CSSetConstantBuffers(0, 1, motionCbs);
-  m_context->Dispatch(DispatchSize(m_smallWidth), DispatchSize(m_smallHeight), 1);
-
-  ID3D11ShaderResourceView* nullSrv2[3] = {};
-  ID3D11UnorderedAccessView* nullUav2[2] = {};
-  ID3D11Buffer* nullCb1[1] = {};
-  m_context->CSSetShaderResources(0, 2, nullSrv2);
-  m_context->CSSetUnorderedAccessViews(0, 2, nullUav2, nullptr);
-  m_context->CSSetConstantBuffers(0, 1, nullCb1);
-
-  RefineConstants refineConstants = {};
-  int refineRadius = m_refineRadius;
-  
-  // QUALITY: Increase refine radius to capture motion of small objects 
-  // that were missed by the coarse pass (because they vanished in downsampling).
-  // Coarse pass found the "background" motion. We need to look further to find the "object" motion.
-  // Old cap was 4. New cap 12.
-  if (refineRadius < 2) {
-    refineRadius = 2;
-  } else if (refineRadius > 12) {
-    refineRadius = 12;
-  }
-  refineConstants.radius = refineRadius;
-  refineConstants.motionScale = static_cast<float>(m_lumaWidth) / static_cast<float>(m_smallWidth);
-  m_context->UpdateSubresource(m_refineConstants.Get(), 0, nullptr, &refineConstants, 0, 0);
-
-  // QUALITY: Use Full-Resolution Luma for refinement (safer than raw RGB)
-  // Revert to original binding scheme: t0=curr(future), t1=prev(past) for Forward Motion
-  ID3D11ShaderResourceView* refineSrvs[] = {
-      m_currLumaSrv.Get(),
-      m_prevLumaSrv.Get(),
-      m_motionCoarseSrv.Get(),
-      m_confidenceCoarseSrv.Get()};
-  ID3D11UnorderedAccessView* refineUavs[] = {m_motionUav.Get(), m_confidenceUav.Get()};
-  ID3D11Buffer* refineCbs[] = {m_refineConstants.Get()};
-  ID3D11SamplerState* refineSamplers[] = {m_linearSampler.Get()};
-  m_context->CSSetShader(m_motionRefineCs.Get(), nullptr, 0);
-  m_context->CSSetShaderResources(0, 4, refineSrvs);
-  m_context->CSSetUnorderedAccessViews(0, 2, refineUavs, nullptr);
-  m_context->CSSetConstantBuffers(0, 1, refineCbs);
-  m_context->CSSetSamplers(0, 1, refineSamplers);
-  m_context->Dispatch(DispatchSize(m_lumaWidth), DispatchSize(m_lumaHeight), 1);
-
-  ID3D11ShaderResourceView* nullSrv4[4] = {};
-  m_context->CSSetShaderResources(0, 4, nullSrv4);
-  m_context->CSSetUnorderedAccessViews(0, 2, nullUav2, nullptr);
-  m_context->CSSetConstantBuffers(0, 1, nullCb1);
+  // Helper arrays for cleanup
+  ID3D11ShaderResourceView* nullSrvs[4] = {};
+  ID3D11UnorderedAccessView* nullUavs[2] = {};
+  ID3D11Buffer* nullCbs[1] = {};
   ID3D11SamplerState* nullSamplers[1] = {};
-  m_context->CSSetSamplers(0, 1, nullSamplers);
+
+  // -----------------------------------------------------------------------
+  // 1. DOWNSAMPLE CHAIN
+  // -----------------------------------------------------------------------
+  
+  // A. Full -> Small (1/4)
+  // ----------------------
+  {
+      // Convert Prev -> Luma Small
+      ID3D11ShaderResourceView* srv[] = {prev};
+      ID3D11UnorderedAccessView* uav[] = {m_prevLumaUav.Get()};
+      m_context->CSSetShader(m_downsampleCs.Get(), nullptr, 0);
+      m_context->CSSetShaderResources(0, 1, srv);
+      m_context->CSSetUnorderedAccessViews(0, 1, uav, nullptr);
+      m_context->Dispatch(DispatchSize(m_lumaWidth), DispatchSize(m_lumaHeight), 1);
+      
+      // Clear
+      m_context->CSSetShaderResources(0, 1, nullSrvs);
+      m_context->CSSetUnorderedAccessViews(0, 1, nullUavs, nullptr);
+
+      // Convert Curr -> Luma Small
+      srv[0] = curr;
+      uav[0] = m_currLumaUav.Get();
+      m_context->CSSetShaderResources(0, 1, srv);
+      m_context->CSSetUnorderedAccessViews(0, 1, uav, nullptr);
+      m_context->Dispatch(DispatchSize(m_lumaWidth), DispatchSize(m_lumaHeight), 1);
+
+      // Clear
+      m_context->CSSetShaderResources(0, 1, nullSrvs);
+      m_context->CSSetUnorderedAccessViews(0, 1, nullUavs, nullptr);
+      
+      // Prev Luma Full -> Prev Luma Small
+      ID3D11ShaderResourceView* lumaSrv[] = {m_prevLumaSrv.Get()};
+      ID3D11UnorderedAccessView* lumaUav[] = {m_prevLumaSmallUav.Get()};
+      m_context->CSSetShader(m_downsampleLumaCs.Get(), nullptr, 0);
+      m_context->CSSetShaderResources(0, 1, lumaSrv);
+      m_context->CSSetUnorderedAccessViews(0, 1, lumaUav, nullptr);
+      m_context->Dispatch(DispatchSize(m_smallWidth), DispatchSize(m_smallHeight), 1);
+
+      m_context->CSSetShaderResources(0, 1, nullSrvs);
+      m_context->CSSetUnorderedAccessViews(0, 1, nullUavs, nullptr);
+
+      // Curr Luma Full -> Curr Luma Small
+      lumaSrv[0] = m_currLumaSrv.Get();
+      lumaUav[0] = m_currLumaSmallUav.Get();
+      m_context->CSSetShaderResources(0, 1, lumaSrv);
+      m_context->CSSetUnorderedAccessViews(0, 1, lumaUav, nullptr);
+      m_context->Dispatch(DispatchSize(m_smallWidth), DispatchSize(m_smallHeight), 1);
+      
+      m_context->CSSetShaderResources(0, 1, nullSrvs);
+      m_context->CSSetUnorderedAccessViews(0, 1, nullUavs, nullptr);
+  }
+
+  // B. Small -> Tiny (1/16)
+  // -----------------------
+  {
+      // Prev Luma Small -> Prev Luma Tiny
+      ID3D11ShaderResourceView* inputs[] = {m_prevLumaSmallSrv.Get()};
+      ID3D11UnorderedAccessView* outputs[] = {m_prevLumaTinyUav.Get()};
+      
+      // Re-use downsampleLumaCs (logic is identical: averaging 2x2 block from input)
+      m_context->CSSetShader(m_downsampleLumaCs.Get(), nullptr, 0); 
+      m_context->CSSetShaderResources(0, 1, inputs);
+      m_context->CSSetUnorderedAccessViews(0, 1, outputs, nullptr);
+      m_context->Dispatch(DispatchSize(m_tinyWidth), DispatchSize(m_tinyHeight), 1);
+      
+      m_context->CSSetShaderResources(0, 1, nullSrvs);
+      m_context->CSSetUnorderedAccessViews(0, 1, nullUavs, nullptr);
+
+      // Curr Luma Small -> Curr Luma Tiny
+      inputs[0] = m_currLumaSmallSrv.Get();
+      outputs[0] = m_currLumaTinyUav.Get();
+      m_context->CSSetShaderResources(0, 1, inputs);
+      m_context->CSSetUnorderedAccessViews(0, 1, outputs, nullptr);
+      m_context->Dispatch(DispatchSize(m_tinyWidth), DispatchSize(m_tinyHeight), 1);
+      
+      m_context->CSSetShaderResources(0, 1, nullSrvs);
+      m_context->CSSetUnorderedAccessViews(0, 1, nullUavs, nullptr);
+  }
+
+  // -----------------------------------------------------------------------
+  // 2. MOTION ESTIMATION PYRAMID
+  // -----------------------------------------------------------------------
+
+  // PASS 1: TINY Coarse Search
+  // --------------------------
+  {
+      MotionConstants tinyConstants = {};
+      // Re-enabled prediction for smoothness. Radius 6 is sufficient with prediction.
+      tinyConstants.radius = 6;
+      tinyConstants.usePrediction = 1;
+      tinyConstants.pad[0] = 0.5f; // Prediction Scale: Coarse (1/4) -> Tiny (1/8) is 0.5x
+      m_context->UpdateSubresource(m_motionConstants.Get(), 0, nullptr, &tinyConstants, 0, 0);
+
+      // Use Previous Coarse Motion as prediction (if valid)
+      ID3D11ShaderResourceView* predSrv = m_prevMotionCoarseValid ? m_prevMotionCoarseSrv.Get() : nullptr;
+      
+      // CORRECT BINDING FOR FORWARD MOTION: {Curr, Prev, Pred}
+      ID3D11ShaderResourceView* srvs[] = {m_currLumaTinySrv.Get(), m_prevLumaTinySrv.Get(), predSrv};
+      ID3D11UnorderedAccessView* uavs[] = {m_motionTinyUav.Get(), m_confidenceTinyUav.Get()};
+      ID3D11Buffer* cbs[] = {m_motionConstants.Get()};
+      ID3D11SamplerState* samplers[] = {m_linearSampler.Get()};
+      
+      m_context->CSSetShader(m_motionCs.Get(), nullptr, 0);
+      m_context->CSSetShaderResources(0, 3, srvs);
+      m_context->CSSetUnorderedAccessViews(0, 2, uavs, nullptr);
+      m_context->CSSetConstantBuffers(0, 1, cbs);
+      m_context->CSSetSamplers(0, 1, samplers);
+      m_context->Dispatch(DispatchSize(m_tinyWidth), DispatchSize(m_tinyHeight), 1);
+      
+      // Cleanup
+      m_context->CSSetShaderResources(0, 3, nullSrvs);
+      m_context->CSSetUnorderedAccessViews(0, 2, nullUavs, nullptr);
+      ID3D11SamplerState* nullSamplers[] = {nullptr};
+      m_context->CSSetSamplers(0, 1, nullSamplers);
+  }
+
+  // PASS 2: MEDIUM Refine
+  // ---------------------
+  {
+      RefineConstants refineSmallConstants = {};
+      refineSmallConstants.radius = 3; 
+      // Scale up the motion vector from Tiny->Small (usually x4)
+      refineSmallConstants.motionScale = static_cast<float>(m_smallWidth) / static_cast<float>(m_tinyWidth); 
+      m_context->UpdateSubresource(m_refineConstants.Get(), 0, nullptr, &refineSmallConstants, 0, 0);
+
+      // Inputs: {CurrSmall, PrevSmall, MotionTiny, ConfTiny}
+      // Note: We MUST use {Curr, Prev} order for Refine shader to calculate Forward vectors (Prev->Curr).
+      ID3D11ShaderResourceView* srvs[] = {
+          m_currLumaSmallSrv.Get(), 
+          m_prevLumaSmallSrv.Get(), 
+          m_motionTinySrv.Get(),
+          m_confidenceTinySrv.Get()
+      };
+      // Outputs: {MotionSmall, ConfSmall}
+      ID3D11UnorderedAccessView* uavs[] = {m_motionCoarseUav.Get(), m_confidenceCoarseUav.Get()};
+      ID3D11Buffer* cbs[] = {m_refineConstants.Get()};
+      
+      m_context->CSSetShader(m_motionRefineCs.Get(), nullptr, 0);
+      m_context->CSSetShaderResources(0, 4, srvs);
+      m_context->CSSetUnorderedAccessViews(0, 2, uavs, nullptr);
+      m_context->CSSetConstantBuffers(0, 1, cbs);
+      m_context->Dispatch(DispatchSize(m_smallWidth), DispatchSize(m_smallHeight), 1);
+      
+      // Cleanup
+      m_context->CSSetShaderResources(0, 4, nullSrvs);
+      m_context->CSSetUnorderedAccessViews(0, 2, nullUavs, nullptr);
+  }
+
+  // PASS 3: FULL Refine
+  // -------------------
+  {
+      RefineConstants refineConstants = {};
+      int refineRadius = m_refineRadius;
+      if (refineRadius < 2) refineRadius = 2;
+      else if (refineRadius > 12) refineRadius = 12;
+      
+      refineConstants.radius = refineRadius;
+      // Scale up the motion vector from Small->Full (usually x4)
+      refineConstants.motionScale = static_cast<float>(m_lumaWidth) / static_cast<float>(m_smallWidth);
+      m_context->UpdateSubresource(m_refineConstants.Get(), 0, nullptr, &refineConstants, 0, 0);
+
+      // Inputs: {CurrFull, PrevFull, MotionSmall, ConfSmall}
+      // Note: Use {Curr, Prev} for Forward Vectors.
+      ID3D11ShaderResourceView* srvs[] = {
+          m_currLumaSrv.Get(),
+          m_prevLumaSrv.Get(),
+          m_motionCoarseSrv.Get(),
+          m_confidenceCoarseSrv.Get()
+      };
+      // Outputs: {MotionFull, ConfFull}
+      ID3D11UnorderedAccessView* uavs[] = {m_motionUav.Get(), m_confidenceUav.Get()};
+      ID3D11Buffer* cbs[] = {m_refineConstants.Get()};
+      ID3D11SamplerState* samplers[] = {m_linearSampler.Get()};
+
+      m_context->CSSetShader(m_motionRefineCs.Get(), nullptr, 0);
+      m_context->CSSetShaderResources(0, 4, srvs);
+      m_context->CSSetUnorderedAccessViews(0, 2, uavs, nullptr);
+      m_context->CSSetConstantBuffers(0, 1, cbs);
+      m_context->CSSetSamplers(0, 1, samplers);
+      m_context->Dispatch(DispatchSize(m_lumaWidth), DispatchSize(m_lumaHeight), 1);
+
+      // Cleanup
+      m_context->CSSetShaderResources(0, 4, nullSrvs);
+      m_context->CSSetUnorderedAccessViews(0, 2, nullUavs, nullptr);
+      m_context->CSSetSamplers(0, 1, nullSamplers);
+  }
+
+  // -----------------------------------------------------------------------
+  // 3. POST PROCESSING (Smooth, Temporal)
+  // -----------------------------------------------------------------------
 
   SmoothConstants smoothConstants = {};
   float edgeScale = m_smoothEdgeScale;
@@ -805,10 +890,10 @@ bool Interpolator::ComputeMotion(
   m_context->CSSetConstantBuffers(0, 1, smoothCbs);
   m_context->Dispatch(DispatchSize(m_lumaWidth), DispatchSize(m_lumaHeight), 1);
 
-  ID3D11ShaderResourceView* nullSrvs[3] = {};
-  m_context->CSSetShaderResources(0, 3, nullSrvs);
-  m_context->CSSetUnorderedAccessViews(0, 2, nullUav2, nullptr);
-  m_context->CSSetConstantBuffers(0, 1, nullCb1);
+  ID3D11ShaderResourceView* nullSrvs3[3] = {};
+  m_context->CSSetShaderResources(0, 3, nullSrvs3);
+  m_context->CSSetUnorderedAccessViews(0, 2, nullUavs, nullptr);
+  m_context->CSSetConstantBuffers(0, 1, nullCbs);
   m_context->CSSetShader(nullptr, nullptr, 0);
 
   if (m_temporalEnabled && m_motionTemporalCs && m_temporalConstants) {
@@ -858,9 +943,11 @@ bool Interpolator::ComputeMotion(
     m_context->Dispatch(DispatchSize(m_lumaWidth), DispatchSize(m_lumaHeight), 1);
 
     ID3D11ShaderResourceView* nullSrvs4[6] = {};
+    ID3D11UnorderedAccessView* nullUavs4[2] = {};
+    ID3D11Buffer* nullCbs4[1] = {};
     m_context->CSSetShaderResources(0, 6, nullSrvs4);
-    m_context->CSSetUnorderedAccessViews(0, 2, nullUav2, nullptr);
-    m_context->CSSetConstantBuffers(0, 1, nullCb1);
+    m_context->CSSetUnorderedAccessViews(0, 2, nullUavs4, nullptr);
+    m_context->CSSetConstantBuffers(0, 1, nullCbs4);
     m_context->CSSetShader(nullptr, nullptr, 0);
 
     m_temporalIndex = writeIndex;

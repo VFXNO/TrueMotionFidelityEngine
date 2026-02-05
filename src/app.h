@@ -100,6 +100,9 @@ private:
   float m_temporalHistoryWeight = 0.2f;
   float m_temporalConfInfluence = 0.6f;
   int m_temporalNeighborhoodSize = 2;
+  bool m_textPreservationMode = false;
+  float m_textPreservationStrength = 1.0f;
+  float m_textPreservationEdgeThreshold = 0.03f;
   bool m_useMotionPrediction = true;
   bool m_limitOutputFps = true;
   bool m_useVsync = false;

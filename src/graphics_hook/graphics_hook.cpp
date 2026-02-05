@@ -5,8 +5,11 @@
 #include <intrin.h>
 #include <stdio.h>
 #include <algorithm>
+#include <wrl/client.h>
 
 #include "../graphics_hook_info.h"
+
+using Microsoft::WRL::ComPtr;
 
 // MinHook for function hooking
 // We'll use manual hooking via VTable for simplicity
@@ -27,12 +30,12 @@ static hook_info* g_hookInfo = nullptr;
 static shmem_data* g_shmemData = nullptr;
 static shtex_data* g_shtexData = nullptr;
 
-static ID3D11Device* g_device = nullptr;
-static ID3D11DeviceContext* g_context = nullptr;
-static IDXGISwapChain* g_swapChain = nullptr;
+static ComPtr<ID3D11Device> g_device;
+static ComPtr<ID3D11DeviceContext> g_context;
+static ComPtr<IDXGISwapChain> g_swapChain; // Use ComPtr, but be careful about ownership
 
-static ID3D11Texture2D* g_captureTexture = nullptr;
-static ID3D11Texture2D* g_stagingTextures[NUM_BUFFERS] = {nullptr};
+static ComPtr<ID3D11Texture2D> g_captureTexture;
+static ComPtr<ID3D11Texture2D> g_stagingTextures[NUM_BUFFERS];
 static HANDLE g_sharedHandle = nullptr;
 
 static uint32_t g_cx = 0;
@@ -155,17 +158,17 @@ static bool InitCaptureTextures() {
     if (g_useSharedTexture) {
         desc.MiscFlags = D3D11_RESOURCE_MISC_SHARED;
         
-        HRESULT hr = g_device->CreateTexture2D(&desc, nullptr, &g_captureTexture);
+        // ComPtr automatically releases old resource if any before assignment, but here we prefer GetAddressOf()
+        HRESULT hr = g_device->CreateTexture2D(&desc, nullptr, g_captureTexture.ReleaseAndGetAddressOf());
         if (FAILED(hr)) {
             Log("[Hook] Failed to create shared texture, falling back to shmem\n");
             g_useSharedTexture = false;
         } else {
             // Get shared handle
-            IDXGIResource* dxgiRes = nullptr;
-            hr = g_captureTexture->QueryInterface(__uuidof(IDXGIResource), (void**)&dxgiRes);
+            ComPtr<IDXGIResource> dxgiRes;
+            hr = g_captureTexture.As(&dxgiRes); // Helper for QueryInterface
             if (SUCCEEDED(hr)) {
                 hr = dxgiRes->GetSharedHandle(&g_sharedHandle);
-                dxgiRes->Release();
                 
                 if (SUCCEEDED(hr)) {
                     Log("[Hook] Created shared texture with handle %p\n", g_sharedHandle);
@@ -185,9 +188,8 @@ static bool InitCaptureTextures() {
                 }
             }
             
-            // Failed to get shared handle
-            g_captureTexture->Release();
-            g_captureTexture = nullptr;
+            // Failed to get shared handle or map memory
+            g_captureTexture.Reset();
             g_useSharedTexture = false;
         }
     }
@@ -199,7 +201,7 @@ static bool InitCaptureTextures() {
     desc.MiscFlags = 0;
     
     for (int i = 0; i < NUM_BUFFERS; i++) {
-        HRESULT hr = g_device->CreateTexture2D(&desc, nullptr, &g_stagingTextures[i]);
+        HRESULT hr = g_device->CreateTexture2D(&desc, nullptr, g_stagingTextures[i].ReleaseAndGetAddressOf());
         if (FAILED(hr)) {
             Log("[Hook] Failed to create staging texture %d\n", i);
             return false;
@@ -208,10 +210,10 @@ static bool InitCaptureTextures() {
     
     // Calculate pitch
     D3D11_MAPPED_SUBRESOURCE mapped;
-    HRESULT hr = g_context->Map(g_stagingTextures[0], 0, D3D11_MAP_READ, 0, &mapped);
+    HRESULT hr = g_context->Map(g_stagingTextures[0].Get(), 0, D3D11_MAP_READ, 0, &mapped);
     if (SUCCEEDED(hr)) {
         g_hookInfo->pitch = mapped.RowPitch;
-        g_context->Unmap(g_stagingTextures[0], 0);
+        g_context->Unmap(g_stagingTextures[0].Get(), 0);
     } else {
         // Estimate pitch
         g_hookInfo->pitch = g_cx * 4;
@@ -249,7 +251,7 @@ static bool InitCapture() {
     if (!g_swapChain || !g_device) return false;
     
     // Get backbuffer description
-    ID3D11Texture2D* backBuffer = nullptr;
+    ComPtr<ID3D11Texture2D> backBuffer;
     HRESULT hr = g_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBuffer);
     if (FAILED(hr)) {
         Log("[Hook] Failed to get backbuffer\n");
@@ -258,7 +260,7 @@ static bool InitCapture() {
     
     D3D11_TEXTURE2D_DESC desc;
     backBuffer->GetDesc(&desc);
-    backBuffer->Release();
+    // No explicit Release needed!
     
     g_cx = desc.Width;
     g_cy = desc.Height;
@@ -301,16 +303,10 @@ static bool InitCapture() {
 static void FreeCapture() {
     g_initialized = false;
     
-    if (g_captureTexture) {
-        g_captureTexture->Release();
-        g_captureTexture = nullptr;
-    }
+    g_captureTexture.Reset();
     
     for (int i = 0; i < NUM_BUFFERS; i++) {
-        if (g_stagingTextures[i]) {
-            g_stagingTextures[i]->Release();
-            g_stagingTextures[i] = nullptr;
-        }
+        g_stagingTextures[i].Reset();
     }
     
     if (g_shmemData) {
@@ -363,13 +359,13 @@ static void CaptureFrame() {
     }
     
     // Get backbuffer
-    ID3D11Texture2D* backBuffer = nullptr;
+    ComPtr<ID3D11Texture2D> backBuffer;
     HRESULT hr = g_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBuffer);
     if (FAILED(hr)) return;
     
     if (g_useSharedTexture && g_captureTexture) {
         // Copy to shared texture
-        g_context->CopyResource(g_captureTexture, backBuffer);
+        g_context->CopyResource(g_captureTexture.Get(), backBuffer.Get());
         g_hookInfo->frame_count++;
         
         LARGE_INTEGER time;
@@ -382,16 +378,16 @@ static void CaptureFrame() {
         // Wait for mutex
         if (g_hTextureMutex[curTex]) {
             if (WaitForSingleObject(g_hTextureMutex[curTex], 0) != WAIT_OBJECT_0) {
-                backBuffer->Release();
+                // backBuffer auto-release
                 return;
             }
         }
         
-        g_context->CopyResource(g_stagingTextures[curTex], backBuffer);
+        g_context->CopyResource(g_stagingTextures[curTex].Get(), backBuffer.Get());
         
         // Map and copy to shared memory
         D3D11_MAPPED_SUBRESOURCE mapped;
-        hr = g_context->Map(g_stagingTextures[curTex], 0, D3D11_MAP_READ, 0, &mapped);
+        hr = g_context->Map(g_stagingTextures[curTex].Get(), 0, D3D11_MAP_READ, 0, &mapped);
         if (SUCCEEDED(hr)) {
             uint8_t* dest = (uint8_t*)g_shmemData;
             dest += (curTex == 0) ? g_shmemData->tex1_offset : g_shmemData->tex2_offset;
@@ -409,7 +405,7 @@ static void CaptureFrame() {
                 }
             }
             
-            g_context->Unmap(g_stagingTextures[curTex], 0);
+            g_context->Unmap(g_stagingTextures[curTex].Get(), 0);
             g_shmemData->last_tex = curTex;
             g_hookInfo->frame_count++;
             
@@ -422,24 +418,21 @@ static void CaptureFrame() {
             ReleaseMutex(g_hTextureMutex[curTex]);
         }
     }
-    
-    backBuffer->Release();
 }
-
+ 
 // Hooked Present
 static HRESULT STDMETHODCALLTYPE HookedPresent(IDXGISwapChain* swapChain, UINT syncInterval, UINT flags) {
     if (!g_initialized && g_active) {
-        g_swapChain = swapChain;
-        swapChain->GetDevice(__uuidof(ID3D11Device), (void**)&g_device);
+        g_swapChain = swapChain; // Keep ComPtr reference
+        swapChain->GetDevice(__uuidof(ID3D11Device), (void**)g_device.ReleaseAndGetAddressOf());
         if (g_device) {
-            g_device->GetImmediateContext(&g_context);
-            g_device->Release(); // Don't hold reference
-            g_context->Release();
+            g_device->GetImmediateContext(g_context.ReleaseAndGetAddressOf());
+            // No explicit Release needed, ComPtr holds reference
             InitCapture();
         }
     }
     
-    if (g_initialized && swapChain == g_swapChain) {
+    if (g_initialized && swapChain == g_swapChain.Get()) {
         CaptureFrame();
     }
     
@@ -449,19 +442,18 @@ static HRESULT STDMETHODCALLTYPE HookedPresent(IDXGISwapChain* swapChain, UINT s
 // Hooked ResizeBuffers
 static HRESULT STDMETHODCALLTYPE HookedResizeBuffers(IDXGISwapChain* swapChain, UINT bufferCount,
                                                       UINT width, UINT height, DXGI_FORMAT format, UINT flags) {
-    if (swapChain == g_swapChain) {
+    if (swapChain == g_swapChain.Get()) {
         FreeCapture();
     }
     
     HRESULT hr = g_origResizeBuffers(swapChain, bufferCount, width, height, format, flags);
     
-    if (SUCCEEDED(hr) && swapChain == g_swapChain && g_active) {
+    if (SUCCEEDED(hr) && swapChain == g_swapChain.Get() && g_active) {
         InitCapture();
     }
     
     return hr;
 }
-
 // VTable hooking
 static void* HookVTable(void* obj, int index, void* newFunc) {
     void** vtable = *(void***)obj;

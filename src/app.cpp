@@ -1090,12 +1090,21 @@ void App::Update() {
   }
   m_toggleUiKeyState = uiKeyDown;
 
-  if (m_monitorDirty) {
-    SelectMonitor(m_selectedMonitor);
-    m_monitorDirty = false;
-  }
-  
-  // Removed explicit waitable object wait here as it was causing sluggishness.
+   if (m_monitorDirty) {
+     SelectMonitor(m_selectedMonitor);
+     m_monitorDirty = false;
+   }
+
+   // Text Preservation Mode - adjust parameters for reduced text flickering
+   if (m_textPreservationMode) {
+     m_temporalHistoryWeight = 0.05f;
+     m_temporalConfInfluence = 0.3f;
+     m_temporalNeighborhoodSize = 1;
+     m_motionEdgeScale = 10.0f;
+     m_confidencePower = 2.0f;
+   }
+
+   // Removed explicit waitable object wait here as it was causing sluggishness.
   // We rely on Present() for pacing (if VSync is on) or run unlocked (if VSync is off).
 
   UpdateCapture();
@@ -1807,6 +1816,8 @@ void App::Render() {
                                                 m_temporalConfInfluence,
                                                 m_temporalNeighborhoodSize);
         m_interpolator.SetMotionVectorPrediction(m_useMotionPrediction);
+        float textProtect = m_textPreservationMode ? m_textPreservationStrength : 0.0f;
+        m_interpolator.SetTextPreservation(textProtect, m_textPreservationEdgeThreshold);
         
         // ALWAYS EXECUTE if allowInterpolation is true.
         // Even if alpha is 0.0 or 1.0, we want the GPU to do the work.
@@ -2566,7 +2577,16 @@ void App::RenderUi() {
   ImGui::Checkbox("Motion Prediction (Multi-Frame)", &m_useMotionPrediction);
   const char* predictionHelp = "Uses previous frame's motion to help find the next motion.\nImproves quality for fast moving objects.";
   if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", predictionHelp);
-  
+
+  ImGui::Checkbox("Text Preservation Mode", &m_textPreservationMode);
+  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Optimize settings for text rendering.\nReduces flickering on text by adjusting temporal stabilization and motion smoothing.\nMay reduce smoothness for fast-moving content.");
+  ImGui::BeginDisabled(!m_textPreservationMode);
+  ImGui::SliderFloat("Text Preserve Strength", &m_textPreservationStrength, 0.0f, 1.0f, "%.2f");
+  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Bias interpolation toward unwarped frames on sharp edges (text/hud).\nHigher reduces shimmer but can look less smooth.");
+  ImGui::SliderFloat("Text Edge Threshold", &m_textPreservationEdgeThreshold, 0.0f, 0.2f, "%.3f");
+  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Edge sensitivity for text protection.\nLower protects more edges; higher limits protection to only the sharpest text.");
+  ImGui::EndDisabled();
+
   // Smooth Blend removed
 
   ImGui::Checkbox("Limit Output FPS", &m_limitOutputFps);

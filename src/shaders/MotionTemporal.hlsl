@@ -1,12 +1,11 @@
 // ============================================================================
-// MOTION TAA v2 (Restored) - Standard Neighborhood Clamping
-// "The Old Implementation" that works wonders.
-// Now with user-adjustable neighborhood size.
+// MOTION TEMPORAL - Temporal Accumulation with Neighborhood Clamping
+// Clean temporal filtering for stable motion estimation
 // ============================================================================
 
-Texture2D<float2> MotionCurr : register(t0);    // Current Raw/Smoothed Motion
+Texture2D<float2> MotionCurr : register(t0);
 Texture2D<float> ConfCurr : register(t1);
-Texture2D<float2> MotionHistory : register(t2); // Previous Frame's Result
+Texture2D<float2> MotionHistory : register(t2);
 Texture2D<float> ConfHistory : register(t3);
 Texture2D<float> LumaPrev : register(t4);
 Texture2D<float> LumaCurr : register(t5);
@@ -17,102 +16,93 @@ RWTexture2D<float> ConfOut : register(u1);
 SamplerState LinearClamp : register(s0);
 
 cbuffer TemporalCB : register(b0) {
-    float historyWeight; 
-    float confInfluence;
-    int resetHistory;
-    int neighborhoodSize; // WAS pad. Range 1..4 typically.
+    float historyWeight;    // Base history blend (0.0-0.9)
+    float confInfluence;    // How much confidence affects blend
+    int resetHistory;       // Reset temporal accumulation
+    int neighborhoodSize;   // Clamp neighborhood (1-3)
 };
 
+// ============================================================================
+// MAIN
+// ============================================================================
 [numthreads(16, 16, 1)]
-void CSMain(uint3 id : SV_DispatchThreadID) {
-    uint width, height;
-    MotionCurr.GetDimensions(width, height);
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    uint w, h;
+    MotionCurr.GetDimensions(w, h);
+    if (id.x >= w || id.y >= h) return;
     
-    if (id.x >= width || id.y >= height) return;
+    int2 pos = int2(id.xy);
+    float2 texelSize = 1.0 / float2(w, h);
+    float2 uv = (float2(pos) + 0.5) * texelSize;
     
-    float2 texelSize = 1.0 / float2(width, height);
-    float2 uv = (float2(id.xy) + 0.5) * texelSize;
+    // Current frame data
+    float2 currMV = MotionCurr.Load(int3(pos, 0));
+    float currConf = ConfCurr.Load(int3(pos, 0));
     
-    // ------------------------------------------------------------------------
-    // 1. Min/Max Neighborhood (Box Clamping)
-    // ------------------------------------------------------------------------
-    // Adjustable neighborhood size for variable stability.
+    // Build neighborhood bounds
+    int k = clamp(neighborhoodSize, 1, 3);
+    float2 minMV = currMV;
+    float2 maxMV = currMV;
     
-    float2 currMotion = MotionCurr.Load(int3(id.xy, 0));
-    float currConf = ConfCurr.Load(int3(id.xy, 0));
-    
-    float2 minMotion = currMotion;
-    float2 maxMotion = currMotion;
-    
-    int k = neighborhoodSize;
-    // Sanity check
-    if (k < 1) k = 1;
-    if (k > 5) k = 5;
-
-    [loop]
-    for(int y = -k; y <= k; ++y) {
-        [loop]
-        for(int x = -k; x <= k; ++x) {
-            int2 nPos = clamp(int2(id.xy) + int2(x, y), int2(0,0), int2(width-1, height-1));
-            float2 v = MotionCurr.Load(int3(nPos, 0));
-            minMotion = min(minMotion, v);
-            maxMotion = max(maxMotion, v);
+    // [unroll] removed for dynamic loop bounds
+    for (int dy = -k; dy <= k; ++dy) {
+        // [unroll] removed for dynamic loop bounds
+        for (int dx = -k; dx <= k; ++dx) {
+            int2 sp = clamp(pos + int2(dx, dy), int2(0,0), int2(w-1, h-1));
+            float2 mv = MotionCurr.Load(int3(sp, 0));
+            minMV = min(minMV, mv);
+            maxMV = max(maxMV, mv);
         }
     }
     
-    // ------------------------------------------------------------------------
-    // 2. Reprojection
-    // ------------------------------------------------------------------------
-    float2 historyUV = uv - (currMotion * texelSize);
-    
-    bool validHistory = !resetHistory;
-    if (any(historyUV < 0.0f) || any(historyUV > 1.0f)) {
-        validHistory = false;
-    }
-    
-    if (!validHistory) {
-        MotionOut[id.xy] = currMotion;
+    // Reset or invalid history
+    if (resetHistory) {
+        MotionOut[id.xy] = currMV;
         ConfOut[id.xy] = currConf;
         return;
     }
     
-    // ------------------------------------------------------------------------
-    // 3. Sample & Clamp History
-    // ------------------------------------------------------------------------
-    float2 historyMotion = MotionHistory.SampleLevel(LinearClamp, historyUV, 0);
-    float historyConf = ConfHistory.SampleLevel(LinearClamp, historyUV, 0);
+    // Reproject history
+    float2 histUV = uv - currMV * texelSize;
     
-    // The Magic Fix: Clamp history to the current neighborhood range.
-    // STRICT CLAMP RESTORED: This is essential to prevent ghosting.
-    float2 clampedHistory = clamp(historyMotion, minMotion, maxMotion);
-    
-    // ------------------------------------------------------------------------
-    // 4. Blend
-    // ------------------------------------------------------------------------
-    float alpha = historyWeight;
-    
-    // INTELLIGENT FALLOFF:
-    // Only drop history if the change is large AND we are confident in the new data.
-    // This prevents flickering when the camera moves fast (high dist) but the
-    // estimation is noisy (low conf).
-    float dist = length(currMotion - clampedHistory);
-    
-    if (dist > 2.0) { // Threshold for "Significant Change"
-        // If confidence is high (1.0), we allow alpha to drop (accept change).
-        // If confidence is low (0.0), we keep alpha high (reject noise).
-        // The factor 0.3 means we drop alpha by up to 70% if confident.
-        float changeCredibility = smoothstep(0.2, 0.8, currConf);
-        alpha *= lerp(1.0, 0.3, changeCredibility);
+    if (any(histUV < 0.0) || any(histUV > 1.0)) {
+        MotionOut[id.xy] = currMV;
+        ConfOut[id.xy] = currConf;
+        return;
     }
     
-    // Confidence Influence:
-    // If we are highly confident in the NEW data, we need less history.
-    // If the NEW data is garbage (low conf), stick to history.
-    float trustCurrent = currConf * confInfluence;
-    alpha = clamp(alpha * (1.0 - trustCurrent * 0.5), 0.0, 0.99); // *0.5 to keep it stable
+    // Sample history
+    float2 histMV = MotionHistory.SampleLevel(LinearClamp, histUV, 0);
+    float histConf = ConfHistory.SampleLevel(LinearClamp, histUV, 0);
     
-    MotionOut[id.xy] = lerp(currMotion, clampedHistory, alpha);
+    // Clamp history to current neighborhood
+    float2 clampedHist = clamp(histMV, minMV, maxMV);
     
-    // Confidence accumulates slowly
-    ConfOut[id.xy] = lerp(currConf, historyConf, alpha);
+    // Compute blend factor AVOID BLUR:
+    // "Temporal Stabilization" should just be de-jittering, not low-pass filtering.
+    float alpha = historyWeight;
+    float dist = length(currMV - clampedHist);
+    
+    // 1. If vectors are very close, SNAP to history (perfect stabilization)
+    if (dist < 0.5) {
+        alpha = 0.95; 
+    } 
+    // 2. If vectors differ significantly, Trust CURRENT (avoid blur/lag)
+    else if (dist > 4.0) {
+        alpha = 0.0; // Break history immediately on fast changes
+    }
+    // 3. In between: Blend, but favor current to keep edges sharp
+    else {
+        alpha = 0.2; // Weak history
+    }
+    
+    // Confidence Check
+    if (currConf > histConf + 0.2) alpha = 0.0; // Trust new clear match
+    
+    alpha = clamp(alpha, 0.0, 0.95);
+    
+    // Blend
+    MotionOut[id.xy] = lerp(currMV, clampedHist, alpha);
+    ConfOut[id.xy] = lerp(currConf, histConf, alpha * 0.8);
 }

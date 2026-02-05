@@ -35,6 +35,10 @@ public:
     m_temporalNeighborhoodSize = neighborhoodSize;
   }
   void SetMotionVectorPrediction(bool enabled) { m_useMotionPrediction = enabled; }
+  void SetTextPreservation(float strength, float edgeThreshold) {
+    m_textProtectStrength = strength;
+    m_textEdgeThreshold = edgeThreshold;
+  }
   void ResetTemporal() {
     m_temporalValid = false;
     m_temporalIndex = 0;
@@ -83,10 +87,14 @@ private:
   Microsoft::WRL::ComPtr<ID3D11Texture2D> m_currLuma;
   Microsoft::WRL::ComPtr<ID3D11Texture2D> m_prevLumaSmall;
   Microsoft::WRL::ComPtr<ID3D11Texture2D> m_currLumaSmall;
+  Microsoft::WRL::ComPtr<ID3D11Texture2D> m_prevLumaTiny;
+  Microsoft::WRL::ComPtr<ID3D11Texture2D> m_currLumaTiny;
   Microsoft::WRL::ComPtr<ID3D11Texture2D> m_motion;
   Microsoft::WRL::ComPtr<ID3D11Texture2D> m_confidence;
   Microsoft::WRL::ComPtr<ID3D11Texture2D> m_motionCoarse;
   Microsoft::WRL::ComPtr<ID3D11Texture2D> m_prevMotionCoarse;
+  Microsoft::WRL::ComPtr<ID3D11Texture2D> m_motionTiny;
+  Microsoft::WRL::ComPtr<ID3D11Texture2D> m_confidenceTiny;
   Microsoft::WRL::ComPtr<ID3D11Texture2D> m_confidenceCoarse;
   Microsoft::WRL::ComPtr<ID3D11Texture2D> m_motionSmooth;
   Microsoft::WRL::ComPtr<ID3D11Texture2D> m_confidenceSmooth;
@@ -108,10 +116,14 @@ private:
   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_currLumaSrv;
   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_prevLumaSmallSrv;
   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_currLumaSmallSrv;
+  Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_prevLumaTinySrv;
+  Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_currLumaTinySrv;
   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_motionSrv;
   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_confidenceSrv;
   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_motionCoarseSrv;
   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_prevMotionCoarseSrv;
+  Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_motionTinySrv;
+  Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_confidenceTinySrv;
   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_confidenceCoarseSrv;
   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_motionSmoothSrv;
   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_confidenceSmoothSrv;
@@ -123,10 +135,14 @@ private:
   Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_currLumaUav;
   Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_prevLumaSmallUav;
   Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_currLumaSmallUav;
+  Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_prevLumaTinyUav;
+  Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_currLumaTinyUav;
   Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_motionUav;
   Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_confidenceUav;
   Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_motionCoarseUav;
   Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_prevMotionCoarseUav;
+  Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_motionTinyUav;
+  Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_confidenceTinyUav;
   Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_confidenceCoarseUav;
   Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_motionSmoothUav;
   Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_confidenceSmoothUav;
@@ -144,12 +160,16 @@ private:
 
   bool m_useMotionPrediction = false;
   bool m_prevMotionCoarseValid = false;
+  float m_textProtectStrength = 0.0f;
+  float m_textEdgeThreshold = 0.04f;
 
   int m_inputWidth = 0;
   int m_inputHeight = 0;
   int m_outputWidth = 0;
   int m_outputHeight = 0;
   int m_lumaWidth = 0;
+  int m_tinyWidth = 0;
+  int m_tinyHeight = 0;
   int m_qualityMode = 0;
   int m_lumaHeight = 0;
   int m_smallWidth = 0;
