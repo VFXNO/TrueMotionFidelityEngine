@@ -211,19 +211,21 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
     float2 uv = (float2(id.xy) + 0.5) / float2(w, h);
     float2 coarse = CoarseMotion.SampleLevel(LinearClamp, uv, 0);
     
+    // Keep fractional prediction from bilinear upsample so the 8x8 flow grid
+    // is expanded into per-pixel motion instead of snapping to integer cells.
     float2 pred = coarse * motionScale;
-    int2 baseMV = int2(round(pred));
+    float2 baseMV = pred;
     
     float bestCost = 1e9;
-    int2 bestMV = baseMV;
+    float2 bestMV = baseMV;
     int searchR = clamp(radius, 1, MAX_RADIUS);
     
     for (int sy = -searchR; sy <= searchR; ++sy) {
         for (int sx = -searchR; sx <= searchR; ++sx) {
-            int2 testMV = baseMV + int2(sx, sy);
+            float2 testMV = baseMV + float2(sx, sy);
             
             float cost = ComputeCostOptimized(
-                localCenter, float2(testMV), uint2(w,h), globalPos,
+                localCenter, testMV, uint2(w,h), globalPos,
                 meanCurr, wVarSumCurr, sumW
             );
             
@@ -240,11 +242,11 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
     // ------------------------------------------------------------------------
     // 4. Sub-Pixel Refinement (Quadratic Fit)
     // ------------------------------------------------------------------------
-    // Optimized: Only fit quadratic on the integer best match
+    // Optimized: Only fit quadratic around the best local match
     // Instead of 8-direction search which is expensive
     // Just calculate +/- neighbours and fit
     
-    float2 finalMV = float2(bestMV);
+    float2 finalMV = bestMV;
     
     // X-Refinement
     float cL = ComputeCostOptimized(localCenter, finalMV + float2(-1, 0), uint2(w, h), globalPos, meanCurr, wVarSumCurr, sumW);
