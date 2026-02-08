@@ -485,6 +485,8 @@ void App::ResetCaptureState() {
   m_holdEndFrame = false;
   m_pairPrevSlot = -1;
   m_pairCurrSlot = -1;
+  m_pairPrevTime100ns = 0;
+  m_pairCurrTime100ns = 0;
   m_frameTime100ns.fill(0);
   m_prevFrameTime100ns = 0;
   m_currFrameTime100ns = 0;
@@ -1562,6 +1564,8 @@ void App::Render() {
       m_holdEndFrame = false;
       m_pairPrevSlot = -1;
       m_pairCurrSlot = -1;
+      m_pairPrevTime100ns = 0;
+      m_pairCurrTime100ns = 0;
     }
 
     double delayScale = (m_delayScale < 0.25f) ? 0.25f : m_delayScale;
@@ -1643,6 +1647,27 @@ void App::Render() {
     bool hasPair = (m_frameQueue.size() >= 2);
     bool hasPrevSrv = (m_frameSrvs[prevSlot] != nullptr);
     bool hasCurrSrv = (m_frameSrvs[currSlot] != nullptr);
+    if (hasPair) {
+      int64_t prevTime100ns = m_frameTime100ns[prevSlot];
+      int64_t currTime100ns = m_frameTime100ns[currSlot];
+      bool pairChanged = (prevSlot != m_pairPrevSlot) ||
+                         (currSlot != m_pairCurrSlot) ||
+                         (prevTime100ns != m_pairPrevTime100ns) ||
+                         (currTime100ns != m_pairCurrTime100ns);
+      if (pairChanged) {
+        m_pairPrevSlot = prevSlot;
+        m_pairCurrSlot = currSlot;
+        m_pairPrevTime100ns = prevTime100ns;
+        m_pairCurrTime100ns = currTime100ns;
+        m_outputStepIndex = 0;
+        m_interpolator.ResetTemporal();
+      }
+    } else {
+      m_pairPrevSlot = -1;
+      m_pairCurrSlot = -1;
+      m_pairPrevTime100ns = 0;
+      m_pairCurrTime100ns = 0;
+    }
     bool canInterpolate = m_interpolationEnabled && hasPair && hasPrevSrv && hasCurrSrv;
     if (useMonitorSync) {
       if (!m_forceInterpolation && (captureFps <= 0.0 || monitorHz <= 0.0f)) {
@@ -1715,12 +1740,26 @@ void App::Render() {
             // UNLOCKED SMOOTHNESS:
             // Instead of stepping (0.0, 0.5, 1.0), calculate exact alpha based on time.
             // This eliminates judder when Monitor Hz != Target Hz.
-            alpha = static_cast<float>(t / useInterval);
+            float rawAlpha = static_cast<float>(t / useInterval);
+            if (rawAlpha < 0.0f) rawAlpha = 0.0f;
+            if (rawAlpha > 1.0f) rawAlpha = 1.0f;
 
-            if (alpha < 0.0f) alpha = 0.0f;
-            if (alpha > 1.0f) alpha = 1.0f;
-
-            m_outputStepIndex = static_cast<int>(alpha * static_cast<float>(multiplier));
+            // In multiplier mode, quantize alpha to stable sub-steps.
+            // This removes phase jitter that is very visible at 2x.
+            bool lockAlphaToMultiplier = (!useMonitorSync && multiplier > 1);
+            if (lockAlphaToMultiplier) {
+              int quantStep = static_cast<int>(rawAlpha * static_cast<float>(multiplier));
+              if (quantStep < 0) {
+                quantStep = 0;
+              } else if (quantStep > multiplier) {
+                quantStep = multiplier;
+              }
+              alpha = static_cast<float>(quantStep) / static_cast<float>(multiplier);
+              m_outputStepIndex = quantStep;
+            } else {
+              alpha = rawAlpha;
+              m_outputStepIndex = static_cast<int>(alpha * static_cast<float>(multiplier));
+            }
           } else {
             alpha = static_cast<float>(t / useInterval);
             if (alpha < 0.0f) {
@@ -1783,7 +1822,7 @@ void App::Render() {
                           debugMode == Interpolator::DebugViewMode::ResidualError)) {
         debugMode = Interpolator::DebugViewMode::None;
       }
-      m_interpolator.SetRefineRadius(m_refineRadius);
+      m_interpolator.SetMotionModel(m_motionModel);
       m_interpolator.SetMotionSmoothing(m_motionEdgeScale, m_confidencePower);
       m_interpolator.SetTemporalStabilization(m_temporalStabilization,
                                               m_temporalHistoryWeight,
@@ -1792,23 +1831,38 @@ void App::Render() {
       m_interpolator.Debug(prevSrv, currSrv, debugMode, m_debugMotionScale, m_debugDiffScale);
       output = m_interpolator.OutputTexture();
     } else if (allowInterpolation) {
-        // Recalculate alpha for Execute to ensure it matches the "unlocked" timing
-        double prevTime = static_cast<double>(m_frameTime100ns[prevSlot]);
-        double t = (displayTime100ns - prevTime) * 1e-7;
-        if (t < 0.0) {
-          t = 0.0;
+        // Keep alpha in sync with output timing.
+        // In never-drop mode we keep the explicit step alpha.
+        if (!neverDropMode) {
+          double prevTime = static_cast<double>(m_frameTime100ns[prevSlot]);
+          double t = (displayTime100ns - prevTime) * 1e-7;
+          if (t < 0.0) {
+            t = 0.0;
+          }
+          float rawAlpha = 0.0f;
+          if (useInterval > 0.0) {
+            rawAlpha = static_cast<float>(t / useInterval);
+          }
+          if (rawAlpha < 0.0f) rawAlpha = 0.0f;
+          if (rawAlpha > 1.0f) rawAlpha = 1.0f;
+
+          bool lockAlphaToMultiplier = (!useMonitorSync && multiplier > 1);
+          if (lockAlphaToMultiplier) {
+            int quantStep = static_cast<int>(rawAlpha * static_cast<float>(multiplier));
+            if (quantStep < 0) {
+              quantStep = 0;
+            } else if (quantStep > multiplier) {
+              quantStep = multiplier;
+            }
+            alpha = static_cast<float>(quantStep) / static_cast<float>(multiplier);
+            m_outputStepIndex = quantStep;
+          } else {
+            alpha = rawAlpha;
+          }
         }
-        // Continuous alpha
-        if (useInterval > 0.0) {
-          alpha = static_cast<float>(t / useInterval);
-        } else {
-          alpha = 0.0f;
-        }
-        if (alpha < 0.0f) alpha = 0.0f;
-        if (alpha > 1.0f) alpha = 1.0f;
+        m_lastAlpha = alpha;
         
-        m_interpolator.SetRadius(m_motionRadius);
-        m_interpolator.SetRefineRadius(m_refineRadius);
+        m_interpolator.SetMotionModel(m_motionModel);
         m_interpolator.SetMotionSmoothing(m_motionEdgeScale, m_confidencePower);
         m_interpolator.SetQualityMode(m_interpolationQuality);
         m_interpolator.SetTemporalStabilization(m_temporalStabilization,
@@ -2595,11 +2649,9 @@ void App::RenderUi() {
   
   ImGui::Checkbox("VSync (Monitor Sync)", &m_useVsync);
   if (ImGui::IsItemHovered()) ImGui::SetTooltip("Synchronize output with monitor refresh rate.\nPrevents tearing but may add latency.\nDisable for lowest latency with possible tearing.");
-  ImGui::SliderInt("Search Radius", &m_motionRadius, 1, 16);
-  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Pixel search radius for motion estimation.\nHigher = Better for fast motion but slower.\nLower = Faster but may miss large movements.\nRecommended: 4-8 for games, 8-12 for fast action.");
-  
-  ImGui::SliderInt("Refine Radius", &m_refineRadius, 1, 4);
-  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Sub-pixel refinement search radius.\nHigher = More accurate motion but slower.\nRecommended: 2 for balance.");
+  const char* motionModelLabels[] = {"Adaptive (Recommended)", "Stable (No Flicker)", "Balanced", "Coverage (Fast Motion)"};
+  ImGui::Combo("Motion Model", &m_motionModel, motionModelLabels, IM_ARRAYSIZE(motionModelLabels));
+  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Replaces manual Search/Refine Radius.\nAdaptive: scene-aware model for mixed content.\nStable: strongest anti-flicker and deterministic vector selection.\nBalanced: default quality/speed.\nCoverage: wider motion capture for fast movement.");
   
   ImGui::SliderInt("Output Multiplier", &m_outputMultiplier, 1, 20);
   if (ImGui::IsItemHovered()) ImGui::SetTooltip("Frame rate multiplier.\n1x = No interpolation (passthrough)\n2x = Double frame rate (60->120)\n3x = Triple (60->180)\n4x = Quadruple (60->240)\n5-20x = Extreme multipliers (quality/latency may degrade)");
@@ -2823,6 +2875,8 @@ void App::ResizeForCapture(int width, int height) {
   m_holdEndFrame = false;
   m_pairPrevSlot = -1;
   m_pairCurrSlot = -1;
+  m_pairPrevTime100ns = 0;
+  m_pairCurrTime100ns = 0;
   m_frameTime100ns.fill(0);
   m_prevFrameTime100ns = 0;
   m_currFrameTime100ns = 0;
@@ -2989,8 +3043,11 @@ void App::ExportDiagnostics() {
   ss << std::endl << "=== Capture Configuration ===" << std::endl;
   ss << "Interpolation: " << (m_interpolationEnabled ? "Enabled" : "Disabled") << std::endl;
   ss << "Output Multiplier: " << m_outputMultiplier << "x" << std::endl;
-  ss << "Motion Radius: " << m_motionRadius << " pixels" << std::endl;
-  ss << "Refine Radius: " << m_refineRadius << " pixels" << std::endl;
+  static const char* kMotionModelNames[] = {"Adaptive", "Stable", "Balanced", "Coverage"};
+  int motionModel = m_motionModel;
+  if (motionModel < 0) motionModel = 0;
+  if (motionModel > 3) motionModel = 3;
+  ss << "Motion Model: " << kMotionModelNames[motionModel] << std::endl;
   ss << "Never Drop Frames: " << (m_neverDropFrames ? "Yes" : "No") << std::endl;
   ss << "Max Queue Size: " << m_maxQueueSize << std::endl;
   ss << "Temporal Stabilization: " << (m_temporalStabilization ? "Enabled" : "Disabled") << std::endl;

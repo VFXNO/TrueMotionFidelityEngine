@@ -75,13 +75,18 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     // Sample history
     float2 histMV = MotionHistory.SampleLevel(LinearClamp, histUV, 0);
     float histConf = ConfHistory.SampleLevel(LinearClamp, histUV, 0);
+    float currLuma = LumaCurr.Load(int3(pos, 0));
+    float prevLumaReproj = LumaPrev.SampleLevel(LinearClamp, histUV, 0);
+    float lumaDiff = abs(currLuma - prevLumaReproj);
     
     // Clamp history to current neighborhood
     float2 clampedHist = clamp(histMV, minMV, maxMV);
+    float spread = length(maxMV - minMV);
     
     // Compute blend factor AVOID BLUR:
     // "Temporal Stabilization" should just be de-jittering, not low-pass filtering.
     float alpha = historyWeight;
+    float ci = saturate(confInfluence);
     float dist = length(currMV - clampedHist);
     
     // 1. If vectors are very close, SNAP to history (perfect stabilization)
@@ -98,11 +103,28 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     }
     
     // Confidence Check
-    if (currConf > histConf + 0.2) alpha = 0.0; // Trust new clear match
+    float confFavorHistory = saturate(0.5 + 0.5 * (histConf - currConf));
+    float confScale = lerp(1.0, confFavorHistory * 1.6, ci);
+    alpha *= confScale;
+
+    float trustCurrentThreshold = 0.2 - 0.15 * ci;
+    if (currConf > histConf + trustCurrentThreshold) alpha = 0.0; // Trust new clear match
+
+    // Motion-boundary gating: reduce history influence where local vectors diverge.
+    float boundaryReject = saturate((spread - 0.9) * 0.40);
+    float boundaryScale = 1.0 - boundaryReject * lerp(0.55, 0.85, ci);
+    alpha *= saturate(boundaryScale);
+
+    // Reduce history pull when reprojection disagrees in luminance.
+    float lumaReject = saturate((lumaDiff - 0.02) * 18.0);
+    float lumaScale = 1.0 - lumaReject * lerp(0.65, 0.90, ci);
+    alpha *= saturate(lumaScale);
     
     alpha = clamp(alpha, 0.0, 0.95);
     
     // Blend
     MotionOut[id.xy] = lerp(currMV, clampedHist, alpha);
-    ConfOut[id.xy] = lerp(currConf, histConf, alpha * 0.8);
+    float confAlpha = alpha * (0.6 + 0.2 * ci);
+    ConfOut[id.xy] = lerp(currConf, histConf, confAlpha);
 }
+

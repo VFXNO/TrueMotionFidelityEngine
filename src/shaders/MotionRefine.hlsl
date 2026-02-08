@@ -4,11 +4,13 @@
 // Optimized using Shared Memory and Single-Pass ZNSSD
 // ============================================================================
 
-// C++ binds: {CurrLuma, PrevLuma, CoarseMotion, CoarseConf}
+// C++ binds: {CurrLuma, PrevLuma, CoarseMotion, CoarseConf, BackwardMotion, BackwardConf}
 Texture2D<float> CurrLuma : register(t0);
 Texture2D<float> PrevLuma : register(t1);
 Texture2D<float2> CoarseMotion : register(t2);
 Texture2D<float> CoarseConf : register(t3);
+Texture2D<float2> BackwardMotion : register(t4);
+Texture2D<float> BackwardConf : register(t5);
 RWTexture2D<float2> MotionOut : register(u0);
 RWTexture2D<float> ConfidenceOut : register(u1);
 
@@ -17,7 +19,8 @@ SamplerState LinearClamp : register(s0);
 cbuffer RefineCB : register(b0) {
     int radius;
     float motionScale;
-    float2 pad;
+    int useBackward;
+    float backwardScale;
 };
 
 #define BLOCK_SIZE 16
@@ -210,6 +213,7 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
     // ------------------------------------------------------------------------
     float2 uv = (float2(id.xy) + 0.5) / float2(w, h);
     float2 coarse = CoarseMotion.SampleLevel(LinearClamp, uv, 0);
+    float coarseConf = saturate(CoarseConf.SampleLevel(LinearClamp, uv, 0));
     
     // Keep fractional prediction from bilinear upsample so the 8x8 flow grid
     // is expanded into per-pixel motion instead of snapping to integer cells.
@@ -217,8 +221,15 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
     float2 baseMV = pred;
     
     float bestCost = 1e9;
+    float secondBestCost = 1e9;
     float2 bestMV = baseMV;
-    int searchR = clamp(radius, 1, MAX_RADIUS);
+    int baseSearchR = clamp(radius, 1, MAX_RADIUS);
+    int searchR = baseSearchR;
+    if (coarseConf < 0.45) {
+        searchR = min(MAX_RADIUS, baseSearchR + 1);
+    }
+    float regBase = lerp(0.014, 0.008, coarseConf);
+    float tieEps = 0.002;
     
     for (int sy = -searchR; sy <= searchR; ++sy) {
         for (int sx = -searchR; sx <= searchR; ++sx) {
@@ -229,12 +240,34 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
                 meanCurr, wVarSumCurr, sumW
             );
             
-            // Regularization
-            cost += length(float2(sx, sy)) * 0.01;
+            // Confidence-adaptive regularization:
+            // high-confidence coarse flow stays tighter, low-confidence can explore.
+            cost += length(float2(sx, sy)) * regBase;
+
+            if (useBackward != 0) {
+                float2 uvProj = uv + testMV / float2(w, h);
+                uvProj = clamp(uvProj, 0.001, 0.999);
+                float2 bwd = BackwardMotion.SampleLevel(LinearClamp, uvProj, 0) * backwardScale;
+                float bwdConf = saturate(BackwardConf.SampleLevel(LinearClamp, uvProj, 0));
+                float cycle = length(testMV + bwd);
+                float cycleWeight = lerp(0.015, 0.08, bwdConf);
+                cost += cycle * cycleWeight;
+            }
+
+            tieEps = max(tieEps, bestCost * lerp(0.035, 0.012, coarseConf));
             
-            if (cost < bestCost) {
+            if (cost + tieEps < bestCost) {
+                secondBestCost = bestCost;
                 bestCost = cost;
                 bestMV = testMV;
+            } else if (abs(cost - bestCost) <= tieEps) {
+                float candDist = length(testMV - baseMV);
+                float bestDist = length(bestMV - baseMV);
+                if (candDist < bestDist) {
+                    bestMV = testMV;
+                }
+            } else if (cost < secondBestCost) {
+                secondBestCost = cost;
             }
         }
     }
@@ -252,6 +285,10 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
     float cL = ComputeCostOptimized(localCenter, finalMV + float2(-1, 0), uint2(w, h), globalPos, meanCurr, wVarSumCurr, sumW);
     float cR = ComputeCostOptimized(localCenter, finalMV + float2( 1, 0), uint2(w, h), globalPos, meanCurr, wVarSumCurr, sumW);
     float cC = bestCost;
+    float2 centerOffset = float2(0.0, 0.0);
+    float minNeighbor = cC;
+    if (cL < minNeighbor) { minNeighbor = cL; centerOffset = float2(-1.0, 0.0); }
+    if (cR < minNeighbor) { minNeighbor = cR; centerOffset = float2( 1.0, 0.0); }
     
     float denomX = cL + cR - 2.0 * cC;
     float subX = (abs(denomX) > 1e-5) ? (0.5 * (cL - cR) / denomX) : 0.0;
@@ -259,15 +296,40 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
     // Y-Refinement
     float cU = ComputeCostOptimized(localCenter, finalMV + float2(0, -1), uint2(w, h), globalPos, meanCurr, wVarSumCurr, sumW);
     float cD = ComputeCostOptimized(localCenter, finalMV + float2(0,  1), uint2(w, h), globalPos, meanCurr, wVarSumCurr, sumW);
+    if (cU < minNeighbor) { minNeighbor = cU; centerOffset = float2(0.0, -1.0); }
+    if (cD < minNeighbor) { minNeighbor = cD; centerOffset = float2(0.0,  1.0); }
+
+    // Shift to a better discrete center before sub-pixel fitting.
+    if (any(centerOffset != float2(0.0, 0.0)) && minNeighbor < cC * 0.985) {
+        finalMV += centerOffset;
+        cC = minNeighbor;
+        cL = ComputeCostOptimized(localCenter, finalMV + float2(-1, 0), uint2(w, h), globalPos, meanCurr, wVarSumCurr, sumW);
+        cR = ComputeCostOptimized(localCenter, finalMV + float2( 1, 0), uint2(w, h), globalPos, meanCurr, wVarSumCurr, sumW);
+        cU = ComputeCostOptimized(localCenter, finalMV + float2(0, -1), uint2(w, h), globalPos, meanCurr, wVarSumCurr, sumW);
+        cD = ComputeCostOptimized(localCenter, finalMV + float2(0,  1), uint2(w, h), globalPos, meanCurr, wVarSumCurr, sumW);
+    }
     
     float denomY = cU + cD - 2.0 * cC;
     float subY = (abs(denomY) > 1e-5) ? (0.5 * (cU - cD) / denomY) : 0.0;
-    
-    finalMV += float2(clamp(subX, -0.5, 0.5), clamp(subY, -0.5, 0.5));
+
+    float ambiguity = saturate((secondBestCost - bestCost) / max(bestCost, 0.01));
+    float stability = saturate(0.25 + 0.75 * ambiguity + 0.25 * coarseConf);
+    finalMV += float2(clamp(subX, -0.5, 0.5), clamp(subY, -0.5, 0.5)) * stability;
     
     // Final Confidence
     float diff = bestCost; // Use min cost as proxy for inverse confidence
     float conf = exp(-diff * 4.0);
+    conf *= lerp(0.45, 1.0, ambiguity);
+    if (useBackward != 0) {
+        float2 uvProj = uv + finalMV / float2(w, h);
+        uvProj = clamp(uvProj, 0.001, 0.999);
+        float2 bwd = BackwardMotion.SampleLevel(LinearClamp, uvProj, 0) * backwardScale;
+        float bwdConf = saturate(BackwardConf.SampleLevel(LinearClamp, uvProj, 0));
+        float cycle = length(finalMV + bwd);
+        float cycleTrust = exp(-cycle * lerp(0.35, 0.85, bwdConf));
+        conf *= lerp(0.55, 1.0, cycleTrust);
+    }
+    conf = max(conf, coarseConf * 0.75);
     conf = clamp(conf, 0.1, 0.98);
     
     MotionOut[id.xy] = finalMV;

@@ -48,6 +48,12 @@ float GetCachedLuma(int2 localPos) {
     return gs_Luma[localPos.y][localPos.x];
 }
 
+float SamplePrev(float2 pos, uint2 dims) {
+    float2 uv = (pos + 0.5) / float2(dims);
+    uv = clamp(uv, 0.001, 0.999);
+    return PrevLuma.SampleLevel(LinearClamp, uv, 0);
+}
+
 // Optimized Gradient from Shared Memory
 // No boundary checks needed as we load enough halo (Halo=4, Window=3, Grad=1)
 float GetCachedGradientMag(int2 lPos) {
@@ -104,9 +110,9 @@ float ComputeCostOptimized(
             float structure = GetCachedGradientMag(lPos);
             float weight = 1.0 + structure * 4.0; 
             
-            // Texture Load (Prev frame)
-            int2 pPos = clamp(globalPos + int2(dx, dy) + int2(mvec), int2(0,0), int2(dims.x-1, dims.y-1));
-            float pVal = PrevLuma.Load(int3(pPos, 0));
+            // Subpixel sampling improves temporal stability and reduces edge flicker.
+            float2 pPos = float2(globalPos + int2(dx, dy)) + mvec;
+            float pVal = SamplePrev(pPos, dims);
             
             // Gradient-Weighted SAD
             cost += abs(cVal - pVal) * weight;
@@ -151,6 +157,13 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
     int2 pos = int2(id.xy);
     int2 localCenter = int2(gtid.xy) + HALO_R;
     int maxR = int(min(w, h) / 4);
+    int searchR = clamp(radius, 1, maxR);
+    float2 uv = (float2(pos) + 0.5) / float2(w, h);
+    float localStructure = GetCachedGradientMag(localCenter);
+    float texReliability = saturate(localStructure * 0.06);
+    float currCenter = GetCachedLuma(localCenter);
+    float prevCenter = PrevLuma.Load(int3(pos, 0));
+    float centerDelta = abs(currCenter - prevCenter);
     
     // ------------------------------------------------------------------------
     // 2. Precompute Current Block Statistics
@@ -164,80 +177,158 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
     // 3. Motion Search
     // ------------------------------------------------------------------------
     float bestCost = 1e9;
-    int2 bestMV = int2(0, 0);
+    float2 bestMV = float2(0.0, 0.0);
     
     // Zero Motion Check
     // "Smoothness" Optimization: Increased bias from 0.85 -> 0.95
     float zeroCost = ComputeCostOptimized(localCenter, pos, float2(0,0), uint2(w,h), meanCurr, wVarSumCurr, sumW) * 0.95;
     bestCost = zeroCost;
-            
-    // REMOVED EARLY EXIT to prevent killing interpolation on subtle motion
-    // if (bestCost < 1.0) ... 
+
+    // Static-region hint:
+    // We avoid hard early-exit here because binary snapping can flicker near thresholds.
+    // Instead this flag narrows the search radius later.
+    float staticZeroGate = lerp(0.36, 0.20, texReliability);
+    bool strongZeroMatch = (zeroCost <= staticZeroGate && centerDelta < 0.010);
 
             
     // Temporal prediction (Frame Prediction)
     if (usePrediction) {
-        float2 uv = (float2(pos) + 0.5) / float2(w, h);
-        float2 predVec = MotionPred.SampleLevel(LinearClamp, uv, 0).xy * predictionScale;
-        int2 predMV = clamp(int2(round(predVec)), int2(-maxR,-maxR), int2(maxR,maxR));
+        float2 texel = 1.0 / float2(w,h);
+        float2 predC = MotionPred.SampleLevel(LinearClamp, uv, 0).xy;
+        float2 predL = MotionPred.SampleLevel(LinearClamp, uv + float2(-2.0, 0.0) * texel, 0).xy;
+        float2 predR = MotionPred.SampleLevel(LinearClamp, uv + float2( 2.0, 0.0) * texel, 0).xy;
+        float2 predU = MotionPred.SampleLevel(LinearClamp, uv + float2(0.0, -2.0) * texel, 0).xy;
+        float2 predD = MotionPred.SampleLevel(LinearClamp, uv + float2(0.0,  2.0) * texel, 0).xy;
+
+        float2 predAvg = (predC + predL + predR + predU + predD) * 0.2;
+        float predSpread = (length(predL - predAvg) + length(predR - predAvg) +
+                            length(predU - predAvg) + length(predD - predAvg)) * 0.25;
+        float predStability = exp(-predSpread * 0.45);
+
+        float predLimit = max(2.0, float(searchR) * lerp(1.6, 2.4, predStability));
+        float2 predMV = predAvg * predictionScale;
+        predMV = clamp(predMV, -float2(predLimit, predLimit), float2(predLimit, predLimit));
         
         // Candidate 1: Direct Temporal
-        if (any(predMV != int2(0,0))) {
-            float c = ComputeCostOptimized(localCenter, pos, float2(predMV), uint2(w,h), meanCurr, wVarSumCurr, sumW) * 0.90; // Bonus for temporal
-            if (c < bestCost) { bestCost = c; bestMV = predMV; }
+        if (length(predMV) > 0.01) {
+            float predRaw = ComputeCostOptimized(localCenter, pos, float2(predMV), uint2(w,h), meanCurr, wVarSumCurr, sumW);
+            float predMag = length(predMV);
+            float bonus = lerp(1.00, 0.975, predStability * saturate(predMag / max(1.0, float(searchR))));
+            float c = predRaw * bonus;
+            float trustGate = zeroCost * lerp(0.96, 1.02, predStability);
+            if (predStability > 0.20 && c < bestCost && predRaw <= trustGate) { bestCost = c; bestMV = predMV; }
         }
         
         // Candidate 2: Spatial Neighbors (Left, Top)
         // High Quality: Propagate neighbor motion to catch large moving objects
-        float2 texel = 1.0 / float2(w,h);
-        float2 neighbors[2] = { float2(-2.0, 0.0), float2(0.0, -2.0) };
+        float2 neighbors[2] = { predL * predictionScale, predU * predictionScale };
         
         [unroll]
         for(int n=0; n<2; ++n) {
-            float2 nPred = MotionPred.SampleLevel(LinearClamp, uv + neighbors[n]*texel, 0).xy * predictionScale;
-            int2 nMV = clamp(int2(round(nPred)), int2(-maxR,-maxR), int2(maxR,maxR));
-            if (any(nMV != int2(0,0))) {
-                float c = ComputeCostOptimized(localCenter, pos, float2(nMV), uint2(w,h), meanCurr, wVarSumCurr, sumW) * 0.95;
-                if (c < bestCost) { bestCost = c; bestMV = nMV; }
+            float2 nMV = clamp(neighbors[n], -float2(predLimit, predLimit), float2(predLimit, predLimit));
+            if (length(nMV) > 0.01) {
+                float predAgree = length(nMV - predMV);
+                if (predAgree <= max(1.5, float(searchR) * lerp(0.65, 1.0, predStability))) {
+                    float nRaw = ComputeCostOptimized(localCenter, pos, float2(nMV), uint2(w,h), meanCurr, wVarSumCurr, sumW);
+                    float nCost = nRaw * lerp(1.0, 0.99, predStability);
+                    if (predStability > 0.30 && nCost < bestCost && nRaw <= zeroCost * lerp(0.95, 1.0, predStability)) { bestCost = nCost; bestMV = nMV; }
+                }
             }
         }
     }
     
-    // Hexagon Search (Optimized Small Hexagon Pattern for Speed + Quality)
-    // Checks 6 reliable directions instead of 4 distant ones
-    static const int2 kHexagon[6] = {
-        int2(-2, 0), int2(2, 0), int2(0, -2), int2(0, 2),
-        int2(-1, -2), int2(1, 2)
+    // Texture-aware radius control:
+    // flat/ambiguous regions should not expand search too far (random minima flicker).
+    int effectiveSearchR = searchR;
+    if (strongZeroMatch) {
+        effectiveSearchR = min(effectiveSearchR, 1);
+    }
+    if (texReliability < 0.25) {
+        effectiveSearchR = min(effectiveSearchR, 2);
+    } else if (texReliability < 0.45) {
+        effectiveSearchR = min(effectiveSearchR, 3);
+    }
+
+    // Coarse-to-fine ring walk with halving step: stable at large radius.
+    float centerPenalty = lerp(0.0045, 0.0010, texReliability);
+    float2 centerMV = bestMV;
+    static const int2 kOctagon[8] = {
+        int2(-1, 0), int2(1, 0), int2(0, -1), int2(0, 1),
+        int2(-1, -1), int2(1, -1), int2(-1, 1), int2(1, 1)
     };
-    
-    [loop] // Force loop
-    for (int d = 0; d < 6; ++d) {
-        int2 mv = clamp(kHexagon[d], int2(-maxR,-maxR), int2(maxR,maxR));
-        float c = ComputeCostOptimized(localCenter, pos, float2(mv), uint2(w,h), meanCurr, wVarSumCurr, sumW);
-        c += length(float2(mv)) * 0.002;
-        if (c < bestCost) { bestCost = c; bestMV = mv; }
+
+    [loop]
+    for (int step = max(1, effectiveSearchR); step >= 1; step >>= 1) {
+        float2 stepCenter = centerMV;
+        float tieEps = max(0.002, bestCost * lerp(0.04, 0.012, texReliability));
+        [loop]
+        for (int d = 0; d < 8; ++d) {
+            float2 mv = clamp(stepCenter + float2(kOctagon[d]) * step, -float2(maxR, maxR), float2(maxR, maxR));
+            float c = ComputeCostOptimized(localCenter, pos, float2(mv), uint2(w,h), meanCurr, wVarSumCurr, sumW);
+            c += length(mv - stepCenter) * centerPenalty;
+            if (c + tieEps < bestCost) {
+                bestCost = c;
+                bestMV = mv;
+            } else if (abs(c - bestCost) <= tieEps) {
+                float candMag = length(mv);
+                float bestMag = length(bestMV);
+                if (candMag + 1e-4 < bestMag) {
+                    bestMV = mv;
+                } else if (abs(candMag - bestMag) <= 1e-4) {
+                    float candDist = length(mv - stepCenter);
+                    float bestDist = length(bestMV - stepCenter);
+                    if (candDist < bestDist) { bestMV = mv; }
+                }
+            }
+        }
+        centerMV = bestMV;
     }
     
-    // Iterative Refinement
-    // OPTIMIZATION: Reduced from 3 to 1 iterations. 1 is usually sufficient for low-displacement.
+    // Local 1-pixel refinement around the updated best.
     {
-        int2 center = bestMV;
-        // Search 4 neighbors
+        float2 center = bestMV;
         int2 offsets[4] = { int2(0,-1), int2(1,0), int2(0,1), int2(-1,0) };
+        float tieEps = max(0.0015, bestCost * lerp(0.03, 0.01, texReliability));
         [loop]
         for (int k = 0; k < 4; ++k) {
-            int2 mv = clamp(center + offsets[k], int2(-maxR,-maxR), int2(maxR,maxR));
+            float2 mv = clamp(center + float2(offsets[k]), -float2(maxR, maxR), float2(maxR, maxR));
             float c = ComputeCostOptimized(localCenter, pos, float2(mv), uint2(w,h), meanCurr, wVarSumCurr, sumW);
-            c += length(float2(mv)) * 0.002;
-            if (c < bestCost) { bestCost = c; bestMV = mv; }
+            c += length(mv - center) * (centerPenalty * 0.75);
+            if (c + tieEps < bestCost) {
+                bestCost = c;
+                bestMV = mv;
+            } else if (abs(c - bestCost) <= tieEps) {
+                float candMag = length(mv);
+                float bestMag = length(bestMV);
+                if (candMag + 1e-4 < bestMag) {
+                    bestMV = mv;
+                } else if (abs(candMag - bestMag) <= 1e-4) {
+                    if (length(mv - center) < length(bestMV - center)) { bestMV = mv; }
+                }
+            }
         }
     }
     
     // OPTIMIZATION: Removed Final 3x3 search (Redundant after Refinement)
+    float improvement = (zeroCost - bestCost) / max(zeroCost, 0.01);
+    float staticGate = lerp(0.060, 0.018, texReliability);
+    bool nearStaticLuma = (centerDelta < 0.012);
+    if (improvement < staticGate ||
+        (length(bestMV) < 0.45 && improvement < staticGate * 1.6) ||
+        (nearStaticLuma && improvement < staticGate * 2.2)) {
+        bestMV = float2(0.0, 0.0);
+        bestCost = zeroCost;
+        improvement = 0.0;
+    }
     
     float conf = exp(-bestCost * 4.0);
+    conf *= lerp(0.65, 1.0, texReliability);
+    conf *= saturate(0.20 + improvement * 14.0);
+    if (length(bestMV) < 0.15 && centerDelta < 0.010 && zeroCost < staticZeroGate * 1.4) {
+        conf = max(conf, 0.90);
+    }
     conf = clamp(conf, 0.1, 0.98);
     
-    MotionOut[id.xy] = float2(bestMV);
+    MotionOut[id.xy] = bestMV;
     ConfidenceOut[id.xy] = conf;
 }

@@ -31,7 +31,8 @@ struct TemporalConstants {
 struct RefineConstants {
   int radius = 2;
   float motionScale = 2.0f;
-  float pad[2] = {};
+  int useBackward = 0;
+  float backwardScale = 1.0f;
 };
 
 struct InterpConstants {
@@ -221,16 +222,6 @@ void Interpolator::Execute(
   if (!ComputeMotion(prev, curr)) {
     return;
   }
-
-  MotionConstants motionConstants = {};
-  int radius = m_radius;
-  if (radius < 1) {
-    radius = 1;
-  } else if (radius > 16) {
-    radius = 16;
-  }
-  motionConstants.radius = radius;
-  m_context->UpdateSubresource(m_motionConstants.Get(), 0, nullptr, &motionConstants, 0, 0);
 
   InterpConstants interpConstants = {};
   float clampedAlpha = alpha;
@@ -560,7 +551,9 @@ void Interpolator::CreateResources() {
   m_prevMotionCoarse.Reset(); m_prevMotionCoarseSrv.Reset(); m_prevMotionCoarseUav.Reset();
   
   m_motionTiny.Reset(); m_motionTinySrv.Reset(); m_motionTinyUav.Reset();
+  m_motionTinyBackward.Reset(); m_motionTinyBackwardSrv.Reset(); m_motionTinyBackwardUav.Reset();
   m_confidenceTiny.Reset(); m_confidenceTinySrv.Reset(); m_confidenceTinyUav.Reset();
+  m_confidenceTinyBackward.Reset(); m_confidenceTinyBackwardSrv.Reset(); m_confidenceTinyBackwardUav.Reset();
   m_confidenceCoarse.Reset(); m_confidenceCoarseSrv.Reset(); m_confidenceCoarseUav.Reset();
   
   m_motionSmooth.Reset(); m_motionSmoothSrv.Reset(); m_motionSmoothUav.Reset();
@@ -617,7 +610,9 @@ void Interpolator::CreateResources() {
   createTexture(m_smallWidth, m_smallHeight, DXGI_FORMAT_R16_FLOAT, m_confidenceCoarse, m_confidenceCoarseSrv, m_confidenceCoarseUav);
 
   createTexture(m_tinyWidth, m_tinyHeight, DXGI_FORMAT_R16G16_FLOAT, m_motionTiny, m_motionTinySrv, m_motionTinyUav);
+  createTexture(m_tinyWidth, m_tinyHeight, DXGI_FORMAT_R16G16_FLOAT, m_motionTinyBackward, m_motionTinyBackwardSrv, m_motionTinyBackwardUav);
   createTexture(m_tinyWidth, m_tinyHeight, DXGI_FORMAT_R16_FLOAT, m_confidenceTiny, m_confidenceTinySrv, m_confidenceTinyUav);
+  createTexture(m_tinyWidth, m_tinyHeight, DXGI_FORMAT_R16_FLOAT, m_confidenceTinyBackward, m_confidenceTinyBackwardSrv, m_confidenceTinyBackwardUav);
 
   createTexture(m_lumaWidth, m_lumaHeight, DXGI_FORMAT_R16G16_FLOAT, m_motionSmooth, m_motionSmoothSrv, m_motionSmoothUav);
   createTexture(m_lumaWidth, m_lumaHeight, DXGI_FORMAT_R16_FLOAT, m_confidenceSmooth, m_confidenceSmoothSrv, m_confidenceSmoothUav);
@@ -635,7 +630,8 @@ void Interpolator::CreateResources() {
       !m_prevLumaUav || !m_currLumaUav ||
       !m_motionUav || !m_confidenceUav ||
       !m_motionCoarseUav || !m_confidenceCoarseUav ||
-      !m_motionTinyUav || !m_confidenceTinyUav ||
+      !m_motionTinyUav || !m_motionTinyBackwardUav ||
+      !m_confidenceTinyUav || !m_confidenceTinyBackwardUav ||
       !m_motionSmoothUav || !m_confidenceSmoothUav) {
     return;
   }
@@ -659,7 +655,8 @@ bool Interpolator::ComputeMotion(
       !m_prevLumaTinyUav || !m_currLumaTinyUav ||
       !m_motionUav || !m_confidenceUav ||
       !m_motionCoarseUav || !m_confidenceCoarseUav ||
-      !m_motionTinyUav || !m_confidenceTinyUav) {
+      !m_motionTinyUav || !m_motionTinyBackwardUav ||
+      !m_confidenceTinyUav || !m_confidenceTinyBackwardUav) {
     return false;
   }
   if (!m_motionCs || !m_motionRefineCs || !m_motionSmoothCs || 
@@ -668,10 +665,45 @@ bool Interpolator::ComputeMotion(
   }
 
   // Helper arrays for cleanup
-  ID3D11ShaderResourceView* nullSrvs[4] = {};
+  ID3D11ShaderResourceView* nullSrvs[6] = {};
   ID3D11UnorderedAccessView* nullUavs[2] = {};
   ID3D11Buffer* nullCbs[1] = {};
   ID3D11SamplerState* nullSamplers[1] = {};
+
+  // Model-driven search radii (replaces manual Search/Refine Radius).
+  int model = m_motionModel;
+  if (model < 0) model = 0;
+  else if (model > 3) model = 3;
+
+  int tinyRadiusForward = 3;
+  int tinyRadiusBackward = 2;
+  int refineSmallRadius = 3;
+  int refineFullRadius = 2;
+
+  if (model == 0) { // Adaptive
+    bool hasPrediction = m_useMotionPrediction && m_prevMotionCoarseValid;
+    if (!hasPrediction) {
+      tinyRadiusForward = 2;
+      tinyRadiusBackward = 2;
+      refineSmallRadius = 2;
+      refineFullRadius = 1;
+    }
+    if (!m_temporalEnabled) {
+      tinyRadiusForward = std::min(4, tinyRadiusForward + 1);
+      refineSmallRadius = std::min(4, refineSmallRadius + 1);
+      refineFullRadius = std::min(3, refineFullRadius + 1);
+    }
+  } else if (model == 1) { // Stable
+    tinyRadiusForward = 2;
+    tinyRadiusBackward = 2;
+    refineSmallRadius = 2;
+    refineFullRadius = 1;
+  } else if (model == 3) { // Coverage
+    tinyRadiusForward = 4;
+    tinyRadiusBackward = 3;
+    refineSmallRadius = 4;
+    refineFullRadius = 3;
+  }
 
   // -----------------------------------------------------------------------
   // 1. DOWNSAMPLE CHAIN
@@ -760,9 +792,8 @@ bool Interpolator::ComputeMotion(
   // --------------------------
   {
       MotionConstants tinyConstants = {};
-      // Re-enabled prediction for smoothness. Radius 6 is sufficient with prediction.
-      tinyConstants.radius = 6;
-      tinyConstants.usePrediction = 1;
+      tinyConstants.radius = tinyRadiusForward;
+      tinyConstants.usePrediction = (m_useMotionPrediction && m_prevMotionCoarseValid) ? 1 : 0;
       tinyConstants.pad[0] = 0.5f; // Prediction Scale: Coarse (1/4) -> Tiny (1/8) is 0.5x
       m_context->UpdateSubresource(m_motionConstants.Get(), 0, nullptr, &tinyConstants, 0, 0);
 
@@ -789,58 +820,92 @@ bool Interpolator::ComputeMotion(
       m_context->CSSetSamplers(0, 1, nullSamplers);
   }
 
+  // PASS 1B: TINY Backward Search (Prev -> Curr) for consistency
+  // -------------------------------------------------------------
+  {
+      MotionConstants tinyBackwardConstants = {};
+      tinyBackwardConstants.radius = tinyRadiusBackward;
+      tinyBackwardConstants.usePrediction = 0;
+      tinyBackwardConstants.pad[0] = 1.0f;
+      m_context->UpdateSubresource(m_motionConstants.Get(), 0, nullptr, &tinyBackwardConstants, 0, 0);
+
+      ID3D11ShaderResourceView* srvs[] = {m_prevLumaTinySrv.Get(), m_currLumaTinySrv.Get(), nullptr};
+      ID3D11UnorderedAccessView* uavs[] = {m_motionTinyBackwardUav.Get(), m_confidenceTinyBackwardUav.Get()};
+      ID3D11Buffer* cbs[] = {m_motionConstants.Get()};
+      ID3D11SamplerState* samplers[] = {m_linearSampler.Get()};
+
+      m_context->CSSetShader(m_motionCs.Get(), nullptr, 0);
+      m_context->CSSetShaderResources(0, 3, srvs);
+      m_context->CSSetUnorderedAccessViews(0, 2, uavs, nullptr);
+      m_context->CSSetConstantBuffers(0, 1, cbs);
+      m_context->CSSetSamplers(0, 1, samplers);
+      m_context->Dispatch(DispatchSize(m_tinyWidth), DispatchSize(m_tinyHeight), 1);
+
+      m_context->CSSetShaderResources(0, 3, nullSrvs);
+      m_context->CSSetUnorderedAccessViews(0, 2, nullUavs, nullptr);
+      ID3D11SamplerState* nullSamplers[] = {nullptr};
+      m_context->CSSetSamplers(0, 1, nullSamplers);
+  }
+
   // PASS 2: MEDIUM Refine
   // ---------------------
   {
       RefineConstants refineSmallConstants = {};
-      refineSmallConstants.radius = 3; 
+      refineSmallConstants.radius = refineSmallRadius;
       // Scale up the motion vector from Tiny->Small (usually x4)
-      refineSmallConstants.motionScale = static_cast<float>(m_smallWidth) / static_cast<float>(m_tinyWidth); 
+      refineSmallConstants.motionScale = static_cast<float>(m_smallWidth) / static_cast<float>(m_tinyWidth);
+      refineSmallConstants.useBackward = 1;
+      refineSmallConstants.backwardScale = refineSmallConstants.motionScale;
       m_context->UpdateSubresource(m_refineConstants.Get(), 0, nullptr, &refineSmallConstants, 0, 0);
 
-      // Inputs: {CurrSmall, PrevSmall, MotionTiny, ConfTiny}
+      // Inputs: {CurrSmall, PrevSmall, MotionTinyFwd, ConfTinyFwd, MotionTinyBwd, ConfTinyBwd}
       // Note: We MUST use {Curr, Prev} order for Refine shader to calculate Forward vectors (Prev->Curr).
       ID3D11ShaderResourceView* srvs[] = {
           m_currLumaSmallSrv.Get(), 
           m_prevLumaSmallSrv.Get(), 
           m_motionTinySrv.Get(),
-          m_confidenceTinySrv.Get()
+          m_confidenceTinySrv.Get(),
+          m_motionTinyBackwardSrv.Get(),
+          m_confidenceTinyBackwardSrv.Get()
       };
       // Outputs: {MotionSmall, ConfSmall}
       ID3D11UnorderedAccessView* uavs[] = {m_motionCoarseUav.Get(), m_confidenceCoarseUav.Get()};
       ID3D11Buffer* cbs[] = {m_refineConstants.Get()};
+      ID3D11SamplerState* samplers[] = {m_linearSampler.Get()};
       
       m_context->CSSetShader(m_motionRefineCs.Get(), nullptr, 0);
-      m_context->CSSetShaderResources(0, 4, srvs);
+      m_context->CSSetShaderResources(0, 6, srvs);
       m_context->CSSetUnorderedAccessViews(0, 2, uavs, nullptr);
       m_context->CSSetConstantBuffers(0, 1, cbs);
+      m_context->CSSetSamplers(0, 1, samplers);
       m_context->Dispatch(DispatchSize(m_smallWidth), DispatchSize(m_smallHeight), 1);
       
       // Cleanup
-      m_context->CSSetShaderResources(0, 4, nullSrvs);
+      m_context->CSSetShaderResources(0, 6, nullSrvs);
       m_context->CSSetUnorderedAccessViews(0, 2, nullUavs, nullptr);
+      m_context->CSSetSamplers(0, 1, nullSamplers);
   }
 
   // PASS 3: FULL Refine
   // -------------------
   {
       RefineConstants refineConstants = {};
-      int refineRadius = m_refineRadius;
-      if (refineRadius < 2) refineRadius = 2;
-      else if (refineRadius > 12) refineRadius = 12;
-      
-      refineConstants.radius = refineRadius;
+      refineConstants.radius = refineFullRadius;
       // Scale up the motion vector from Small->Full (usually x4)
       refineConstants.motionScale = static_cast<float>(m_lumaWidth) / static_cast<float>(m_smallWidth);
+      refineConstants.useBackward = 0;
+      refineConstants.backwardScale = 1.0f;
       m_context->UpdateSubresource(m_refineConstants.Get(), 0, nullptr, &refineConstants, 0, 0);
 
-      // Inputs: {CurrFull, PrevFull, MotionSmall, ConfSmall}
+      // Inputs: {CurrFull, PrevFull, MotionSmall, ConfSmall, DummyBwdMotion, DummyBwdConf}
       // Note: Use {Curr, Prev} for Forward Vectors.
       ID3D11ShaderResourceView* srvs[] = {
           m_currLumaSrv.Get(),
           m_prevLumaSrv.Get(),
           m_motionCoarseSrv.Get(),
-          m_confidenceCoarseSrv.Get()
+          m_confidenceCoarseSrv.Get(),
+          m_motionTinyBackwardSrv.Get(),
+          m_confidenceTinyBackwardSrv.Get()
       };
       // Outputs: {MotionFull, ConfFull}
       ID3D11UnorderedAccessView* uavs[] = {m_motionUav.Get(), m_confidenceUav.Get()};
@@ -848,14 +913,14 @@ bool Interpolator::ComputeMotion(
       ID3D11SamplerState* samplers[] = {m_linearSampler.Get()};
 
       m_context->CSSetShader(m_motionRefineCs.Get(), nullptr, 0);
-      m_context->CSSetShaderResources(0, 4, srvs);
+      m_context->CSSetShaderResources(0, 6, srvs);
       m_context->CSSetUnorderedAccessViews(0, 2, uavs, nullptr);
       m_context->CSSetConstantBuffers(0, 1, cbs);
       m_context->CSSetSamplers(0, 1, samplers);
       m_context->Dispatch(DispatchSize(m_lumaWidth), DispatchSize(m_lumaHeight), 1);
 
       // Cleanup
-      m_context->CSSetShaderResources(0, 4, nullSrvs);
+      m_context->CSSetShaderResources(0, 6, nullSrvs);
       m_context->CSSetUnorderedAccessViews(0, 2, nullUavs, nullptr);
       m_context->CSSetSamplers(0, 1, nullSamplers);
   }
@@ -881,7 +946,7 @@ bool Interpolator::ComputeMotion(
   smoothConstants.confPower = confPower;
   m_context->UpdateSubresource(m_smoothConstants.Get(), 0, nullptr, &smoothConstants, 0, 0);
 
-  ID3D11ShaderResourceView* smoothSrvs[] = {m_motionSrv.Get(), m_confidenceSrv.Get(), m_prevLumaSrv.Get()};
+  ID3D11ShaderResourceView* smoothSrvs[] = {m_motionSrv.Get(), m_confidenceSrv.Get(), m_currLumaSrv.Get()};
   ID3D11UnorderedAccessView* smoothUavs[] = {m_motionSmoothUav.Get(), m_confidenceSmoothUav.Get()};
   ID3D11Buffer* smoothCbs[] = {m_smoothConstants.Get()};
   m_context->CSSetShader(m_motionSmoothCs.Get(), nullptr, 0);

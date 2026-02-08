@@ -11,7 +11,7 @@ RWTexture2D<float> ConfOut : register(u1);
 
 cbuffer SmoothCB : register(b0) {
     float edgeScale;   // Edge preservation strength
-    float confPower;   // Unused, kept for API
+    float confPower;   // Confidence tightening for vector filtering
     float2 pad;
 };
 
@@ -85,10 +85,12 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     float anisotropy;
     ComputeStructureTensor(pos, w, h, edgeDir, anisotropy);
     
-    // Adaptive sigma based on edge strength
+    // Adaptive sigma based on edge strength.
+    // Smaller sigma at higher edgeScale prevents vectors leaking across boundaries.
     float baseSigma = 1.5;
-    float sigmaMV = 2.5;  // Motion similarity sigma
-    float sigmaLuma = 0.08 * max(0.5, edgeScale);
+    float sigmaMV = lerp(2.5, 1.4, anisotropy);  // Tighter near strong edges
+    float sigmaLuma = clamp(0.08 / max(0.5, edgeScale), 0.01, 0.12);
+    float confTight = saturate((confPower - 0.25) / 3.75);
     
     float2 sumMV = float2(0, 0);
     float sumConf = 0.0;
@@ -127,8 +129,14 @@ void CSMain(uint3 id : SV_DispatchThreadID)
             float mvDist2 = dot(mvDiff, mvDiff);
             float wm = exp(-mvDist2 / (sigmaMV * sigmaMV));
             
-            // Confidence weight
-            float wc = 0.3 + 0.7 * conf;
+            // Confidence-aware weight: favor reliable neighbors and keep center ownership.
+            float wcBase = 0.2 + 0.8 * conf;
+            float wcTight = conf * conf;
+            float wc = lerp(wcBase, wcTight, confTight);
+            wc *= (0.5 + 0.5 * centerConf);
+            float confAgreement = 1.0 - abs(conf - centerConf);
+            wc *= saturate(0.4 + 0.6 * confAgreement);
+            wc = max(wc, 0.05);
             
             float weight = ws * wl * wm * wc;
             sumMV += mv * weight;
@@ -137,12 +145,67 @@ void CSMain(uint3 id : SV_DispatchThreadID)
         }
     }
     
-    // Output
+    float2 firstMV = centerMV;
+    float firstConf = centerConf;
     if (sumW > 0.001) {
-        MotionOut[id.xy] = sumMV / sumW;
-        ConfOut[id.xy] = sumConf / sumW;
+        firstMV = sumMV / sumW;
+        firstConf = sumConf / sumW;
+    }
+
+    // Robust second stage: suppress outlier vectors that survive bilateral weights.
+    float2 sumMV2 = float2(0, 0);
+    float sumConf2 = 0.0;
+    float sumW2 = 0.0;
+    float sigmaRobust = lerp(1.6, 0.9, anisotropy);
+    float sigmaRobust2 = sigmaRobust * sigmaRobust;
+
+    for (int dy2 = -2; dy2 <= 2; ++dy2) {
+        for (int dx2 = -2; dx2 <= 2; ++dx2) {
+            int2 sp = clamp(pos + int2(dx2, dy2), int2(0,0), int2(w-1, h-1));
+
+            float2 mv = MotionIn.Load(int3(sp, 0));
+            float conf = ConfIn.Load(int3(sp, 0));
+            float luma = LumaIn.Load(int3(sp, 0));
+
+            float2 offset = float2(dx2, dy2);
+            float alongEdge = dot(offset, edgeDir);
+            float acrossEdge = length(offset - alongEdge * edgeDir);
+            float stretchFactor = lerp(1.0, 3.0, anisotropy);
+            float effectiveDist = sqrt(alongEdge * alongEdge / (stretchFactor * stretchFactor) + acrossEdge * acrossEdge);
+            float ws = exp(-effectiveDist * effectiveDist / (2.0 * baseSigma * baseSigma));
+
+            float lumaDiff = abs(luma - centerLuma);
+            float wl = exp(-lumaDiff / sigmaLuma);
+
+            float2 mvDiff = mv - firstMV;
+            float mvDist2 = dot(mvDiff, mvDiff);
+            float wm = exp(-mvDist2 / (sigmaMV * sigmaMV));
+            float wr = rcp(1.0 + mvDist2 / max(0.25, sigmaRobust2));
+
+            float wcBase = 0.2 + 0.8 * conf;
+            float wcTight = conf * conf;
+            float wc = lerp(wcBase, wcTight, confTight);
+            wc *= (0.5 + 0.5 * firstConf);
+            float confAgreement = 1.0 - abs(conf - firstConf);
+            wc *= saturate(0.4 + 0.6 * confAgreement);
+            wc = max(wc, 0.05);
+
+            float weight = ws * wl * wm * wr * wc;
+            sumMV2 += mv * weight;
+            sumConf2 += conf * weight;
+            sumW2 += weight;
+        }
+    }
+
+    if (sumW2 > 0.001) {
+        MotionOut[id.xy] = sumMV2 / sumW2;
+        ConfOut[id.xy] = sumConf2 / sumW2;
+    } else if (sumW > 0.001) {
+        MotionOut[id.xy] = firstMV;
+        ConfOut[id.xy] = firstConf;
     } else {
         MotionOut[id.xy] = centerMV;
         ConfOut[id.xy] = centerConf;
     }
 }
+

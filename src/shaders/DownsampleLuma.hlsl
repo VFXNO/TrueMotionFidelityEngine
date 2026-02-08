@@ -31,15 +31,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     float l2 = dot(Src.Load(int3(p2, 0)).rgb, kLumaWeights);
     float l3 = dot(Src.Load(int3(p3, 0)).rgb, kLumaWeights);
     
-    // Average with detail preservation
+    // Stable box average to avoid introducing synthetic motion on static UI/text.
     float avg = (l0 + l1 + l2 + l3) * 0.25;
-    float maxL = max(max(l0, l1), max(l2, l3));
-    float minL = min(min(l0, l1), min(l2, l3));
-    float contrast = maxL - minL;
-    
-    // Preserve outlier for high contrast
-    float outlier = (abs(maxL - avg) > abs(minL - avg)) ? maxL : minL;
-    float luma = lerp(avg, outlier, saturate(contrast * 5.0));
-    
-    LumaOut[id.xy] = luma;
+    LumaOut[id.xy] = avg;
 }

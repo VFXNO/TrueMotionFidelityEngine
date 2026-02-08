@@ -21,13 +21,12 @@ public:
 
   bool Initialize(ID3D11Device* device, ID3D11DeviceContext* context);
   bool Resize(int inputWidth, int inputHeight, int outputWidth, int outputHeight);
-  void SetRadius(int radius) { m_radius = radius; }
+  void SetMotionModel(int model) { m_motionModel = model; }
   void SetMotionSmoothing(float edgeScale, float confPower) {
     m_smoothEdgeScale = edgeScale;
     m_smoothConfPower = confPower;
   }
   void SetQualityMode(int qualityMode) { m_qualityMode = qualityMode; }
-  void SetRefineRadius(int radius) { m_refineRadius = radius; }
   void SetTemporalStabilization(bool enabled, float historyWeight, float confInfluence, int neighborhoodSize) {
     m_temporalEnabled = enabled;
     m_temporalHistoryWeight = historyWeight;
@@ -94,7 +93,9 @@ private:
   Microsoft::WRL::ComPtr<ID3D11Texture2D> m_motionCoarse;
   Microsoft::WRL::ComPtr<ID3D11Texture2D> m_prevMotionCoarse;
   Microsoft::WRL::ComPtr<ID3D11Texture2D> m_motionTiny;
+  Microsoft::WRL::ComPtr<ID3D11Texture2D> m_motionTinyBackward;
   Microsoft::WRL::ComPtr<ID3D11Texture2D> m_confidenceTiny;
+  Microsoft::WRL::ComPtr<ID3D11Texture2D> m_confidenceTinyBackward;
   Microsoft::WRL::ComPtr<ID3D11Texture2D> m_confidenceCoarse;
   Microsoft::WRL::ComPtr<ID3D11Texture2D> m_motionSmooth;
   Microsoft::WRL::ComPtr<ID3D11Texture2D> m_confidenceSmooth;
@@ -123,7 +124,9 @@ private:
   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_motionCoarseSrv;
   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_prevMotionCoarseSrv;
   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_motionTinySrv;
+  Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_motionTinyBackwardSrv;
   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_confidenceTinySrv;
+  Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_confidenceTinyBackwardSrv;
   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_confidenceCoarseSrv;
   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_motionSmoothSrv;
   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_confidenceSmoothSrv;
@@ -142,7 +145,9 @@ private:
   Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_motionCoarseUav;
   Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_prevMotionCoarseUav;
   Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_motionTinyUav;
+  Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_motionTinyBackwardUav;
   Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_confidenceTinyUav;
+  Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_confidenceTinyBackwardUav;
   Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_confidenceCoarseUav;
   Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_motionSmoothUav;
   Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_confidenceSmoothUav;
@@ -174,11 +179,10 @@ private:
   int m_lumaHeight = 0;
   int m_smallWidth = 0;
   int m_smallHeight = 0;
-  int m_radius = 3;
+  int m_motionModel = 1;
   float m_confPower = 1.0f;
   float m_smoothEdgeScale = 6.0f;
   float m_smoothConfPower = 1.0f;
-  int m_refineRadius = 2;
   bool m_temporalEnabled = true;
   bool m_temporalValid = false;
   int m_temporalIndex = 0;

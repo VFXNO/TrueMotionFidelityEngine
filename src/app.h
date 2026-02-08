@@ -126,7 +126,7 @@ private:
   bool m_uiTopmost = false;
   bool m_captureWindowBehindOutput = false;
   HWND m_zOrderCaptureWindow = nullptr;
-  int m_motionRadius = 5;
+  int m_motionModel = 0; // 0=Adaptive, 1=Stable, 2=Balanced, 3=Coverage
   int m_outputMultiplier = 2;
   int m_debugView = 0;
   float m_debugMotionScale = 0.03f;
@@ -134,7 +134,6 @@ private:
   float m_confidencePower = 1.5f;
   float m_motionEdgeScale = 6.0f;
   int m_interpolationQuality = 1; // 0=Standard, 1=High
-  int m_refineRadius = 2;
   float m_delayScale = 1.0f;
   float m_jitterSuppression = 0.2f;
   bool m_forceInterpolation = false;
@@ -190,6 +189,8 @@ private:
   int m_lastMultiplier = 1;
   int m_pairPrevSlot = -1;
   int m_pairCurrSlot = -1;
+  int64_t m_pairPrevTime100ns = 0;
+  int64_t m_pairCurrTime100ns = 0;
   bool m_holdEndFrame = false;
   int m_maxQueueSize = 12;
   int m_frameWidth = 0;
