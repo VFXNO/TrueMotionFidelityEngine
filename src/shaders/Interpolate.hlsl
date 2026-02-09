@@ -110,19 +110,16 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
     float lumaDiffCurr = abs(lumaCurr - lumaPrev);
     float lumaDiffWarped = abs(lumaWarped - lumaCurr);
     
-    float warpReliable = saturate(1.0 - warpError * diffScale * 3.0);
-    warpReliable = lerp(warpReliable, conf, 0.5);
+    float warpReliable = saturate(1.0 - warpError * diffScale * 6.0); // Stricter error tolerance
+    warpReliable = lerp(warpReliable, conf, 0.7); // Rely more on Confidence/Consistency
     
+    // Calculate how much better warping is compared to just blending
     float warpGain = saturate((baseDiff - warpError) / max(baseDiff, 0.001));
-    warpGain = pow(warpGain, 0.7);
+    warpGain = pow(warpGain, 1.5); // Require significant improvement to trust warp
     
     float occlusionTest = lumaDiffWarped / max(lumaDiffCurr, 0.001);
     float occlusionFactor = saturate(1.0 - (occlusionTest - 1.0) * 0.5);
-    
-    float interpBlend = warpReliable * (0.4 + 0.6 * warpGain);
-    interpBlend = lerp(interpBlend, 1.0, smoothstep(0.5, 3.0, motionMag));
-    interpBlend *= lerp(0.5, 1.0, occlusionFactor);
-    
+
     float lC = Luma(baseCurr);
     float lL = Luma(CurrColor.SampleLevel(LinearClamp, clamp(inputUv + float2(-texelSize.x, 0.0), 0.0, 0.999), 0).rgb);
     float lR = Luma(CurrColor.SampleLevel(LinearClamp, clamp(inputUv + float2(texelSize.x, 0.0), 0.0, 0.999), 0).rgb);
@@ -130,18 +127,37 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
     float lD = Luma(CurrColor.SampleLevel(LinearClamp, clamp(inputUv + float2(0.0, texelSize.y), 0.0, 0.999), 0).rgb);
     float edgeMag = abs(lR - lL) + abs(lU - lD);
     
+    // User Request: ALWAYS interpellate.
+    // We ignore warping errors or confidence. We trust the flow.
+    float interpBlend = 1.0; 
+    
+    // Still respect text protection slightly if defined, but otherwise FULL MOTION
+    if (textProtect > 0.0 && edgeMag > edgeThreshold && conf < 0.25) {
+         interpBlend = 0.0; // Hard cutoff for text only
+    }
+    
     if (textProtect > 0.0 && edgeMag > edgeThreshold && conf < 0.75) {
         interpBlend *= (1.0 - textProtect * 0.75);
     }
     
-    interpBlend = saturate(interpBlend);
+    // interpBlend = saturate(interpBlend); // Already handled logic above
     
     // Smooth Bidirectional Blend
     float3 motionInterp = lerp(warpedPrev, warpedCurr, alpha);
     
-    // Fallback: simple linear blend for low-confidence areas
+    // Fallback: simply linear blend 
     float3 linearInterp = lerp(basePrev, baseCurr, alpha);
-    // Choose based on motion compensation quality
+    
+    // HALO SUPPRESSION:
+    // Slightly relaxed to 50% range expansion to prevent harsh clamping 
+    float3 minColor = min(basePrev, baseCurr);
+    float3 maxColor = max(basePrev, baseCurr);
+    float3 range = maxColor - minColor;
+    minColor -= range * 0.5; // Was 0.2
+    maxColor += range * 0.5; // Was 0.2
+    motionInterp = clamp(motionInterp, minColor, maxColor);
+    
+    // Always use motion result unless text protection kicked in
     float3 result = lerp(linearInterp, motionInterp, interpBlend);
     
     OutColor[id.xy] = float4(saturate(result), 1.0);

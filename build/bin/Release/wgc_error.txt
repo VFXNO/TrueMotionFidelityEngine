@@ -1,0 +1,2 @@
+WGC StartCapture failed - hresult_error
+HRESULT: 0x80070057

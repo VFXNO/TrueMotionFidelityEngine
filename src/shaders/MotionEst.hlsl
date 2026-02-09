@@ -9,7 +9,7 @@ Texture2D<float2> MotionPred : register(t2);
 RWTexture2D<float2> MotionOut : register(u0);
 RWTexture2D<float> ConfidenceOut : register(u1);
 
-SamplerState PointClamp : register(s0); // Note: Bound to Linear Sampler in C++
+SamplerState LinearClamp : register(s0);
 
 cbuffer MotionCB : register(b0) {
     int radius;
@@ -19,11 +19,10 @@ cbuffer MotionCB : register(b0) {
 };
 
 #define BLOCK_SIZE 16
-#define BLOCK_R 4
+#define BLOCK_R 8
 #define SEARCH_R 8
 
-groupshared float gs_Curr[24][24];
-// groupshared float gs_Prev[24][24]; // Removed: Search radius exceeds shared memory
+groupshared float gs_Curr[32][32];
 
 [numthreads(BLOCK_SIZE, BLOCK_SIZE, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid : SV_GroupThreadID) {
@@ -34,12 +33,13 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
     int2 loadPosBase = groupBase; // Base for loading
     uint tid = gtid.y * BLOCK_SIZE + gtid.x;
     
-    // Load Current Block + Apron into Shared Memory
-    for (int i = 0; i < 3; ++i) {
+    // Load Current Block + Apron into Shared Memory (32x32 = 1024 pixels)
+    // 256 threads * 4 iter = 1024 loads. Coverage: Perfect.
+    for (int i = 0; i < 4; ++i) {
         uint pIdx = tid + i * 256;
-        if (pIdx < 576) {
-            int ly = pIdx / 24;
-            int lx = pIdx % 24;
+        if (pIdx < 1024) {
+            int ly = pIdx / 32;
+            int lx = pIdx % 32;
             int2 loadPos = clamp(groupBase + int2(lx, ly), int2(0, 0), int2(w - 1, h - 1));
             gs_Curr[ly][lx] = CurrLuma.Load(int3(loadPos, 0));
         }
@@ -77,14 +77,18 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
             
             int2 pPos = clamp(pos + int2(bx, by), int2(0,0), int2(w-1, h-1));
             float pVal = PrevLuma.Load(int3(pPos, 0));
-            sad += abs(cVal - pVal);
+            
+            // Weighted SAD: Center pixels matter more to prevent background halos
+            float dist = max(abs(bx), abs(by));
+            float weight = 1.0 - (dist / (float(BLOCK_R) + 2.0)); 
+            sad += abs(cVal - pVal) * weight;
         }
     }
     bestSad = sad * 0.95f; // Bias for zero motion
     
     // 2. Prediction
     if (usePrediction) {
-        float2 pred = MotionPred.SampleLevel(PointClamp, uv, 0).xy * predictionScale;
+        float2 pred = MotionPred.SampleLevel(LinearClamp, uv, 0).xy * predictionScale;
         float2 clampedPred = clamp(pred, -float2(searchR, searchR), float2(searchR, searchR));
         
         if (length(clampedPred) > 0.5f) {
@@ -97,7 +101,10 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
                     
                     int2 pPos = clamp(pos + int2(bxP, byP) + mvi, int2(0,0), int2(w-1, h-1));
                     float pVal = PrevLuma.Load(int3(pPos, 0));
-                    sad += abs(cVal - pVal);
+                    
+                    float dist = max(abs(bxP), abs(byP));
+                    float weight = 1.0 - (dist / (float(BLOCK_R) + 2.0)); 
+                    sad += abs(cVal - pVal) * weight;
                 }
             }
             if (sad < bestSad * 1.05f) {
@@ -130,7 +137,10 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
                     
                     int2 pPos = clamp(pos + int2(bxD, byD) + testMV, int2(0,0), int2(w-1, h-1));
                     float pVal = PrevLuma.Load(int3(pPos, 0));
-                    sad += abs(cVal - pVal);
+                    
+                    float dist = max(abs(bxD), abs(byD));
+                    float weight = 1.0 - (dist / (float(BLOCK_R) + 2.0)); 
+                    sad += abs(cVal - pVal) * weight;
                 }
             }
             
@@ -202,7 +212,7 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
                     float2 pUV = pPos / float2(w, h); // Use normalized coords for SampleLevel
                     
                     // Linear Filtered Sample
-                    sad += abs(cVal - PrevLuma.SampleLevel(PointClamp, pUV, 0));
+                    sad += abs(cVal - PrevLuma.SampleLevel(LinearClamp, pUV, 0));
                 }
             }
             
@@ -231,7 +241,7 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
                      
                      float2 pPos = float2(pos) + float2(bxQ, byQ) + 0.5f + testMV;
                      float2 pUV = pPos / float2(w, h);
-                     sad += abs(cVal - PrevLuma.SampleLevel(PointClamp, pUV, 0));
+                     sad += abs(cVal - PrevLuma.SampleLevel(LinearClamp, pUV, 0));
                 }
             }
             
@@ -255,3 +265,4 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
     MotionOut[id.xy] = bestQuarterMV;
     ConfidenceOut[id.xy] = confidence;
 }
+

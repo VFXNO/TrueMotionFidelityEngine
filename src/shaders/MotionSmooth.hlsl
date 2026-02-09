@@ -38,7 +38,7 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
     float sumConf = 0.0;
     float sumW = 0.0;
     
-    // Increased kernel size 3x3 -> 5x5 for better stability
+    // Optimized: 5x5 Kernel (-2..2) - Sufficient for smoothing, 9x9 was redundant
     for (int dy = -2; dy <= 2; ++dy) {
         for (int dx = -2; dx <= 2; ++dx) {
             int2 sp = clamp(pos + int2(dx, dy), int2(0, 0), int2(w - 1, h - 1));
@@ -47,17 +47,20 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
             float conf = ConfIn.Load(int3(sp, 0));
             float luma = LumaIn.Load(int3(sp, 0));
             
-            float spatialW = exp(-float(dx * dx + dy * dy) / 4.0); // Broader spatial falloff
+            // Adjusted sigma for smaller kernel (sigma^2 = 4.0)
+            float spatialW = exp(-float(dx * dx + dy * dy) / 4.0);
             float lumaDiff = abs(luma - centerLuma);
-            float lumaW = exp(-lumaDiff / max(0.05, edgeScale * 0.2)); // Relaxed luma constraint
+            
+            // Restore Edge Awareness to prevent Halos around bright lights
+            // Use a softer Falloff but DO NOT allow free bleeding across high contrast edges
+            float lumaW = exp(-lumaDiff * 4.0); 
             
             float2 mvDiff = mv - centerMV;
-            // Key fix: If center is outlier, we don't want to exclude neighbors that differ from it.
-            // Instead of penalizing difference from center, we penalize difference from 'neighbors average' (too loop heavy)
-            // Or just relax this weight significantly so we average distinct vectors together (smoothing major discontinuities)
-            float mvW = exp(-dot(mvDiff, mvDiff) / 16.0); 
             
-            float confW = 0.5 + 2.0 * conf; // Give high confidence pixels much more weight
+            // Re-introduce mild motion similarity weight to prevent blending distinct objects
+            float mvW = exp(-dot(mvDiff, mvDiff) / 64.0); // Very loose tolerance (8px diff)
+            
+            float confW = 0.5 + 4.0 * conf; // Give high confidence pixels DOMINANT weight
             
             float weight = spatialW * lumaW * mvW * confW;
             
@@ -74,7 +77,7 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
         // Use smooth motion almost everywhere, only preserve center if it was VERY confident
         // and part of a structural edge
         float preserve = centerConf * smoothstep(0.05, 0.2, edgeStrength);
-        preserve = clamp(preserve, 0.0, 0.5); // Max 50% blend with original - prefer smoothed
+        preserve = clamp(preserve, 0.0, 0.4); 
         
         MotionOut[id.xy] = lerp(smoothedMV, centerMV, preserve);
         ConfOut[id.xy] = lerp(smoothedConf, centerConf, preserve * 0.5);

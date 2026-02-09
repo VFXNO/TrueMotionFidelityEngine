@@ -71,33 +71,23 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
     
     float2 clampedHist = clamp(histMV, minMV, maxMV);
     float spread = length(maxMV - minMV);
-    float mvDist = length(currMV - clampedHist);
     
-    float confDelta = currConf - histConf;
-    
+    // RESTORED LOGIC AND INCREASED STRENGTH
+    float mvDist = length(currMV - histMV); // Use raw history for distance
     float blend = historyWeight;
     
-    // Less aggressive penalties
-    if (mvDist < 1.0) {
-        // Very close - trust history more
-        blend = lerp(blend, 0.95, 0.5);
-    } else if (mvDist > 8.0) {
-        // Huge jump - assume new motion
+    if (mvDist < 4.0) {
+        // Super stable if motion is somewhat consistent
+        blend = lerp(blend, 0.99, 0.9);
+    } else if (mvDist > 50.0) {
         blend *= 0.5;
     }
     
-    blend *= exp(-mvDist * 0.05); // Relaxed distance penalty
-    
-    // Don't kill blend just because history was confident and now we aren't
-    // blend *= smoothstep(-0.2, 0.3, confDelta); 
-    
-    // blend *= exp(-spread * 0.15); // Removed spread penalty - neighborhoods are noisy
-    
-    // blend *= exp(-lumaDiff * 12.0); // Removed luma penalty - lighting changes shouldn't kill motion history
-    
-    blend = clamp(blend, 0.6, 0.95); // Ensure strong temporal smoothing (min 0.6)
-    
-    float2 resultMV = lerp(currMV, clampedHist, blend);
+    blend = clamp(blend, 0.90, 0.99); // MINIMUM 90% HISTORY - EXTREME STABILIZATION
+
+    // Use raw history instead of clamped to avoid re-introducing current frame jitter
+    // float2 resultMV = lerp(currMV, clampedHist, blend);
+    float2 resultMV = lerp(currMV, histMV, blend); 
     float resultConf = lerp(currConf, histConf, blend * 0.8);
     
     MotionOut[id.xy] = resultMV;

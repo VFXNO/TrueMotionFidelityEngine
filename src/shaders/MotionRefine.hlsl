@@ -31,7 +31,7 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
     float coarseConf = CoarseConf.SampleLevel(LinearClamp, uv, 0).x;
     
     int2 baseMV = int2(round(coarseMV));
-    int searchR = clamp(radius, 1, 4);
+    int searchR = clamp(radius, 1, 2); // Limit search to immediate neighbors (max 2)
     
     float bestSad = 1e9f;
     float2 bestMV = coarseMV;
@@ -41,8 +41,10 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
             int2 testMV = baseMV + int2(dx, dy);
             
             float sad = 0.0f;
-            for (int by = -3; by <= 3; ++by) {
-                for (int bx = -3; bx <= 3; ++bx) {
+            // Optimized Block: Reduced from 13x13 (-6..6) to 5x5 (-2..2)
+            // We only need local feature matching for refinement
+            for (int by = -2; by <= 2; ++by) {
+                for (int bx = -2; bx <= 2; ++bx) {
                     int2 cPos = clamp(pos + int2(bx, by), int2(0, 0), int2(w - 1, h - 1));
                     int2 pPos = clamp(pos + int2(bx, by) + testMV, int2(0, 0), int2(w - 1, h - 1));
                     sad += abs(CurrLuma.Load(int3(cPos, 0)) - PrevLuma.Load(int3(pPos, 0)));
@@ -66,8 +68,8 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
             float2 testMV = bestMV + float2(dxH, dyH) * 0.5f;
             
             float sad = 0.0f;
-            for (int byH = -3; byH <= 3; ++byH) {
-                for (int bxH = -3; bxH <= 3; ++bxH) {
+            for (int byH = -2; byH <= 2; ++byH) {
+                for (int bxH = -2; bxH <= 2; ++bxH) {
                     float2 cPos = float2(pos) + float2(bxH, byH) + 0.5f;
                     float2 pPos = cPos + testMV;
                     float2 pUV = pPos / float2(w, h);
@@ -93,8 +95,8 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
             float2 testMV = bestHalfMV + float2(dxQ, dyQ) * 0.25f;
             
             float sad = 0.0f;
-            for (int byQ = -3; byQ <= 3; ++byQ) {
-                for (int bxQ = -3; bxQ <= 3; ++bxQ) {
+            for (int byQ = -2; byQ <= 2; ++byQ) {
+                for (int bxQ = -2; bxQ <= 2; ++bxQ) {
                     float2 cPos = float2(pos) + float2(bxQ, byQ) + 0.5f;
                     float2 pPos = cPos + testMV;
                     float2 pUV = pPos / float2(w, h);
