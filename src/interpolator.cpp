@@ -40,14 +40,12 @@ struct InterpConstants {
   float diffScale = 2.0f;
   float confPower = 1.0f;
   int qualityMode = 0;
-  int useDepth = 0;
-  float depthScale = 1.0f;
-  float depthThreshold = 0.02f;
-  float motionSampleScale = 1.5f;
   int useHistory = 0;
   float historyWeight = 0.2f;
   float textProtect = 0.0f;
   float edgeThreshold = 0.0f;
+  float motionSampleScale = 2.0f;
+  float pad[3] = {};
 };
 
 struct DebugConstants {
@@ -244,10 +242,6 @@ void Interpolator::Execute(
   }
   interpConstants.confPower = confPower;
   interpConstants.qualityMode = m_qualityMode;
-  interpConstants.useDepth = (prevDepth && currDepth) ? 1 : 0;
-  interpConstants.depthScale = 1.0f;
-  interpConstants.depthThreshold = 0.02f;
-  interpConstants.motionSampleScale = 1.5f;
   float historyWeight = m_temporalHistoryWeight;
   if (historyWeight < 0.0f) {
     historyWeight = 0.0f;
@@ -270,6 +264,8 @@ void Interpolator::Execute(
   }
   interpConstants.textProtect = textProtect;
   interpConstants.edgeThreshold = edgeThreshold;
+  // Scale motion vectors from luma-space to color-space (luma is half resolution)
+  interpConstants.motionSampleScale = static_cast<float>(m_inputWidth) / static_cast<float>(m_lumaWidth);
   m_context->UpdateSubresource(m_interpConstants.Get(), 0, nullptr, &interpConstants, 0, 0);
 
   ID3D11ShaderResourceView* motionSrv = m_motionSmoothSrv ? m_motionSmoothSrv.Get() : m_motionSrv.Get();

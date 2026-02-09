@@ -1,6 +1,6 @@
 // ============================================================================
-// MOTION TEMPORAL - Temporal Accumulation with Neighborhood Clamping
-// Clean temporal filtering for stable motion estimation
+// MOTION TEMPORAL - Strong Temporal Smoothing
+// Aggressive temporal blending for smooth, jitter-free motion vectors
 // ============================================================================
 
 Texture2D<float2> MotionCurr : register(t0);
@@ -16,18 +16,14 @@ RWTexture2D<float> ConfOut : register(u1);
 SamplerState LinearClamp : register(s0);
 
 cbuffer TemporalCB : register(b0) {
-    float historyWeight;    // Base history blend (0.0-0.9)
-    float confInfluence;    // How much confidence affects blend
-    int resetHistory;       // Reset temporal accumulation
-    int neighborhoodSize;   // Clamp neighborhood (1-3)
+    float historyWeight;
+    float confInfluence;
+    int resetHistory;
+    int neighborhoodSize;
 };
 
-// ============================================================================
-// MAIN
-// ============================================================================
 [numthreads(16, 16, 1)]
-void CSMain(uint3 id : SV_DispatchThreadID)
-{
+void CSMain(uint3 id : SV_DispatchThreadID) {
     uint w, h;
     MotionCurr.GetDimensions(w, h);
     if (id.x >= w || id.y >= h) return;
@@ -36,34 +32,28 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     float2 texelSize = 1.0 / float2(w, h);
     float2 uv = (float2(pos) + 0.5) * texelSize;
     
-    // Current frame data
     float2 currMV = MotionCurr.Load(int3(pos, 0));
     float currConf = ConfCurr.Load(int3(pos, 0));
     
-    // Build neighborhood bounds
     int k = clamp(neighborhoodSize, 1, 3);
     float2 minMV = currMV;
     float2 maxMV = currMV;
     
-    // [unroll] removed for dynamic loop bounds
     for (int dy = -k; dy <= k; ++dy) {
-        // [unroll] removed for dynamic loop bounds
         for (int dx = -k; dx <= k; ++dx) {
-            int2 sp = clamp(pos + int2(dx, dy), int2(0,0), int2(w-1, h-1));
+            int2 sp = clamp(pos + int2(dx, dy), int2(0, 0), int2(w - 1, h - 1));
             float2 mv = MotionCurr.Load(int3(sp, 0));
             minMV = min(minMV, mv);
             maxMV = max(maxMV, mv);
         }
     }
     
-    // Reset or invalid history
     if (resetHistory) {
         MotionOut[id.xy] = currMV;
         ConfOut[id.xy] = currConf;
         return;
     }
     
-    // Reproject history
     float2 histUV = uv - currMV * texelSize;
     
     if (any(histUV < 0.0) || any(histUV > 1.0)) {
@@ -72,59 +62,44 @@ void CSMain(uint3 id : SV_DispatchThreadID)
         return;
     }
     
-    // Sample history
     float2 histMV = MotionHistory.SampleLevel(LinearClamp, histUV, 0);
     float histConf = ConfHistory.SampleLevel(LinearClamp, histUV, 0);
-    float currLuma = LumaCurr.Load(int3(pos, 0));
-    float prevLumaReproj = LumaPrev.SampleLevel(LinearClamp, histUV, 0);
-    float lumaDiff = abs(currLuma - prevLumaReproj);
     
-    // Clamp history to current neighborhood
+    float currLuma = LumaCurr.Load(int3(pos, 0));
+    float prevLuma = LumaPrev.SampleLevel(LinearClamp, histUV, 0);
+    float lumaDiff = abs(currLuma - prevLuma);
+    
     float2 clampedHist = clamp(histMV, minMV, maxMV);
     float spread = length(maxMV - minMV);
+    float mvDist = length(currMV - clampedHist);
     
-    // Compute blend factor AVOID BLUR:
-    // "Temporal Stabilization" should just be de-jittering, not low-pass filtering.
-    float alpha = historyWeight;
-    float ci = saturate(confInfluence);
-    float dist = length(currMV - clampedHist);
+    float confDelta = currConf - histConf;
     
-    // 1. If vectors are very close, SNAP to history (perfect stabilization)
-    if (dist < 0.5) {
-        alpha = 0.95; 
-    } 
-    // 2. If vectors differ significantly, Trust CURRENT (avoid blur/lag)
-    else if (dist > 4.0) {
-        alpha = 0.0; // Break history immediately on fast changes
-    }
-    // 3. In between: Blend, but favor current to keep edges sharp
-    else {
-        alpha = 0.2; // Weak history
+    float blend = historyWeight;
+    
+    // Less aggressive penalties
+    if (mvDist < 1.0) {
+        // Very close - trust history more
+        blend = lerp(blend, 0.95, 0.5);
+    } else if (mvDist > 8.0) {
+        // Huge jump - assume new motion
+        blend *= 0.5;
     }
     
-    // Confidence Check
-    float confFavorHistory = saturate(0.5 + 0.5 * (histConf - currConf));
-    float confScale = lerp(1.0, confFavorHistory * 1.6, ci);
-    alpha *= confScale;
-
-    float trustCurrentThreshold = 0.2 - 0.15 * ci;
-    if (currConf > histConf + trustCurrentThreshold) alpha = 0.0; // Trust new clear match
-
-    // Motion-boundary gating: reduce history influence where local vectors diverge.
-    float boundaryReject = saturate((spread - 0.9) * 0.40);
-    float boundaryScale = 1.0 - boundaryReject * lerp(0.55, 0.85, ci);
-    alpha *= saturate(boundaryScale);
-
-    // Reduce history pull when reprojection disagrees in luminance.
-    float lumaReject = saturate((lumaDiff - 0.02) * 18.0);
-    float lumaScale = 1.0 - lumaReject * lerp(0.65, 0.90, ci);
-    alpha *= saturate(lumaScale);
+    blend *= exp(-mvDist * 0.05); // Relaxed distance penalty
     
-    alpha = clamp(alpha, 0.0, 0.95);
+    // Don't kill blend just because history was confident and now we aren't
+    // blend *= smoothstep(-0.2, 0.3, confDelta); 
     
-    // Blend
-    MotionOut[id.xy] = lerp(currMV, clampedHist, alpha);
-    float confAlpha = alpha * (0.6 + 0.2 * ci);
-    ConfOut[id.xy] = lerp(currConf, histConf, confAlpha);
+    // blend *= exp(-spread * 0.15); // Removed spread penalty - neighborhoods are noisy
+    
+    // blend *= exp(-lumaDiff * 12.0); // Removed luma penalty - lighting changes shouldn't kill motion history
+    
+    blend = clamp(blend, 0.6, 0.95); // Ensure strong temporal smoothing (min 0.6)
+    
+    float2 resultMV = lerp(currMV, clampedHist, blend);
+    float resultConf = lerp(currConf, histConf, blend * 0.8);
+    
+    MotionOut[id.xy] = resultMV;
+    ConfOut[id.xy] = resultConf;
 }
-
