@@ -1669,18 +1669,6 @@ void App::Render() {
       m_pairCurrTime100ns = 0;
     }
     bool canInterpolate = m_interpolationEnabled && hasPair && hasPrevSrv && hasCurrSrv;
-    if (useMonitorSync) {
-      if (!m_forceInterpolation && (captureFps <= 0.0 || monitorHz <= 0.0f)) {
-        canInterpolate = false;
-      } else {
-        float minInterpFps = captureFps * 1.2f;
-        canInterpolate = m_forceInterpolation || (monitorHz > minInterpFps);
-      }
-    } else {
-      if (multiplier <= 1 && !m_forceInterpolation) {
-        canInterpolate = false;
-      }
-    }
     bool needScale = (m_outputWidth != m_frameWidth) || (m_outputHeight != m_frameHeight);
 
     float alpha = 1.0f;
@@ -1796,8 +1784,7 @@ void App::Render() {
       }
     }
 
-    // Fix: Force Interpolation should also override the instability check
-    bool allowInterpolation = canInterpolate && (!unstable || neverDropMode || m_forceInterpolation);
+    bool allowInterpolation = canInterpolate;
 
     m_lastUnstable = unstable;
     m_lastAlpha = alpha;

@@ -2,10 +2,10 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-subbuild\x64\Debug\ZERO_CHECK</FullPath>
+      <FullPath>C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-subbuild\x64\Debug\ZERO_CHECK</FullPath>
     </ProjectOutput>
     <ProjectOutput>
-      <FullPath>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-subbuild\x64\Debug\imgui-populate</FullPath>
+      <FullPath>C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-subbuild\x64\Debug\imgui-populate</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

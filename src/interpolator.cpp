@@ -268,13 +268,9 @@ void Interpolator::Execute(
   interpConstants.motionSampleScale = static_cast<float>(m_inputWidth) / static_cast<float>(m_lumaWidth);
   m_context->UpdateSubresource(m_interpConstants.Get(), 0, nullptr, &interpConstants, 0, 0);
 
-  ID3D11ShaderResourceView* motionSrv = m_motionSmoothSrv ? m_motionSmoothSrv.Get() : m_motionSrv.Get();
-  ID3D11ShaderResourceView* confSrv = m_confidenceSmoothSrv ? m_confidenceSmoothSrv.Get() : m_confidenceSrv.Get();
-  if (m_temporalEnabled && m_temporalValid && m_motionTemporalSrv[m_temporalIndex] &&
-      m_confidenceTemporalSrv[m_temporalIndex]) {
-    motionSrv = m_motionTemporalSrv[m_temporalIndex].Get();
-    confSrv = m_confidenceTemporalSrv[m_temporalIndex].Get();
-  }
+  // Pure warp path: use direct motion/confidence output without temporal/smoothing blend selection.
+  ID3D11ShaderResourceView* motionSrv = m_motionSrv.Get();
+  ID3D11ShaderResourceView* confSrv = m_confidenceSrv.Get();
   int historyReadIndex = m_historyIndex;
   ID3D11ShaderResourceView* historySrv =
       (m_historyValid && m_historyColorSrv[historyReadIndex]) ? m_historyColorSrv[historyReadIndex].Get() : nullptr;

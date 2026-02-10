@@ -1,110 +1,110 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\app.cpp">
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\app.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\d3d11_device.cpp">
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\d3d11_device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\dll_injector.cpp">
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\dll_injector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\dup_capture.cpp">
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\dup_capture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\game_capture.cpp">
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\game_capture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\interpolator.cpp">
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\interpolator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\main.cpp">
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\shader_utils.cpp">
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\shader_utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\ui.cpp">
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\ui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\wgc_capture.cpp">
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\wgc_capture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\window_list.cpp">
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\window_list.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\imgui.cpp">
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\imgui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\imgui_draw.cpp">
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\imgui_draw.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\imgui_tables.cpp">
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\imgui_tables.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\imgui_widgets.cpp">
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends\imgui_impl_win32.cpp">
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\backends\imgui_impl_win32.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends\imgui_impl_dx11.cpp">
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\backends\imgui_impl_dx11.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\app.h">
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\app.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\capture_frame.h">
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\capture_frame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\d3d11_device.h">
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\d3d11_device.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\dll_injector.h">
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\dll_injector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\dup_capture.h">
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\dup_capture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\game_capture.h">
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\game_capture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\graphics_hook_info.h">
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\graphics_hook_info.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\interpolator.h">
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\interpolator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\shader_utils.h">
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\shader_utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\ui.h">
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\ui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\wgc_capture.h">
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\wgc_capture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\window_list.h">
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\window_list.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\resources.rc">
+    <ResourceCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\resources.rc">
       <Filter>Source Files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{3C620004-78B6-3F8E-988B-221981493CA7}</UniqueIdentifier>
+      <UniqueIdentifier>{7AEE89CE-BEDC-3AF4-A7DE-433771496B31}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{20156801-D986-3A02-AC43-03CEAF4B9249}</UniqueIdentifier>
+      <UniqueIdentifier>{95FCC62B-25D9-3FB2-A2C2-6B71B22BD136}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -1,10 +1,8 @@
 // ============================================================================
-// MOTION ESTIMATION - Professional Grade Coarse Pass
-// Gradient-weighted NCC block matching for game frame interpolation
-// Optimized with Shared Memory and Single-Pass ZNSSD to reduce register pressure
+// MOTION ESTIMATION - Robust Block Matching
+// Tuned to reduce ambiguous vectors that create visible warp artifacts.
 // ============================================================================
 
-// C++ binds: {CurrLuma, PrevLuma, MotionPred}
 Texture2D<float> CurrLuma : register(t0);
 Texture2D<float> PrevLuma : register(t1);
 Texture2D<float2> MotionPred : register(t2);
@@ -16,228 +14,255 @@ SamplerState LinearClamp : register(s0);
 cbuffer MotionCB : register(b0) {
     int radius;
     int usePrediction;
-    float predictionScale; // scale factor for prediction vectors (e.g. 0.5 if Coarse->Tiny)
+    float predictionScale;
     float pad;
 };
 
 #define BLOCK_SIZE 16
-// Window R=3 (7x7). Gradient needs +1 Neighbor. Total Halo = 4.
-#define HALO_R 4 
-#define SHARED_DIM (BLOCK_SIZE + 2 * HALO_R) // 16 + 8 = 24
+#define BLOCK_R 8
+#define BLOCK_EXTENT (BLOCK_SIZE + BLOCK_R * 2)
 
-groupshared float gs_Luma[SHARED_DIM][SHARED_DIM];
+groupshared float gs_Curr[BLOCK_EXTENT][BLOCK_EXTENT];
 
-// ============================================================================
-// CONSTANTS
-// ============================================================================
-// 7x7 Gaussian weights (sigma ~1.4)
-static const float kGaussian[49] = {
-    0.005, 0.012, 0.020, 0.024, 0.020, 0.012, 0.005,
-    0.012, 0.027, 0.044, 0.052, 0.044, 0.027, 0.012,
-    0.020, 0.044, 0.072, 0.085, 0.072, 0.044, 0.020,
-    0.024, 0.052, 0.085, 0.100, 0.085, 0.052, 0.024,
-    0.020, 0.044, 0.072, 0.085, 0.072, 0.044, 0.020,
-    0.012, 0.027, 0.044, 0.052, 0.044, 0.027, 0.012,
-    0.005, 0.012, 0.020, 0.024, 0.020, 0.012, 0.005
-};
-
-// ============================================================================
-// Helpers for Shared Memory Access
-// ============================================================================
-float GetCachedLuma(int2 localPos) {
-    return gs_Luma[localPos.y][localPos.x];
+float BlockWeight(int2 offset) {
+    float dist = max(abs(offset.x), abs(offset.y));
+    float w = 1.0 - dist / (float(BLOCK_R) + 1.0);
+    return 0.25 + 0.75 * saturate(w);
 }
 
-// Optimized Gradient from Shared Memory
-// No boundary checks needed as we load enough halo (Halo=4, Window=3, Grad=1)
-float GetCachedGradientMag(int2 lPos) {
-    float v00 = gs_Luma[lPos.y - 1][lPos.x - 1];
-    float v10 = gs_Luma[lPos.y - 1][lPos.x];
-    float v20 = gs_Luma[lPos.y - 1][lPos.x + 1];
-    
-    float v01 = gs_Luma[lPos.y][lPos.x - 1];
-    float v21 = gs_Luma[lPos.y][lPos.x + 1];
-    
-    float v02 = gs_Luma[lPos.y + 1][lPos.x - 1];
-    float v12 = gs_Luma[lPos.y + 1][lPos.x];
-    float v22 = gs_Luma[lPos.y + 1][lPos.x + 1];
-
-    float gx = -v00 + v20 - 2.0*v01 + 2.0*v21 - v02 + v22;
-    float gy = -v00 - 2.0*v10 - v20 + v02 + 2.0*v12 + v22;
-    
-    // OPTIMIZATION: Use Manhattan Distance (abs sum) instead of sqrt()
-    // Much faster, sufficient for weighting.
-    return abs(gx) + abs(gy); 
+float RobustDiff(float a, float b) {
+    return min(abs(a - b), 0.35);
 }
 
-// ============================================================================
-// Enhanced SAD with Structural Gradient Weighting
-// "High Quality" - Uses local structure (edges) to guide the match.
-// ============================================================================
-float ComputeCostOptimized(
-    int2 localCenter,
-    int2 globalPos,
-    float2 mvec,
-    uint2 dims,
-    float meanCurr,    
-    float wVarSumCurr, // Unused
-    float wSum         // Unused
-)
-{
-    float cost = 0.0;
-    
-    // STRUCTURE GRADIENT:
-    // "High Quality" Edge Alignment.
-    
-    // OPTIMIZATION: Subsampled Loops (Step 2)
-    // Reduces checks from 49 -> 16 per candidate. 
-    // ~3x Performance Boost with negligible quality loss.
-    
-    [loop] 
-    for (int dy = -3; dy <= 3; dy += 2) {
+float EvalSadInt(int2 pos, int2 localPos, int2 mv, uint w, uint h) {
+    float sad = 0.0;
+    int2 maxPos = int2(int(w) - 1, int(h) - 1);
+
+    [loop]
+    for (int by = -BLOCK_R; by <= BLOCK_R; ++by) {
         [loop]
-        for (int dx = -3; dx <= 3; dx += 2) {
-            int2 lPos = localCenter + int2(dx, dy);
-            float cVal = GetCachedLuma(lPos);
-            
-            // Get Structure Gradient from Shared Memory (Fast)
-            float structure = GetCachedGradientMag(lPos);
-            float weight = 1.0 + structure * 4.0; 
-            
-            // Texture Load (Prev frame)
-            int2 pPos = clamp(globalPos + int2(dx, dy) + int2(mvec), int2(0,0), int2(dims.x-1, dims.y-1));
+        for (int bx = -BLOCK_R; bx <= BLOCK_R; ++bx) {
+            int2 offset = int2(bx, by);
+            int2 sp = localPos + offset;
+            float cVal = gs_Curr[sp.y][sp.x];
+            int2 pPos = clamp(pos + offset + mv, int2(0, 0), maxPos);
             float pVal = PrevLuma.Load(int3(pPos, 0));
-            
-            // Gradient-Weighted SAD
-            cost += abs(cVal - pVal) * weight;
+            sad += RobustDiff(cVal, pVal) * BlockWeight(offset);
         }
     }
-    
-    return cost;
+
+    return sad;
 }
 
-// ============================================================================
-// MAIN
-// ============================================================================
+float EvalSadFrac(int2 pos, int2 localPos, float2 mv, float2 invSize) {
+    float sad = 0.0;
+
+    [loop]
+    for (int by = -BLOCK_R; by <= BLOCK_R; ++by) {
+        [loop]
+        for (int bx = -BLOCK_R; bx <= BLOCK_R; ++bx) {
+            int2 offset = int2(bx, by);
+            int2 sp = localPos + offset;
+            float cVal = gs_Curr[sp.y][sp.x];
+            float2 pPos = float2(pos + offset) + 0.5 + mv;
+            float2 pUv = clamp(pPos * invSize, 0.0, 0.999);
+            float pVal = PrevLuma.SampleLevel(LinearClamp, pUv, 0);
+            sad += RobustDiff(cVal, pVal) * BlockWeight(offset);
+        }
+    }
+
+    return sad;
+}
+
+void UpdateBest(float cost, float2 mv, inout float bestCost, inout float2 bestMV, inout float secondCost) {
+    if (cost < bestCost) {
+        secondCost = bestCost;
+        bestCost = cost;
+        bestMV = mv;
+    } else if (cost < secondCost) {
+        secondCost = cost;
+    }
+}
+
 [numthreads(BLOCK_SIZE, BLOCK_SIZE, 1)]
-void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid : SV_GroupThreadID)
-{
+void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid : SV_GroupThreadID) {
     uint w, h;
     CurrLuma.GetDimensions(w, h);
-    
-    // ------------------------------------------------------------------------
-    // 1. Cooperative Load to Shared Memory
-    // ------------------------------------------------------------------------
-    int2 groupBase = gid.xy * BLOCK_SIZE - HALO_R;
+
+    int2 groupBase = int2(gid.xy) * BLOCK_SIZE - BLOCK_R;
     uint tid = gtid.y * BLOCK_SIZE + gtid.x;
-    
-    // Fill 24x24 = 576 floats. 256 threads. Each loads ~2.25 pixels.
-    // Clean loop of 3 loads per thread (covering 768 slots > 576)
-    [unroll]
-    for (int i = 0; i < 3; ++i) {
+
+    // Load current frame tile + apron into shared memory.
+    [loop]
+    for (int i = 0; i < 4; ++i) {
         uint pIdx = tid + i * 256;
-        if (pIdx < SHARED_DIM * SHARED_DIM) {
-            int ly = pIdx / SHARED_DIM;
-            int lx = pIdx % SHARED_DIM;
-            int2 loadPos = clamp(groupBase + int2(lx, ly), int2(0,0), int2(w-1, h-1));
-            gs_Luma[ly][lx] = CurrLuma.Load(int3(loadPos, 0));
+        if (pIdx < 1024) {
+            int ly = int(pIdx / BLOCK_EXTENT);
+            int lx = int(pIdx % BLOCK_EXTENT);
+            int2 loadPos = clamp(groupBase + int2(lx, ly), int2(0, 0), int2(int(w) - 1, int(h) - 1));
+            gs_Curr[ly][lx] = CurrLuma.Load(int3(loadPos, 0));
         }
     }
-    
+
     GroupMemoryBarrierWithGroupSync();
-    
-    if (id.x >= w || id.y >= h) return;
-    
+
+    if (id.x >= w || id.y >= h) {
+        return;
+    }
+
     int2 pos = int2(id.xy);
-    int2 localCenter = int2(gtid.xy) + HALO_R;
-    int maxR = int(min(w, h) / 4);
-    
-    // ------------------------------------------------------------------------
-    // 2. Precompute Current Block Statistics
-    // ------------------------------------------------------------------------
-    // OPTIMIZATION: SAD+Gradient doesn't use these stats. Removed 7x7 loop.
-    float meanCurr = 0.0;
-    float wVarSumCurr = 0.0;
-    float sumW = 0.0;
+    int2 localPos = int2(gtid.xy) + BLOCK_R;
+    float2 invSize = 1.0 / float2(w, h);
+    float2 uv = (float2(pos) + 0.5) * invSize;
 
-    // ------------------------------------------------------------------------
-    // 3. Motion Search
-    // ------------------------------------------------------------------------
-    float bestCost = 1e9;
-    int2 bestMV = int2(0, 0);
-    
-    // Zero Motion Check
-    // "Smoothness" Optimization: Increased bias from 0.85 -> 0.95
-    float zeroCost = ComputeCostOptimized(localCenter, pos, float2(0,0), uint2(w,h), meanCurr, wVarSumCurr, sumW) * 0.95;
-    bestCost = zeroCost;
-            
-    // REMOVED EARLY EXIT to prevent killing interpolation on subtle motion
-    // if (bestCost < 1.0) ... 
+    float currCenter = gs_Curr[localPos.y][localPos.x];
+    float prevCenter = PrevLuma.Load(int3(pos, 0));
+    float frameDiff = abs(currCenter - prevCenter);
 
-            
-    // Temporal prediction (Frame Prediction)
-    if (usePrediction) {
-        float2 uv = (float2(pos) + 0.5) / float2(w, h);
-        float2 predVec = MotionPred.SampleLevel(LinearClamp, uv, 0).xy * predictionScale;
-        int2 predMV = clamp(int2(round(predVec)), int2(-maxR,-maxR), int2(maxR,maxR));
-        
-        // Candidate 1: Direct Temporal
-        if (any(predMV != int2(0,0))) {
-            float c = ComputeCostOptimized(localCenter, pos, float2(predMV), uint2(w,h), meanCurr, wVarSumCurr, sumW) * 0.90; // Bonus for temporal
-            if (c < bestCost) { bestCost = c; bestMV = predMV; }
+    int lxL = max(localPos.x - 1, 0);
+    int lxR = min(localPos.x + 1, BLOCK_EXTENT - 1);
+    int lyU = max(localPos.y - 1, 0);
+    int lyD = min(localPos.y + 1, BLOCK_EXTENT - 1);
+    float gx = abs(gs_Curr[localPos.y][lxR] - gs_Curr[localPos.y][lxL]);
+    float gy = abs(gs_Curr[lyD][localPos.x] - gs_Curr[lyU][localPos.x]);
+    float textureStrength = saturate((gx + gy) * 6.0);
+
+    int maxR = max(1, int(min(w, h) / 4));
+    int baseR = clamp(radius, 1, maxR);
+    float motionHint = max(smoothstep(0.01, 0.2, frameDiff), textureStrength * 0.75);
+    int searchR = clamp(int(round(lerp(float(baseR), float(baseR) * 1.5, motionHint))), 1, maxR);
+
+    float bestSad = 1e9;
+    float secondSad = 1e9;
+    float2 bestMV = float2(0.0, 0.0);
+
+    float motionPenaltyBase = lerp(0.16, 0.04, textureStrength);
+
+    // Zero motion candidate.
+    float zeroSad = EvalSadInt(pos, localPos, int2(0, 0), w, h);
+    float zeroBias = lerp(0.88, 0.98, textureStrength);
+    UpdateBest(zeroSad * zeroBias, float2(0.0, 0.0), bestSad, bestMV, secondSad);
+
+    // Predicted candidate.
+    if (usePrediction != 0) {
+        float2 pred = MotionPred.SampleLevel(LinearClamp, uv, 0).xy * predictionScale;
+        pred = clamp(pred, -float2(searchR, searchR), float2(searchR, searchR));
+        if (dot(pred, pred) > 0.05) {
+            int2 predMV = int2(round(pred));
+            float predSad = EvalSadInt(pos, localPos, predMV, w, h);
+            predSad += length(float2(predMV)) * motionPenaltyBase;
+            UpdateBest(predSad, float2(predMV), bestSad, bestMV, secondSad);
         }
-        
-        // Candidate 2: Spatial Neighbors (Left, Top)
-        // High Quality: Propagate neighbor motion to catch large moving objects
-        float2 texel = 1.0 / float2(w,h);
-        float2 neighbors[2] = { float2(-2.0, 0.0), float2(0.0, -2.0) };
-        
+    }
+
+    static const int2 kDiamond[4] = {
+        int2(0, -1),
+        int2(1, 0),
+        int2(0, 1),
+        int2(-1, 0)
+    };
+
+    // Coarse-to-fine diamond search.
+    float2 searchCenter = bestMV;
+    uint step = max(1u, (uint(searchR) + 1u) >> 1u);
+    while (step >= 1u) {
+        bool foundBetter = false;
+        float stepBestSad = bestSad;
+        float2 stepBestMV = searchCenter;
+        int2 centerMV = int2(round(searchCenter));
+
         [unroll]
-        for(int n=0; n<2; ++n) {
-            float2 nPred = MotionPred.SampleLevel(LinearClamp, uv + neighbors[n]*texel, 0).xy * predictionScale;
-            int2 nMV = clamp(int2(round(nPred)), int2(-maxR,-maxR), int2(maxR,maxR));
-            if (any(nMV != int2(0,0))) {
-                float c = ComputeCostOptimized(localCenter, pos, float2(nMV), uint2(w,h), meanCurr, wVarSumCurr, sumW) * 0.95;
-                if (c < bestCost) { bestCost = c; bestMV = nMV; }
+        for (int d = 0; d < 4; ++d) {
+            int2 testMV = centerMV + kDiamond[d] * int(step);
+            testMV = clamp(testMV, -int2(searchR, searchR), int2(searchR, searchR));
+
+            float sad = EvalSadInt(pos, localPos, testMV, w, h);
+            sad += length(float2(testMV)) * motionPenaltyBase;
+            UpdateBest(sad, float2(testMV), bestSad, bestMV, secondSad);
+
+            if (sad < stepBestSad) {
+                stepBestSad = sad;
+                stepBestMV = float2(testMV);
+                foundBetter = true;
             }
         }
-    }
-    
-    // Hexagon Search (Optimized Small Hexagon Pattern for Speed + Quality)
-    // Checks 6 reliable directions instead of 4 distant ones
-    static const int2 kHexagon[6] = {
-        int2(-2, 0), int2(2, 0), int2(0, -2), int2(0, 2),
-        int2(-1, -2), int2(1, 2)
-    };
-    
-    [loop] // Force loop
-    for (int d = 0; d < 6; ++d) {
-        int2 mv = clamp(kHexagon[d], int2(-maxR,-maxR), int2(maxR,maxR));
-        float c = ComputeCostOptimized(localCenter, pos, float2(mv), uint2(w,h), meanCurr, wVarSumCurr, sumW);
-        c += length(float2(mv)) * 0.002;
-        if (c < bestCost) { bestCost = c; bestMV = mv; }
-    }
-    
-    // Iterative Refinement
-    // OPTIMIZATION: Reduced from 3 to 1 iterations. 1 is usually sufficient for low-displacement.
-    {
-        int2 center = bestMV;
-        // Search 4 neighbors
-        int2 offsets[4] = { int2(0,-1), int2(1,0), int2(0,1), int2(-1,0) };
-        [loop]
-        for (int k = 0; k < 4; ++k) {
-            int2 mv = clamp(center + offsets[k], int2(-maxR,-maxR), int2(maxR,maxR));
-            float c = ComputeCostOptimized(localCenter, pos, float2(mv), uint2(w,h), meanCurr, wVarSumCurr, sumW);
-            c += length(float2(mv)) * 0.002;
-            if (c < bestCost) { bestCost = c; bestMV = mv; }
+
+        if (foundBetter) {
+            searchCenter = stepBestMV;
+        } else {
+            if (step == 1u) {
+                break;
+            }
+            step >>= 1u;
         }
     }
-    
-    // OPTIMIZATION: Removed Final 3x3 search (Redundant after Refinement)
-    
-    float conf = exp(-bestCost * 4.0);
-    conf = clamp(conf, 0.1, 0.98);
-    
-    MotionOut[id.xy] = float2(bestMV);
-    ConfidenceOut[id.xy] = conf;
+
+    // Integer local refinement.
+    int2 bestIntMV = int2(round(bestMV));
+    [loop]
+    for (int dyI = -1; dyI <= 1; ++dyI) {
+        [loop]
+        for (int dxI = -1; dxI <= 1; ++dxI) {
+            int2 testMV = bestIntMV + int2(dxI, dyI);
+            testMV = clamp(testMV, -int2(searchR, searchR), int2(searchR, searchR));
+            float sad = EvalSadInt(pos, localPos, testMV, w, h);
+            sad += length(float2(testMV)) * motionPenaltyBase;
+            UpdateBest(sad, float2(testMV), bestSad, bestMV, secondSad);
+        }
+    }
+
+    // Half-pixel refinement.
+    float2 halfCenter = bestMV;
+    [loop]
+    for (int dyH = -1; dyH <= 1; ++dyH) {
+        [loop]
+        for (int dxH = -1; dxH <= 1; ++dxH) {
+            if (dxH == 0 && dyH == 0) {
+                continue;
+            }
+            float2 testMV = halfCenter + float2(dxH, dyH) * 0.5;
+            testMV = clamp(testMV, -float2(searchR, searchR), float2(searchR, searchR));
+            float sad = EvalSadFrac(pos, localPos, testMV, invSize);
+            sad += length(testMV) * (motionPenaltyBase * 0.75);
+            UpdateBest(sad, testMV, bestSad, bestMV, secondSad);
+        }
+    }
+
+    // Quarter-pixel refinement.
+    float2 quarterCenter = bestMV;
+    [loop]
+    for (int dyQ = -1; dyQ <= 1; ++dyQ) {
+        [loop]
+        for (int dxQ = -1; dxQ <= 1; ++dxQ) {
+            if (dxQ == 0 && dyQ == 0) {
+                continue;
+            }
+            float2 testMV = quarterCenter + float2(dxQ, dyQ) * 0.25;
+            testMV = clamp(testMV, -float2(searchR, searchR), float2(searchR, searchR));
+            float sad = EvalSadFrac(pos, localPos, testMV, invSize);
+            sad += length(testMV) * (motionPenaltyBase * 0.6);
+            UpdateBest(sad, testMV, bestSad, bestMV, secondSad);
+        }
+    }
+
+    float uniqueness = saturate((secondSad - bestSad) / max(secondSad, 1e-4));
+    float staticRegion = 1.0 - smoothstep(0.02, 0.14, frameDiff);
+    float ambiguity = 1.0 - uniqueness;
+    float damping = ambiguity * (1.0 - textureStrength) * staticRegion;
+    bestMV *= (1.0 - 0.70 * damping);
+
+    float photoSad = EvalSadFrac(pos, localPos, bestMV, invSize);
+    float sampleCount = float((2 * BLOCK_R + 1) * (2 * BLOCK_R + 1));
+    float avgDiff = photoSad / sampleCount;
+    float matchConf = exp(-avgDiff * 9.0);
+    float confidence = matchConf;
+    confidence *= (0.35 + 0.65 * uniqueness);
+    confidence *= lerp(0.55, 1.0, textureStrength);
+    if (frameDiff < 0.02 && length(bestMV) < 0.5) {
+        confidence = max(confidence, 0.90);
+    }
+    confidence = clamp(confidence, 0.05, 0.98);
+
+    MotionOut[id.xy] = bestMV;
+    ConfidenceOut[id.xy] = confidence;
 }

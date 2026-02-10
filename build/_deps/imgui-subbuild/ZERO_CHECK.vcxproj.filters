@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <CustomBuild Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-subbuild\CMakeFiles\4666556a5f69caca11fdf53876fa1af9\generate.stamp.rule">
+    <CustomBuild Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-subbuild\CMakeFiles\fc186a568a82be87b9fe43ec36320f51\generate.stamp.rule">
       <Filter>CMake Rules</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="CMake Rules">
-      <UniqueIdentifier>{FF4823AB-E845-396B-AB42-05325EEEF426}</UniqueIdentifier>
+      <UniqueIdentifier>{423EF507-53D1-3805-8DEA-F6106B4F8A5B}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

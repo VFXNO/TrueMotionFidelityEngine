@@ -71,20 +71,15 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
     float2 outPos = float2(id.xy) + 0.5;
     float2 inputPos = outPos * (inSize / outSize);
     float2 inputUv = inputPos / inSize;
-    float2 texelSize = 1.0 / inSize;
     
     float2 mv = Motion.SampleLevel(LinearClamp, inputUv, 0).xy;
     // Motion vectors are in luma-space pixels - scale to color-space pixels
     mv *= motionSampleScale;
-    float conf = pow(saturate(Confidence.SampleLevel(LinearClamp, inputUv, 0)), confPower);
-    float motionMag = length(mv);
     
-    // Bidirectional Warp
-    // 1. Warp Prev forward to time alpha (sample Prev at x + mv * alpha)
+    // Pure warp path: no linear-frame fallback blending.
     float2 warpedPosPrev = inputPos + mv * alpha;
     float2 warpedUvPrev = clamp(warpedPosPrev / inSize, 0.0, 0.999);
     
-    // 2. Warp Curr backward to time alpha (sample Curr at x - mv * (1-alpha))
     float2 warpedPosCurr = inputPos - mv * (1.0 - alpha);
     float2 warpedUvCurr = clamp(warpedPosCurr / inSize, 0.0, 0.999);
     
@@ -97,68 +92,8 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
         warpedPrev = PrevColor.SampleLevel(LinearClamp, warpedUvPrev, 0).rgb;
         warpedCurr = CurrColor.SampleLevel(LinearClamp, warpedUvCurr, 0).rgb;
     }
-    
-    float3 basePrev = PrevColor.SampleLevel(LinearClamp, inputUv, 0).rgb;
-    float3 baseCurr = CurrColor.SampleLevel(LinearClamp, inputUv, 0).rgb;
-    
-    float warpError = length(warpedPrev - warpedCurr); // Compare forward/backward consistency
-    float baseDiff = length(baseCurr - basePrev);
-    
-    float lumaCurr = Luma(baseCurr);
-    float lumaPrev = Luma(basePrev);
-    float lumaWarped = Luma(warpedPrev);
-    float lumaDiffCurr = abs(lumaCurr - lumaPrev);
-    float lumaDiffWarped = abs(lumaWarped - lumaCurr);
-    
-    float warpReliable = saturate(1.0 - warpError * diffScale * 6.0); // Stricter error tolerance
-    warpReliable = lerp(warpReliable, conf, 0.7); // Rely more on Confidence/Consistency
-    
-    // Calculate how much better warping is compared to just blending
-    float warpGain = saturate((baseDiff - warpError) / max(baseDiff, 0.001));
-    warpGain = pow(warpGain, 1.5); // Require significant improvement to trust warp
-    
-    float occlusionTest = lumaDiffWarped / max(lumaDiffCurr, 0.001);
-    float occlusionFactor = saturate(1.0 - (occlusionTest - 1.0) * 0.5);
 
-    float lC = Luma(baseCurr);
-    float lL = Luma(CurrColor.SampleLevel(LinearClamp, clamp(inputUv + float2(-texelSize.x, 0.0), 0.0, 0.999), 0).rgb);
-    float lR = Luma(CurrColor.SampleLevel(LinearClamp, clamp(inputUv + float2(texelSize.x, 0.0), 0.0, 0.999), 0).rgb);
-    float lU = Luma(CurrColor.SampleLevel(LinearClamp, clamp(inputUv + float2(0.0, -texelSize.y), 0.0, 0.999), 0).rgb);
-    float lD = Luma(CurrColor.SampleLevel(LinearClamp, clamp(inputUv + float2(0.0, texelSize.y), 0.0, 0.999), 0).rgb);
-    float edgeMag = abs(lR - lL) + abs(lU - lD);
-    
-    // User Request: ALWAYS interpellate.
-    // We ignore warping errors or confidence. We trust the flow.
-    float interpBlend = 1.0; 
-    
-    // Still respect text protection slightly if defined, but otherwise FULL MOTION
-    if (textProtect > 0.0 && edgeMag > edgeThreshold && conf < 0.25) {
-         interpBlend = 0.0; // Hard cutoff for text only
-    }
-    
-    if (textProtect > 0.0 && edgeMag > edgeThreshold && conf < 0.75) {
-        interpBlend *= (1.0 - textProtect * 0.75);
-    }
-    
-    // interpBlend = saturate(interpBlend); // Already handled logic above
-    
-    // Smooth Bidirectional Blend
-    float3 motionInterp = lerp(warpedPrev, warpedCurr, alpha);
-    
-    // Fallback: simply linear blend 
-    float3 linearInterp = lerp(basePrev, baseCurr, alpha);
-    
-    // HALO SUPPRESSION:
-    // Slightly relaxed to 50% range expansion to prevent harsh clamping 
-    float3 minColor = min(basePrev, baseCurr);
-    float3 maxColor = max(basePrev, baseCurr);
-    float3 range = maxColor - minColor;
-    minColor -= range * 0.5; // Was 0.2
-    maxColor += range * 0.5; // Was 0.2
-    motionInterp = clamp(motionInterp, minColor, maxColor);
-    
-    // Always use motion result unless text protection kicked in
-    float3 result = lerp(linearInterp, motionInterp, interpBlend);
+    float3 result = lerp(warpedPrev, warpedCurr, alpha);
     
     OutColor[id.xy] = float4(saturate(result), 1.0);
 }

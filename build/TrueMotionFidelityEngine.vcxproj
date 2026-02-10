@@ -22,7 +22,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{C4D46A09-C36A-3FF5-A5C7-F4532A48CDC8}</ProjectGuid>
+    <ProjectGuid>{E4776ADA-0514-343A-9324-2C52CAC0EAD6}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
     <Platform>x64</Platform>
@@ -59,25 +59,25 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\bin\Debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\bin\Debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">TrueMotionFidelityEngine.dir\Debug\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">True Motion Fidelity Engine</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\bin\Release\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\bin\Release\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">TrueMotionFidelityEngine.dir\Release\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">True Motion Fidelity Engine</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\bin\MinSizeRel\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\bin\MinSizeRel\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">TrueMotionFidelityEngine.dir\MinSizeRel\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">True Motion Fidelity Engine</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\bin\RelWithDebInfo\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\bin\RelWithDebInfo\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">TrueMotionFidelityEngine.dir\RelWithDebInfo\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">True Motion Fidelity Engine</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.exe</TargetExt>
@@ -86,18 +86,21 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>Sync</ExceptionHandling>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MinimalRebuild></MinimalRebuild>
       <Optimization>Disabled</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;WINRT_NO_COROUTINES;NOMINMAX;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
@@ -105,10 +108,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;WINRT_NO_COROUTINES;NOMINMAX;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -118,18 +121,9 @@
     <PostBuildEvent>
       <Message>Copying shader source files	Compiling CopyScale.hlsl	Compiling DebugView.hlsl	Compiling DownsampleLuma.hlsl	Compiling DownsampleLumaR.hlsl	Compiling Interpolate.hlsl	Compiling MotionEst.hlsl	Compiling MotionRefine.hlsl	Compiling MotionSmooth.hlsl	Compiling MotionTemporal.hlsl</Message>
       <Command>setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Debug/shaders
 if %errorlevel% neq 0 goto :cmEnd
-"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders
-if %errorlevel% neq 0 goto :cmEnd
-:cmEnd
-endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
-:cmErrorLevel
-exit /b %1
-:cmDone
-if %errorlevel% neq 0 goto :VCEnd
-setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders/CopyScale.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/CopyScale.hlsl || echo "Warning: CopyScale compilation failed, will use runtime compilation"
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Debug/shaders
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -138,7 +132,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders/DebugView.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DebugView.hlsl || echo "Warning: DebugView compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Debug/shaders/CopyScale.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/CopyScale.hlsl || echo "Warning: CopyScale compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -147,7 +141,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders/DownsampleLuma.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DownsampleLuma.hlsl || echo "Warning: DownsampleLuma compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Debug/shaders/DebugView.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/DebugView.hlsl || echo "Warning: DebugView compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -156,7 +150,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders/DownsampleLumaR.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DownsampleLumaR.hlsl || echo "Warning: DownsampleLumaR compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Debug/shaders/DownsampleLuma.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/DownsampleLuma.hlsl || echo "Warning: DownsampleLuma compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -165,7 +159,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders/Interpolate.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/Interpolate.hlsl || echo "Warning: Interpolate compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Debug/shaders/DownsampleLumaR.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/DownsampleLumaR.hlsl || echo "Warning: DownsampleLumaR compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -174,7 +168,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders/MotionEst.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionEst.hlsl || echo "Warning: MotionEst compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Debug/shaders/Interpolate.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/Interpolate.hlsl || echo "Warning: Interpolate compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -183,7 +177,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders/MotionRefine.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionRefine.hlsl || echo "Warning: MotionRefine compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Debug/shaders/MotionEst.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/MotionEst.hlsl || echo "Warning: MotionEst compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -192,7 +186,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders/MotionSmooth.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionSmooth.hlsl || echo "Warning: MotionSmooth compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Debug/shaders/MotionRefine.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/MotionRefine.hlsl || echo "Warning: MotionRefine compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -201,7 +195,16 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/shaders/MotionTemporal.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionTemporal.hlsl || echo "Warning: MotionTemporal compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Debug/shaders/MotionSmooth.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/MotionSmooth.hlsl || echo "Warning: MotionSmooth compilation failed, will use runtime compilation"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Debug/shaders/MotionTemporal.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/MotionTemporal.hlsl || echo "Warning: MotionTemporal compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -214,10 +217,14 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalDependencies>d3d11.lib;dxgi.lib;d3dcompiler.lib;dwmapi.lib;windowsapp.lib;winmm.lib;shcore.lib;shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/Debug/True Motion Fidelity Engine.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Debug/True Motion Fidelity Engine.pdb</ProgramDataBaseFile>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/Debug/True Motion Fidelity Engine.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Debug/True Motion Fidelity Engine.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
       <SubSystem>Windows</SubSystem>
     </Link>
     <ProjectReference>
@@ -226,17 +233,20 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <ExceptionHandling>Sync</ExceptionHandling>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MinimalRebuild></MinimalRebuild>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;WINRT_NO_COROUTINES;NOMINMAX;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
@@ -246,10 +256,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;WINRT_NO_COROUTINES;NOMINMAX;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -259,18 +269,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <PostBuildEvent>
       <Message>Copying shader source files	Compiling CopyScale.hlsl	Compiling DebugView.hlsl	Compiling DownsampleLuma.hlsl	Compiling DownsampleLumaR.hlsl	Compiling Interpolate.hlsl	Compiling MotionEst.hlsl	Compiling MotionRefine.hlsl	Compiling MotionSmooth.hlsl	Compiling MotionTemporal.hlsl</Message>
       <Command>setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Release/shaders
 if %errorlevel% neq 0 goto :cmEnd
-"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders
-if %errorlevel% neq 0 goto :cmEnd
-:cmEnd
-endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
-:cmErrorLevel
-exit /b %1
-:cmDone
-if %errorlevel% neq 0 goto :VCEnd
-setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders/CopyScale.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/CopyScale.hlsl || echo "Warning: CopyScale compilation failed, will use runtime compilation"
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Release/shaders
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -279,7 +280,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders/DebugView.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DebugView.hlsl || echo "Warning: DebugView compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Release/shaders/CopyScale.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/CopyScale.hlsl || echo "Warning: CopyScale compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -288,7 +289,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders/DownsampleLuma.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DownsampleLuma.hlsl || echo "Warning: DownsampleLuma compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Release/shaders/DebugView.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/DebugView.hlsl || echo "Warning: DebugView compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -297,7 +298,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders/DownsampleLumaR.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DownsampleLumaR.hlsl || echo "Warning: DownsampleLumaR compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Release/shaders/DownsampleLuma.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/DownsampleLuma.hlsl || echo "Warning: DownsampleLuma compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -306,7 +307,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders/Interpolate.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/Interpolate.hlsl || echo "Warning: Interpolate compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Release/shaders/DownsampleLumaR.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/DownsampleLumaR.hlsl || echo "Warning: DownsampleLumaR compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -315,7 +316,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders/MotionEst.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionEst.hlsl || echo "Warning: MotionEst compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Release/shaders/Interpolate.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/Interpolate.hlsl || echo "Warning: Interpolate compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -324,7 +325,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders/MotionRefine.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionRefine.hlsl || echo "Warning: MotionRefine compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Release/shaders/MotionEst.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/MotionEst.hlsl || echo "Warning: MotionEst compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -333,7 +334,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders/MotionSmooth.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionSmooth.hlsl || echo "Warning: MotionSmooth compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Release/shaders/MotionRefine.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/MotionRefine.hlsl || echo "Warning: MotionRefine compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -342,7 +343,16 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/shaders/MotionTemporal.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionTemporal.hlsl || echo "Warning: MotionTemporal compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Release/shaders/MotionSmooth.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/MotionSmooth.hlsl || echo "Warning: MotionSmooth compilation failed, will use runtime compilation"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Release/shaders/MotionTemporal.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/MotionTemporal.hlsl || echo "Warning: MotionTemporal compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -355,10 +365,14 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalDependencies>d3d11.lib;dxgi.lib;d3dcompiler.lib;dwmapi.lib;windowsapp.lib;winmm.lib;shcore.lib;shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/Release/True Motion Fidelity Engine.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/Release/True Motion Fidelity Engine.pdb</ProgramDataBaseFile>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/Release/True Motion Fidelity Engine.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/Release/True Motion Fidelity Engine.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
       <SubSystem>Windows</SubSystem>
     </Link>
     <ProjectReference>
@@ -367,17 +381,20 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <ExceptionHandling>Sync</ExceptionHandling>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MinimalRebuild></MinimalRebuild>
       <Optimization>MinSpace</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;WINRT_NO_COROUTINES;NOMINMAX;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
@@ -387,10 +404,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;WINRT_NO_COROUTINES;NOMINMAX;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -400,18 +417,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <PostBuildEvent>
       <Message>Copying shader source files	Compiling CopyScale.hlsl	Compiling DebugView.hlsl	Compiling DownsampleLuma.hlsl	Compiling DownsampleLumaR.hlsl	Compiling Interpolate.hlsl	Compiling MotionEst.hlsl	Compiling MotionRefine.hlsl	Compiling MotionSmooth.hlsl	Compiling MotionTemporal.hlsl</Message>
       <Command>setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/MinSizeRel/shaders
 if %errorlevel% neq 0 goto :cmEnd
-"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders
-if %errorlevel% neq 0 goto :cmEnd
-:cmEnd
-endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
-:cmErrorLevel
-exit /b %1
-:cmDone
-if %errorlevel% neq 0 goto :VCEnd
-setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders/CopyScale.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/CopyScale.hlsl || echo "Warning: CopyScale compilation failed, will use runtime compilation"
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/MinSizeRel/shaders
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -420,7 +428,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders/DebugView.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DebugView.hlsl || echo "Warning: DebugView compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/MinSizeRel/shaders/CopyScale.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/CopyScale.hlsl || echo "Warning: CopyScale compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -429,7 +437,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders/DownsampleLuma.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DownsampleLuma.hlsl || echo "Warning: DownsampleLuma compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/MinSizeRel/shaders/DebugView.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/DebugView.hlsl || echo "Warning: DebugView compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -438,7 +446,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders/DownsampleLumaR.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DownsampleLumaR.hlsl || echo "Warning: DownsampleLumaR compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/MinSizeRel/shaders/DownsampleLuma.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/DownsampleLuma.hlsl || echo "Warning: DownsampleLuma compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -447,7 +455,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders/Interpolate.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/Interpolate.hlsl || echo "Warning: Interpolate compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/MinSizeRel/shaders/DownsampleLumaR.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/DownsampleLumaR.hlsl || echo "Warning: DownsampleLumaR compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -456,7 +464,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders/MotionEst.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionEst.hlsl || echo "Warning: MotionEst compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/MinSizeRel/shaders/Interpolate.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/Interpolate.hlsl || echo "Warning: Interpolate compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -465,7 +473,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders/MotionRefine.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionRefine.hlsl || echo "Warning: MotionRefine compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/MinSizeRel/shaders/MotionEst.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/MotionEst.hlsl || echo "Warning: MotionEst compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -474,7 +482,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders/MotionSmooth.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionSmooth.hlsl || echo "Warning: MotionSmooth compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/MinSizeRel/shaders/MotionRefine.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/MotionRefine.hlsl || echo "Warning: MotionRefine compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -483,7 +491,16 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/shaders/MotionTemporal.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionTemporal.hlsl || echo "Warning: MotionTemporal compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/MinSizeRel/shaders/MotionSmooth.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/MotionSmooth.hlsl || echo "Warning: MotionSmooth compilation failed, will use runtime compilation"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/MinSizeRel/shaders/MotionTemporal.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/MotionTemporal.hlsl || echo "Warning: MotionTemporal compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -496,10 +513,14 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalDependencies>d3d11.lib;dxgi.lib;d3dcompiler.lib;dwmapi.lib;windowsapp.lib;winmm.lib;shcore.lib;shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/MinSizeRel/True Motion Fidelity Engine.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/MinSizeRel/True Motion Fidelity Engine.pdb</ProgramDataBaseFile>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/MinSizeRel/True Motion Fidelity Engine.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/MinSizeRel/True Motion Fidelity Engine.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
       <SubSystem>Windows</SubSystem>
     </Link>
     <ProjectReference>
@@ -508,18 +529,21 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>Sync</ExceptionHandling>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MinimalRebuild></MinimalRebuild>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;WINRT_NO_COROUTINES;NOMINMAX;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
@@ -527,10 +551,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;WINRT_NO_COROUTINES;NOMINMAX;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -540,18 +564,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <PostBuildEvent>
       <Message>Copying shader source files	Compiling CopyScale.hlsl	Compiling DebugView.hlsl	Compiling DownsampleLuma.hlsl	Compiling DownsampleLumaR.hlsl	Compiling Interpolate.hlsl	Compiling MotionEst.hlsl	Compiling MotionRefine.hlsl	Compiling MotionSmooth.hlsl	Compiling MotionTemporal.hlsl</Message>
       <Command>setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/RelWithDebInfo/shaders
 if %errorlevel% neq 0 goto :cmEnd
-"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders
-if %errorlevel% neq 0 goto :cmEnd
-:cmEnd
-endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
-:cmErrorLevel
-exit /b %1
-:cmDone
-if %errorlevel% neq 0 goto :VCEnd
-setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders/CopyScale.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/CopyScale.hlsl || echo "Warning: CopyScale compilation failed, will use runtime compilation"
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/RelWithDebInfo/shaders
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -560,7 +575,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders/DebugView.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DebugView.hlsl || echo "Warning: DebugView compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/RelWithDebInfo/shaders/CopyScale.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/CopyScale.hlsl || echo "Warning: CopyScale compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -569,7 +584,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders/DownsampleLuma.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DownsampleLuma.hlsl || echo "Warning: DownsampleLuma compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/RelWithDebInfo/shaders/DebugView.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/DebugView.hlsl || echo "Warning: DebugView compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -578,7 +593,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders/DownsampleLumaR.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/DownsampleLumaR.hlsl || echo "Warning: DownsampleLumaR compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/RelWithDebInfo/shaders/DownsampleLuma.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/DownsampleLuma.hlsl || echo "Warning: DownsampleLuma compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -587,7 +602,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders/Interpolate.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/Interpolate.hlsl || echo "Warning: Interpolate compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/RelWithDebInfo/shaders/DownsampleLumaR.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/DownsampleLumaR.hlsl || echo "Warning: DownsampleLumaR compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -596,7 +611,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders/MotionEst.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionEst.hlsl || echo "Warning: MotionEst compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/RelWithDebInfo/shaders/Interpolate.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/Interpolate.hlsl || echo "Warning: Interpolate compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -605,7 +620,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders/MotionRefine.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionRefine.hlsl || echo "Warning: MotionRefine compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/RelWithDebInfo/shaders/MotionEst.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/MotionEst.hlsl || echo "Warning: MotionEst compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -614,7 +629,7 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders/MotionSmooth.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionSmooth.hlsl || echo "Warning: MotionSmooth compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/RelWithDebInfo/shaders/MotionRefine.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/MotionRefine.hlsl || echo "Warning: MotionRefine compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -623,7 +638,16 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
 setlocal
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/shaders/MotionTemporal.cso C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/src/shaders/MotionTemporal.hlsl || echo "Warning: MotionTemporal compilation failed, will use runtime compilation"
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/RelWithDebInfo/shaders/MotionSmooth.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/MotionSmooth.hlsl || echo "Warning: MotionSmooth compilation failed, will use runtime compilation"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" /T cs_5_0 /E CSMain /O1 /nologo /Fo C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/RelWithDebInfo/shaders/MotionTemporal.cso C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/src/shaders/MotionTemporal.hlsl || echo "Warning: MotionTemporal compilation failed, will use runtime compilation"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -636,10 +660,14 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalDependencies>d3d11.lib;dxgi.lib;d3dcompiler.lib;dwmapi.lib;windowsapp.lib;winmm.lib;shcore.lib;shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/RelWithDebInfo/True Motion Fidelity Engine.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/bin/RelWithDebInfo/True Motion Fidelity Engine.pdb</ProgramDataBaseFile>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/RelWithDebInfo/True Motion Fidelity Engine.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/bin/RelWithDebInfo/True Motion Fidelity Engine.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
       <SubSystem>Windows</SubSystem>
     </Link>
     <ProjectReference>
@@ -647,11 +675,11 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\CMakeLists.txt">
+    <CustomBuild Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\CMakeLists.txt">
       <UseUtf8Encoding>Always</UseUtf8Encoding>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine -BC:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build --check-stamp-file C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/CMakeFiles/generate.stamp
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/vfxno/Documents/TrueMotionFidelityEngine-main -BC:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build --check-stamp-file C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -659,12 +687,12 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent\CMakeLists.cmake.in;C:\Program Files\CMake\share\cmake-4.0\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\WindowsPaths.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeCXXCompiler.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeRCCompiler.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCXXCompiler.cmake.in;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCXXCompilerABI.cpp;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCompilerIdDetection.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineCXXCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineCompilerABI.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineCompilerId.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineCompilerSupport.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineRCCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineSystem.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeFindBinUtils.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeParseImplicitIncludeInfo.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeParseImplicitLinkInfo.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeParseLibraryArchitecture.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeRCCompiler.cmake.in;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeSystem.cmake.in;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeTestCXXCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeTestCompilerCommon.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeTestRCCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\ADSP-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\ARMCC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\ARMClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\AppleClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Borland-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Clang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Clang-DetermineCompilerInternal.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Compaq-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Cray-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\CrayClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Diab-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Embarcadero-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Fujitsu-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\FujitsuClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\GHS-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\GNU-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\HP-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\IAR-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\IBMCPP-CXX-DetermineVersionInternal.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\IBMClang-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Intel-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\IntelLLVM-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\LCC-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\NVHPC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\NVIDIA-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\OpenWatcom-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\OrangeC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\PGI-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\PathScale-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Renesas-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\SCO-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\SunPro-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\TI-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\TIClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Tasking-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\VisualAge-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Watcom-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\XL-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\XLClang-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\zOS-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CompilerId\VS-10.vcxproj.in;C:\Program Files\CMake\share\cmake-4.1\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\FetchContent.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\FetchContent\CMakeLists.cmake.in;C:\Program Files\CMake\share\cmake-4.1\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeDetermineLinkerId.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeInspectCXXLinker.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\FeatureTesting.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-Determine-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\WindowsPaths.cmake;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\CMakeFiles\4.1.0-rc4\CMakeCXXCompiler.cmake;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\CMakeFiles\4.1.0-rc4\CMakeRCCompiler.cmake;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\CMakeFiles\4.1.0-rc4\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine -BC:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build --check-stamp-file C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/CMakeFiles/generate.stamp
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/vfxno/Documents/TrueMotionFidelityEngine-main -BC:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build --check-stamp-file C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -672,12 +700,12 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent\CMakeLists.cmake.in;C:\Program Files\CMake\share\cmake-4.0\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\WindowsPaths.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeCXXCompiler.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeRCCompiler.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCXXCompiler.cmake.in;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCXXCompilerABI.cpp;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCompilerIdDetection.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineCXXCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineCompilerABI.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineCompilerId.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineCompilerSupport.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineRCCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineSystem.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeFindBinUtils.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeParseImplicitIncludeInfo.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeParseImplicitLinkInfo.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeParseLibraryArchitecture.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeRCCompiler.cmake.in;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeSystem.cmake.in;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeTestCXXCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeTestCompilerCommon.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeTestRCCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\ADSP-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\ARMCC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\ARMClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\AppleClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Borland-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Clang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Clang-DetermineCompilerInternal.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Compaq-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Cray-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\CrayClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Diab-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Embarcadero-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Fujitsu-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\FujitsuClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\GHS-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\GNU-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\HP-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\IAR-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\IBMCPP-CXX-DetermineVersionInternal.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\IBMClang-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Intel-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\IntelLLVM-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\LCC-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\NVHPC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\NVIDIA-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\OpenWatcom-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\OrangeC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\PGI-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\PathScale-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Renesas-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\SCO-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\SunPro-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\TI-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\TIClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Tasking-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\VisualAge-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Watcom-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\XL-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\XLClang-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\zOS-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CompilerId\VS-10.vcxproj.in;C:\Program Files\CMake\share\cmake-4.1\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\FetchContent.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\FetchContent\CMakeLists.cmake.in;C:\Program Files\CMake\share\cmake-4.1\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeDetermineLinkerId.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeInspectCXXLinker.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\FeatureTesting.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-Determine-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\WindowsPaths.cmake;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\CMakeFiles\4.1.0-rc4\CMakeCXXCompiler.cmake;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\CMakeFiles\4.1.0-rc4\CMakeRCCompiler.cmake;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\CMakeFiles\4.1.0-rc4\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine -BC:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build --check-stamp-file C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/CMakeFiles/generate.stamp
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/vfxno/Documents/TrueMotionFidelityEngine-main -BC:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build --check-stamp-file C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -685,12 +713,12 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent\CMakeLists.cmake.in;C:\Program Files\CMake\share\cmake-4.0\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\WindowsPaths.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeCXXCompiler.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeRCCompiler.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCXXCompiler.cmake.in;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCXXCompilerABI.cpp;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCompilerIdDetection.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineCXXCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineCompilerABI.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineCompilerId.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineCompilerSupport.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineRCCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineSystem.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeFindBinUtils.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeParseImplicitIncludeInfo.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeParseImplicitLinkInfo.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeParseLibraryArchitecture.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeRCCompiler.cmake.in;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeSystem.cmake.in;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeTestCXXCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeTestCompilerCommon.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeTestRCCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\ADSP-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\ARMCC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\ARMClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\AppleClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Borland-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Clang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Clang-DetermineCompilerInternal.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Compaq-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Cray-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\CrayClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Diab-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Embarcadero-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Fujitsu-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\FujitsuClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\GHS-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\GNU-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\HP-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\IAR-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\IBMCPP-CXX-DetermineVersionInternal.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\IBMClang-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Intel-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\IntelLLVM-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\LCC-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\NVHPC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\NVIDIA-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\OpenWatcom-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\OrangeC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\PGI-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\PathScale-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Renesas-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\SCO-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\SunPro-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\TI-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\TIClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Tasking-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\VisualAge-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Watcom-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\XL-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\XLClang-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\zOS-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CompilerId\VS-10.vcxproj.in;C:\Program Files\CMake\share\cmake-4.1\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\FetchContent.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\FetchContent\CMakeLists.cmake.in;C:\Program Files\CMake\share\cmake-4.1\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeDetermineLinkerId.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeInspectCXXLinker.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\FeatureTesting.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-Determine-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\WindowsPaths.cmake;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\CMakeFiles\4.1.0-rc4\CMakeCXXCompiler.cmake;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\CMakeFiles\4.1.0-rc4\CMakeRCCompiler.cmake;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\CMakeFiles\4.1.0-rc4\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine -BC:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build --check-stamp-file C:/Users/vfxno/Downloads/2/TrueMotionFidelityEngine/build/CMakeFiles/generate.stamp
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/vfxno/Documents/TrueMotionFidelityEngine-main -BC:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build --check-stamp-file C:/Users/vfxno/Documents/TrueMotionFidelityEngine-main/build/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -698,53 +726,53 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FetchContent\CMakeLists.cmake.in;C:\Program Files\CMake\share\cmake-4.0\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Platform\WindowsPaths.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeCXXCompiler.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeRCCompiler.cmake;C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\4.0.2\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCXXCompiler.cmake.in;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCXXCompilerABI.cpp;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCompilerIdDetection.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineCXXCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineCompilerABI.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineCompilerId.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineCompilerSupport.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineRCCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeDetermineSystem.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeFindBinUtils.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeParseImplicitIncludeInfo.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeParseImplicitLinkInfo.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeParseLibraryArchitecture.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeRCCompiler.cmake.in;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeSystem.cmake.in;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeTestCXXCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeTestCompilerCommon.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeTestRCCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\ADSP-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\ARMCC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\ARMClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\AppleClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Borland-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Clang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Clang-DetermineCompilerInternal.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Compaq-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Cray-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\CrayClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Diab-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Embarcadero-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Fujitsu-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\FujitsuClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\GHS-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\GNU-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\HP-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\IAR-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\IBMCPP-CXX-DetermineVersionInternal.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\IBMClang-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Intel-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\IntelLLVM-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\LCC-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\NVHPC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\NVIDIA-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\OpenWatcom-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\OrangeC-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\PGI-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\PathScale-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Renesas-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\SCO-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\SunPro-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\TI-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\TIClang-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Tasking-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\VisualAge-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\Watcom-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\XL-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\XLClang-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\zOS-CXX-DetermineCompiler.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CompilerId\VS-10.vcxproj.in;C:\Program Files\CMake\share\cmake-4.1\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\FetchContent.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\FetchContent\CMakeLists.cmake.in;C:\Program Files\CMake\share\cmake-4.1\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeDetermineLinkerId.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeInspectCXXLinker.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\FeatureTesting.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-Determine-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\WindowsPaths.cmake;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\CMakeFiles\4.1.0-rc4\CMakeCXXCompiler.cmake;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\CMakeFiles\4.1.0-rc4\CMakeRCCompiler.cmake;C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\CMakeFiles\4.1.0-rc4\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\app.cpp" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\app.h" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\capture_frame.h" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\d3d11_device.cpp" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\d3d11_device.h" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\dll_injector.cpp" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\dll_injector.h" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\dup_capture.cpp" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\dup_capture.h" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\game_capture.cpp" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\game_capture.h" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\graphics_hook_info.h" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\interpolator.cpp" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\interpolator.h" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\main.cpp" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\shader_utils.cpp" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\shader_utils.h" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\ui.cpp" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\ui.h" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\wgc_capture.cpp" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\wgc_capture.h" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\window_list.cpp" />
-    <ClInclude Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\window_list.h" />
-    <ResourceCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\src\resources.rc" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\imgui.cpp" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\imgui_draw.cpp" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\imgui_tables.cpp" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\imgui_widgets.cpp" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends\imgui_impl_win32.cpp" />
-    <ClCompile Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\_deps\imgui-src\backends\imgui_impl_dx11.cpp" />
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\app.cpp" />
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\app.h" />
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\capture_frame.h" />
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\d3d11_device.cpp" />
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\d3d11_device.h" />
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\dll_injector.cpp" />
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\dll_injector.h" />
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\dup_capture.cpp" />
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\dup_capture.h" />
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\game_capture.cpp" />
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\game_capture.h" />
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\graphics_hook_info.h" />
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\interpolator.cpp" />
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\interpolator.h" />
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\main.cpp" />
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\shader_utils.cpp" />
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\shader_utils.h" />
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\ui.cpp" />
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\ui.h" />
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\wgc_capture.cpp" />
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\wgc_capture.h" />
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\window_list.cpp" />
+    <ClInclude Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\window_list.h" />
+    <ResourceCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\src\resources.rc" />
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\imgui.cpp" />
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\imgui_draw.cpp" />
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\imgui_tables.cpp" />
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\imgui_widgets.cpp" />
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\_deps\imgui-src\backends\imgui_impl_dx11.cpp" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <ProjectReference Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\ZERO_CHECK.vcxproj">
-      <Project>{CB3EA15C-EDC1-30BD-9F3A-9BE7835AFD0C}</Project>
+    <ProjectReference Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\ZERO_CHECK.vcxproj">
+      <Project>{B765D2C7-E718-3A0C-8B07-18A26A688AF1}</Project>
       <Name>ZERO_CHECK</Name>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </ProjectReference>
-    <ProjectReference Include="C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\graphics_hook.vcxproj">
-      <Project>{AF56D1BF-AF35-3138-98FA-5523D28667EB}</Project>
+    <ProjectReference Include="C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\graphics_hook.vcxproj">
+      <Project>{1E46EA27-BB39-31BE-B0EA-6DE49424A697}</Project>
       <Name>graphics_hook</Name>
     </ProjectReference>
   </ItemGroup>

@@ -2,13 +2,13 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\x64\Release\ZERO_CHECK</FullPath>
+      <FullPath>C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\x64\Release\ZERO_CHECK</FullPath>
     </ProjectOutput>
     <ProjectOutput>
-      <FullPath>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\bin\Release\graphics_hook64_v2.dll</FullPath>
+      <FullPath>C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\bin\Release\graphics_hook64_v2.dll</FullPath>
     </ProjectOutput>
     <ProjectOutput>
-      <FullPath>C:\Users\vfxno\Downloads\2\TrueMotionFidelityEngine\build\bin\Release\True Motion Fidelity Engine.exe</FullPath>
+      <FullPath>C:\Users\vfxno\Documents\TrueMotionFidelityEngine-main\build\bin\Release\True Motion Fidelity Engine.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />
