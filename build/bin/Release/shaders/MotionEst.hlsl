@@ -1,6 +1,6 @@
 // ============================================================================
 // MOTION ESTIMATION - Robust Block Matching
-// Tuned to reduce ambiguous vectors that create visible warp artifacts.
+// Tuned to reduce ambiguous vectors while keeping the GPU cost practical.
 // ============================================================================
 
 Texture2D<float> CurrLuma : register(t0);
@@ -19,55 +19,75 @@ cbuffer MotionCB : register(b0) {
 };
 
 #define BLOCK_SIZE 16
-#define BLOCK_R 8
-#define BLOCK_EXTENT (BLOCK_SIZE + BLOCK_R * 2)
+#define BLOCK_R_INT 2
+#define BLOCK_R_FRAC 2
+#define BLOCK_EXTENT (BLOCK_SIZE + BLOCK_R_INT * 2)
+#define SHARED_PIXELS (BLOCK_EXTENT * BLOCK_EXTENT)
+#define SHARED_LOAD_ITERS ((SHARED_PIXELS + 255) / 256)
 
 groupshared float gs_Curr[BLOCK_EXTENT][BLOCK_EXTENT];
 
-float BlockWeight(int2 offset) {
-    float dist = max(abs(offset.x), abs(offset.y));
-    float w = 1.0 - dist / (float(BLOCK_R) + 1.0);
-    return 0.25 + 0.75 * saturate(w);
+static const float kKernel5x5[25] = {
+    0.25, 0.25, 0.25, 0.25, 0.25,
+    0.25, 0.50, 0.50, 0.50, 0.25,
+    0.25, 0.50, 1.00, 0.50, 0.25,
+    0.25, 0.50, 0.50, 0.50, 0.25,
+    0.25, 0.25, 0.25, 0.25, 0.25
+};
+
+float KernelWeight5x5(int bx, int by) {
+    return kKernel5x5[(by + 2) * 5 + (bx + 2)];
 }
 
 float RobustDiff(float a, float b) {
     return min(abs(a - b), 0.35);
 }
 
-float EvalSadInt(int2 pos, int2 localPos, int2 mv, uint w, uint h) {
+float MotionPenalty(float2 mv) {
+    float2 a = abs(mv);
+    float hi = max(a.x, a.y);
+    float lo = min(a.x, a.y);
+    return hi + lo * 0.5;
+}
+
+float EvalSadInt(int2 pos, int2 localPos, int2 mv, uint w, uint h, float cutoff) {
     float sad = 0.0;
     int2 maxPos = int2(int(w) - 1, int(h) - 1);
 
     [loop]
-    for (int by = -BLOCK_R; by <= BLOCK_R; ++by) {
+    for (int by = -BLOCK_R_INT; by <= BLOCK_R_INT; ++by) {
         [loop]
-        for (int bx = -BLOCK_R; bx <= BLOCK_R; ++bx) {
-            int2 offset = int2(bx, by);
-            int2 sp = localPos + offset;
+        for (int bx = -BLOCK_R_INT; bx <= BLOCK_R_INT; ++bx) {
+            int2 sp = localPos + int2(bx, by);
             float cVal = gs_Curr[sp.y][sp.x];
-            int2 pPos = clamp(pos + offset + mv, int2(0, 0), maxPos);
+            int2 pPos = clamp(pos + int2(bx, by) + mv, int2(0, 0), maxPos);
             float pVal = PrevLuma.Load(int3(pPos, 0));
-            sad += RobustDiff(cVal, pVal) * BlockWeight(offset);
+            sad += RobustDiff(cVal, pVal) * KernelWeight5x5(bx, by);
+            if (sad > cutoff) {
+                return sad;
+            }
         }
     }
 
     return sad;
 }
 
-float EvalSadFrac(int2 pos, int2 localPos, float2 mv, float2 invSize) {
+float EvalSadFrac(int2 pos, int2 localPos, float2 mv, float2 invSize, float cutoff) {
     float sad = 0.0;
 
     [loop]
-    for (int by = -BLOCK_R; by <= BLOCK_R; ++by) {
+    for (int by = -BLOCK_R_FRAC; by <= BLOCK_R_FRAC; ++by) {
         [loop]
-        for (int bx = -BLOCK_R; bx <= BLOCK_R; ++bx) {
-            int2 offset = int2(bx, by);
-            int2 sp = localPos + offset;
+        for (int bx = -BLOCK_R_FRAC; bx <= BLOCK_R_FRAC; ++bx) {
+            int2 sp = localPos + int2(bx, by);
             float cVal = gs_Curr[sp.y][sp.x];
-            float2 pPos = float2(pos + offset) + 0.5 + mv;
+            float2 pPos = float2(pos + int2(bx, by)) + 0.5 + mv;
             float2 pUv = clamp(pPos * invSize, 0.0, 0.999);
             float pVal = PrevLuma.SampleLevel(LinearClamp, pUv, 0);
-            sad += RobustDiff(cVal, pVal) * BlockWeight(offset);
+            sad += RobustDiff(cVal, pVal) * KernelWeight5x5(bx, by);
+            if (sad > cutoff) {
+                return sad;
+            }
         }
     }
 
@@ -89,14 +109,14 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
     uint w, h;
     CurrLuma.GetDimensions(w, h);
 
-    int2 groupBase = int2(gid.xy) * BLOCK_SIZE - BLOCK_R;
+    int2 groupBase = int2(gid.xy) * BLOCK_SIZE - BLOCK_R_INT;
     uint tid = gtid.y * BLOCK_SIZE + gtid.x;
 
     // Load current frame tile + apron into shared memory.
     [loop]
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < SHARED_LOAD_ITERS; ++i) {
         uint pIdx = tid + i * 256;
-        if (pIdx < 1024) {
+        if (pIdx < SHARED_PIXELS) {
             int ly = int(pIdx / BLOCK_EXTENT);
             int lx = int(pIdx % BLOCK_EXTENT);
             int2 loadPos = clamp(groupBase + int2(lx, ly), int2(0, 0), int2(int(w) - 1, int(h) - 1));
@@ -111,7 +131,7 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
     }
 
     int2 pos = int2(id.xy);
-    int2 localPos = int2(gtid.xy) + BLOCK_R;
+    int2 localPos = int2(gtid.xy) + BLOCK_R_INT;
     float2 invSize = 1.0 / float2(w, h);
     float2 uv = (float2(pos) + 0.5) * invSize;
 
@@ -137,21 +157,37 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
     float2 bestMV = float2(0.0, 0.0);
 
     float motionPenaltyBase = lerp(0.16, 0.04, textureStrength);
+    float2 pred = float2(0.0, 0.0);
+    bool hasPred = false;
+    if (usePrediction != 0) {
+        pred = MotionPred.SampleLevel(LinearClamp, uv, 0).xy * predictionScale;
+        hasPred = (dot(pred, pred) > 0.05);
+    }
+
+    // Fast-path for near-static pixels.
+    if (frameDiff < 0.0035 && textureStrength < 0.08) {
+        if (!hasPred || dot(pred, pred) < 0.04) {
+            MotionOut[id.xy] = float2(0.0, 0.0);
+            ConfidenceOut[id.xy] = 0.96;
+            return;
+        }
+    }
 
     // Zero motion candidate.
-    float zeroSad = EvalSadInt(pos, localPos, int2(0, 0), w, h);
+    float zeroSad = EvalSadInt(pos, localPos, int2(0, 0), w, h, 1e30);
     float zeroBias = lerp(0.88, 0.98, textureStrength);
     UpdateBest(zeroSad * zeroBias, float2(0.0, 0.0), bestSad, bestMV, secondSad);
 
     // Predicted candidate.
     if (usePrediction != 0) {
-        float2 pred = MotionPred.SampleLevel(LinearClamp, uv, 0).xy * predictionScale;
         pred = clamp(pred, -float2(searchR, searchR), float2(searchR, searchR));
-        if (dot(pred, pred) > 0.05) {
+        if (hasPred) {
             int2 predMV = int2(round(pred));
-            float predSad = EvalSadInt(pos, localPos, predMV, w, h);
-            predSad += length(float2(predMV)) * motionPenaltyBase;
-            UpdateBest(predSad, float2(predMV), bestSad, bestMV, secondSad);
+            float predSad = EvalSadInt(pos, localPos, predMV, w, h, secondSad);
+            if (predSad < secondSad) {
+                predSad += MotionPenalty(float2(predMV)) * motionPenaltyBase;
+                UpdateBest(predSad, float2(predMV), bestSad, bestMV, secondSad);
+            }
         }
     }
 
@@ -176,8 +212,14 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
             int2 testMV = centerMV + kDiamond[d] * int(step);
             testMV = clamp(testMV, -int2(searchR, searchR), int2(searchR, searchR));
 
-            float sad = EvalSadInt(pos, localPos, testMV, w, h);
-            sad += length(float2(testMV)) * motionPenaltyBase;
+            float sad = EvalSadInt(pos, localPos, testMV, w, h, secondSad);
+            if (sad >= secondSad) {
+                continue;
+            }
+            sad += MotionPenalty(float2(testMV)) * motionPenaltyBase;
+            if (sad >= secondSad) {
+                continue;
+            }
             UpdateBest(sad, float2(testMV), bestSad, bestMV, secondSad);
 
             if (sad < stepBestSad) {
@@ -205,13 +247,20 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
         for (int dxI = -1; dxI <= 1; ++dxI) {
             int2 testMV = bestIntMV + int2(dxI, dyI);
             testMV = clamp(testMV, -int2(searchR, searchR), int2(searchR, searchR));
-            float sad = EvalSadInt(pos, localPos, testMV, w, h);
-            sad += length(float2(testMV)) * motionPenaltyBase;
+            float sad = EvalSadInt(pos, localPos, testMV, w, h, secondSad);
+            if (sad >= secondSad) {
+                continue;
+            }
+            sad += MotionPenalty(float2(testMV)) * motionPenaltyBase;
+            if (sad >= secondSad) {
+                continue;
+            }
             UpdateBest(sad, float2(testMV), bestSad, bestMV, secondSad);
         }
     }
 
     // Half-pixel refinement.
+    float halfStartSad = bestSad;
     float2 halfCenter = bestMV;
     [loop]
     for (int dyH = -1; dyH <= 1; ++dyH) {
@@ -222,26 +271,42 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
             }
             float2 testMV = halfCenter + float2(dxH, dyH) * 0.5;
             testMV = clamp(testMV, -float2(searchR, searchR), float2(searchR, searchR));
-            float sad = EvalSadFrac(pos, localPos, testMV, invSize);
-            sad += length(testMV) * (motionPenaltyBase * 0.75);
+            float sad = EvalSadFrac(pos, localPos, testMV, invSize, secondSad);
+            if (sad >= secondSad) {
+                continue;
+            }
+            sad += MotionPenalty(testMV) * (motionPenaltyBase * 0.75);
+            if (sad >= secondSad) {
+                continue;
+            }
             UpdateBest(sad, testMV, bestSad, bestMV, secondSad);
         }
     }
 
-    // Quarter-pixel refinement.
-    float2 quarterCenter = bestMV;
-    [loop]
-    for (int dyQ = -1; dyQ <= 1; ++dyQ) {
+    // Quarter-pixel refinement can be skipped when half-pixel already converged.
+    float halfGain = halfStartSad - bestSad;
+    bool runQuarter = (halfGain > (halfStartSad * 0.0025)) || (dot(bestMV, bestMV) > 0.1225) || (textureStrength > 0.2);
+    if (runQuarter) {
+        float2 quarterCenter = bestMV;
         [loop]
-        for (int dxQ = -1; dxQ <= 1; ++dxQ) {
-            if (dxQ == 0 && dyQ == 0) {
-                continue;
+        for (int dyQ = -1; dyQ <= 1; ++dyQ) {
+            [loop]
+            for (int dxQ = -1; dxQ <= 1; ++dxQ) {
+                if (dxQ == 0 && dyQ == 0) {
+                    continue;
+                }
+                float2 testMV = quarterCenter + float2(dxQ, dyQ) * 0.25;
+                testMV = clamp(testMV, -float2(searchR, searchR), float2(searchR, searchR));
+                float sad = EvalSadFrac(pos, localPos, testMV, invSize, secondSad);
+                if (sad >= secondSad) {
+                    continue;
+                }
+                sad += MotionPenalty(testMV) * (motionPenaltyBase * 0.6);
+                if (sad >= secondSad) {
+                    continue;
+                }
+                UpdateBest(sad, testMV, bestSad, bestMV, secondSad);
             }
-            float2 testMV = quarterCenter + float2(dxQ, dyQ) * 0.25;
-            testMV = clamp(testMV, -float2(searchR, searchR), float2(searchR, searchR));
-            float sad = EvalSadFrac(pos, localPos, testMV, invSize);
-            sad += length(testMV) * (motionPenaltyBase * 0.6);
-            UpdateBest(sad, testMV, bestSad, bestMV, secondSad);
         }
     }
 
@@ -251,14 +316,14 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
     float damping = ambiguity * (1.0 - textureStrength) * staticRegion;
     bestMV *= (1.0 - 0.70 * damping);
 
-    float photoSad = EvalSadFrac(pos, localPos, bestMV, invSize);
-    float sampleCount = float((2 * BLOCK_R + 1) * (2 * BLOCK_R + 1));
+    float photoSad = EvalSadFrac(pos, localPos, bestMV, invSize, 1e30);
+    float sampleCount = float((2 * BLOCK_R_FRAC + 1) * (2 * BLOCK_R_FRAC + 1));
     float avgDiff = photoSad / sampleCount;
     float matchConf = exp(-avgDiff * 9.0);
     float confidence = matchConf;
     confidence *= (0.35 + 0.65 * uniqueness);
     confidence *= lerp(0.55, 1.0, textureStrength);
-    if (frameDiff < 0.02 && length(bestMV) < 0.5) {
+    if (frameDiff < 0.02 && dot(bestMV, bestMV) < 0.25) {
         confidence = max(confidence, 0.90);
     }
     confidence = clamp(confidence, 0.05, 0.98);
