@@ -1463,6 +1463,7 @@ void App::Render() {
 
   int multiplier = (m_outputMultiplier < 1) ? 1 : m_outputMultiplier;
   double captureFps = (m_avgFrameInterval > 0.0) ? (1.0 / m_avgFrameInterval) : 0.0;
+  bool lowFpsSource = (captureFps > 0.0 && captureFps < 30.0);
   float monitorHz = m_device.RefreshHz(m_selectedMonitor);
   bool useMonitorSync = (m_outputMode == 1);
 
@@ -1472,6 +1473,10 @@ void App::Render() {
     m_targetFps = static_cast<float>(static_cast<double>(multiplier) / m_avgFrameInterval);
   } else {
     m_targetFps = 0.0f;
+  }
+  // Sub-30 FPS sources benefit from stable pacing near display refresh instead of very high multiplier targets.
+  if (!useMonitorSync && lowFpsSource && monitorHz > 0.0f && m_targetFps > monitorHz) {
+    m_targetFps = monitorHz;
   }
 
   LARGE_INTEGER now = {};
@@ -1539,7 +1544,7 @@ void App::Render() {
   }
 
   bool neverDropMode = m_neverDropFrames;
-  int maxQueueSize = neverDropMode ? m_maxQueueSize : 3;
+  int maxQueueSize = neverDropMode ? m_maxQueueSize : (lowFpsSource ? 4 : 3);
   if (maxQueueSize < 2) {
     maxQueueSize = 2;
   } else if (maxQueueSize > kFrameQueueSize) {
@@ -1630,7 +1635,7 @@ void App::Render() {
           break;
         }
         
-        if (!neverDropMode && m_frameQueue.size() > 2) {
+        if (!neverDropMode && !lowFpsSource && m_frameQueue.size() > 2) {
           int nextSlot = m_frameQueue[2];
           double nextTime = static_cast<double>(m_frameTime100ns[nextSlot]);
           if (nextTime > cTime && (nextTime - cTime) < (m_avgFrameInterval * 0.8)) {
@@ -1692,7 +1697,10 @@ void App::Render() {
       useInterval = intervalSec;
       
       if (m_avgFrameInterval > 0.0) {
-          if (m_forceInterpolation) {
+          if (lowFpsSource) {
+              // For low-FPS capture, lock to the running average interval to avoid visible cadence jitter.
+              useInterval = m_avgFrameInterval;
+          } else if (m_forceInterpolation) {
               useInterval = m_avgFrameInterval;
           } else if (intervalSec > 0.0) {
               double diff = std::abs(intervalSec - m_avgFrameInterval);
@@ -1734,7 +1742,8 @@ void App::Render() {
 
             // In multiplier mode, quantize alpha to stable sub-steps.
             // This removes phase jitter that is very visible at 2x.
-            bool lockAlphaToMultiplier = (!useMonitorSync && multiplier > 1);
+            // Low-FPS sources look smoother with continuous alpha (no multiplier quantization).
+            bool lockAlphaToMultiplier = (!useMonitorSync && multiplier > 1 && !lowFpsSource);
             if (lockAlphaToMultiplier) {
               int quantStep = static_cast<int>(rawAlpha * static_cast<float>(multiplier));
               if (quantStep < 0) {
@@ -1833,7 +1842,7 @@ void App::Render() {
           if (rawAlpha < 0.0f) rawAlpha = 0.0f;
           if (rawAlpha > 1.0f) rawAlpha = 1.0f;
 
-          bool lockAlphaToMultiplier = (!useMonitorSync && multiplier > 1);
+          bool lockAlphaToMultiplier = (!useMonitorSync && multiplier > 1 && !lowFpsSource);
           if (lockAlphaToMultiplier) {
             int quantStep = static_cast<int>(rawAlpha * static_cast<float>(multiplier));
             if (quantStep < 0) {
