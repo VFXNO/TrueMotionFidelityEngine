@@ -104,6 +104,7 @@ private:
   float m_textPreservationStrength = 1.0f;
   float m_textPreservationEdgeThreshold = 0.03f;
   bool m_useMotionPrediction = true;
+  bool m_minimalMotionPipeline = true;
   bool m_limitOutputFps = true;
   bool m_useVsync = false;
   bool m_fullscreenWindowOutput = false;

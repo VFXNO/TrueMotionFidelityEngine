@@ -1,361 +1,333 @@
 // ============================================================================
-// PROFESSIONAL MOTION ESTIMATION - Coarse Pass (Quarter Resolution)
-// Hierarchical block matching with multi-predictor consensus
-// Author: Professional Shader Engineer
+// MOTION ESTIMATION - Robust Block Matching
+// Tuned to reduce ambiguous vectors while keeping the GPU cost practical.
 // ============================================================================
 
-Texture2D<float> PrevLuma : register(t0);
-Texture2D<float> CurrLuma : register(t1);
+Texture2D<float> CurrLuma : register(t0);
+Texture2D<float> PrevLuma : register(t1);
 Texture2D<float2> MotionPred : register(t2);
 RWTexture2D<float2> MotionOut : register(u0);
 RWTexture2D<float> ConfidenceOut : register(u1);
 
+SamplerState LinearClamp : register(s0);
+
 cbuffer MotionCB : register(b0) {
     int radius;
     int usePrediction;
-    float2 pad;
+    float predictionScale;
+    float pad;
 };
 
-// ============================================================================
-// TUNING CONSTANTS - Carefully balanced for gaming content
-// ============================================================================
+#define BLOCK_SIZE 16
+#define BLOCK_R_INT 2
+#define BLOCK_R_FRAC 2
+#define BLOCK_EXTENT (BLOCK_SIZE + BLOCK_R_INT * 2)
+#define SHARED_PIXELS (BLOCK_EXTENT * BLOCK_EXTENT)
+#define SHARED_LOAD_ITERS ((SHARED_PIXELS + 255) / 256)
 
-// Cost function weights
-static const float WEIGHT_SAD = 0.40;          // Sum of Absolute Differences
-static const float WEIGHT_SSD = 0.30;          // Sum of Squared Differences  
-static const float WEIGHT_CENSUS = 0.15;       // Census transform
-static const float WEIGHT_GRADIENT = 2.0;      // Structure/Edge Alignment (Gradient Cost)
+groupshared float gs_Curr[BLOCK_EXTENT][BLOCK_EXTENT];
 
-// Region classification thresholds
-static const float VARIANCE_FLAT = 0.012;      // Below = flat region (aperture problem)
-static const float VARIANCE_TEXTURE = 0.045;   // Above = textured region
-static const float GRADIENT_EDGE = 0.025;      // Above = edge region
-
-// Smoothness regularization
-static const float LAMBDA_SPATIAL = 0.0025;    // Smoothness cost weight
-static const float LAMBDA_TEMPORAL = 0.0018;   // Temporal consistency weight
-
-// Confidence model
-static const float CONF_SCALE = 8.0;           // Cost to confidence mapping
-static const float CONF_MIN = 0.12;            // Minimum confidence floor
-static const float CONF_MAX = 0.96;            // Maximum confidence cap
-
-// ============================================================================
-// GAUSSIAN WEIGHTS (5x5 precomputed, sigma=1.5)
-// ============================================================================
-static const float kGaussian5x5[25] = {
-    0.0232, 0.0338, 0.0383, 0.0338, 0.0232,
-    0.0338, 0.0492, 0.0558, 0.0492, 0.0338,
-    0.0383, 0.0558, 0.0632, 0.0558, 0.0383,
-    0.0338, 0.0492, 0.0558, 0.0492, 0.0338,
-    0.0232, 0.0338, 0.0383, 0.0338, 0.0232
+static const float kKernel5x5[25] = {
+    0.25, 0.25, 0.25, 0.25, 0.25,
+    0.25, 0.50, 0.50, 0.50, 0.25,
+    0.25, 0.50, 1.00, 0.50, 0.25,
+    0.25, 0.50, 0.50, 0.50, 0.25,
+    0.25, 0.25, 0.25, 0.25, 0.25
 };
 
-// ============================================================================
-// HELPER: Compute Gradient at arbitrary position
-// ============================================================================
-float2 GetGradient(Texture2D<float> tex, int2 pos) {
-    // 3x3 Sobel kernel
-    float v00 = tex.Load(int3(pos + int2(-1, -1), 0));
-    float v10 = tex.Load(int3(pos + int2( 0, -1), 0));
-    float v20 = tex.Load(int3(pos + int2( 1, -1), 0));
-    float v01 = tex.Load(int3(pos + int2(-1,  0), 0));
-    float v21 = tex.Load(int3(pos + int2( 1,  0), 0));
-    float v02 = tex.Load(int3(pos + int2(-1,  1), 0));
-    float v12 = tex.Load(int3(pos + int2( 0,  1), 0));
-    float v22 = tex.Load(int3(pos + int2( 1,  1), 0));
-    
-    float gx = -v00 + v20 - 2.0 * v01 + 2.0 * v21 - v02 + v22;
-    float gy = -v00 - 2.0 * v10 - v20 + v02 + 2.0 * v12 + v22;
-    
-    return float2(gx, gy) / 8.0;
+float KernelWeight5x5(int bx, int by) {
+    return kKernel5x5[(by + 2) * 5 + (bx + 2)];
 }
 
-// ============================================================================
-// HELPER: Robust Multi-Metric Cost Function
-// Combines SAD, SSD, Census, and GRADIENT for robustness
-// ============================================================================
-float ComputeBlockCost(int2 currBase, int2 offset, float centerLuma,
-                       float cachedBlock[25], uint width, uint height,
-                       float2 targetGrad)
-{
-    // Sample center of previous frame at offset position
-    int2 prevCenter = clamp(currBase + offset, int2(0, 0), int2(width - 1, height - 1));
-    float prevCenterLuma = PrevLuma.Load(int3(prevCenter, 0));
-    
-    // DC offset for zero-mean matching (handles brightness changes)
-    float dcOffset = prevCenterLuma - centerLuma;
-    
-    float sadSum = 0.0;
-    float ssdSum = 0.0;
-    float censusSum = 0.0;
-    float weightSum = 0.0;
-    
-    // 5x5 block matching with Gaussian weighting
-    [unroll]
-    for (int dy = -2; dy <= 2; ++dy) {
-        [unroll]
-        for (int dx = -2; dx <= 2; ++dx) {
-            int idx = (dy + 2) * 5 + (dx + 2);
-            float weight = kGaussian5x5[idx];
-            
-            // Current frame value from cache
-            float currVal = cachedBlock[idx];
-            
-            // Previous frame value with offset
-            int2 prevPos = clamp(currBase + offset + int2(dx, dy), int2(0, 0), int2(width - 1, height - 1));
-            float prevVal = PrevLuma.Load(int3(prevPos, 0));
-            
-            // Zero-mean difference (invariant to global brightness)
-            float diff = (prevVal - currVal) - dcOffset;
-            
-            // SAD component
-            sadSum += abs(diff) * weight;
-            
-            // SSD component (more sensitive to large errors)
-            ssdSum += diff * diff * weight;
-            
-            // Census component (sign comparison - illumination invariant)
-            float prevSign = (prevVal > prevCenterLuma) ? 1.0 : 0.0;
-            float currSign = (currVal > centerLuma) ? 1.0 : 0.0;
-            censusSum += abs(prevSign - currSign) * weight;
-            
-            weightSum += weight;
-        }
-    }
-    
-    // Gradient Cost: Compare structural orientation
-    float2 candGrad = GetGradient(PrevLuma, prevCenter);
-    float gradCost = length(targetGrad - candGrad); 
-
-    // Normalize
-    float invWeight = 1.0 / max(weightSum, 0.001);
-    sadSum *= invWeight;
-    ssdSum *= invWeight;
-    censusSum *= invWeight;
-    
-    // Combine metrics (SSD is already squared, take sqrt for consistency)
-    return sadSum * WEIGHT_SAD + 
-           sqrt(ssdSum) * WEIGHT_SSD + 
-           censusSum * WEIGHT_CENSUS + 
-           gradCost * WEIGHT_GRADIENT;
+float RobustDiff(float a, float b) {
+    return min(abs(a - b), 0.35);
 }
 
-// ============================================================================
-// HELPER: Compute Local Variance and Gradient
-// ============================================================================
-void AnalyzeRegion(float cachedBlock[25], float centerLuma,
-                   out float variance, out float2 gradient, out float edgeness)
-{
-    // Variance using center-weighted samples
-    float sumDiff = 0.0;
-    float sumWeight = 0.0;
-    
-    [unroll]
-    for (int i = 0; i < 25; ++i) {
-        float w = kGaussian5x5[i];
-        sumDiff += abs(cachedBlock[i] - centerLuma) * w;
-        sumWeight += w;
-    }
-    variance = sumDiff / max(sumWeight, 0.001);
-    
-    // Sobel gradient (3x3 center of the 5x5 block)
-    float gx = -cachedBlock[6] + cachedBlock[8]
-             - 2.0 * cachedBlock[11] + 2.0 * cachedBlock[13]
-             - cachedBlock[16] + cachedBlock[18];
-    
-    float gy = -cachedBlock[6] - 2.0 * cachedBlock[7] - cachedBlock[8]
-             + cachedBlock[16] + 2.0 * cachedBlock[17] + cachedBlock[18];
-    
-    gradient = float2(gx, gy) / 8.0;
-    edgeness = length(gradient);
+float MotionPenalty(float2 mv) {
+    float2 a = abs(mv);
+    float hi = max(a.x, a.y);
+    float lo = min(a.x, a.y);
+    return hi + lo * 0.5;
 }
 
-// ============================================================================
-// MAIN ENTRY POINT
-// ============================================================================
-[numthreads(16, 16, 1)]
-void CSMain(uint3 id : SV_DispatchThreadID) {
-    uint width, height;
-    CurrLuma.GetDimensions(width, height);
-    
-    if (id.x >= width || id.y >= height) return;
-    
-    int2 base = int2(id.xy);
-    float centerLuma = CurrLuma.Load(int3(base, 0));
-    int maxMag = int(min(width, height) / 3u);
-    
-    // ========================================================================
-    // STEP 1: Cache 5x5 block from current frame
-    // ========================================================================
-    float cachedBlock[25];
-    [unroll]
-    for (int cy = -2; cy <= 2; ++cy) {
-        [unroll]
-        for (int cx = -2; cx <= 2; ++cx) {
-            int2 p = clamp(base + int2(cx, cy), int2(0, 0), int2(width - 1, height - 1));
-            cachedBlock[(cy + 2) * 5 + (cx + 2)] = CurrLuma.Load(int3(p, 0));
+float EvalSadInt(int2 pos, int2 localPos, int2 mv, uint w, uint h, float cutoff) {
+    float sad = 0.0;
+    int2 maxPos = int2(int(w) - 1, int(h) - 1);
+
+    [loop]
+    for (int by = -BLOCK_R_INT; by <= BLOCK_R_INT; ++by) {
+        [loop]
+        for (int bx = -BLOCK_R_INT; bx <= BLOCK_R_INT; ++bx) {
+            int2 sp = localPos + int2(bx, by);
+            float cVal = gs_Curr[sp.y][sp.x];
+            int2 pPos = clamp(pos + int2(bx, by) + mv, int2(0, 0), maxPos);
+            float pVal = PrevLuma.Load(int3(pPos, 0));
+            sad += RobustDiff(cVal, pVal) * KernelWeight5x5(bx, by);
+            if (sad > cutoff) {
+                return sad;
+            }
         }
     }
-    
-    // ========================================================================
-    // STEP 2: Analyze local region characteristics
-    // ========================================================================
-    float variance, edgeness;
-    float2 gradient;
-    AnalyzeRegion(cachedBlock, centerLuma, variance, gradient, edgeness);
-    
-    float flatness = saturate(1.0 - variance / VARIANCE_FLAT);
-    float textureness = saturate((variance - VARIANCE_FLAT) / (VARIANCE_TEXTURE - VARIANCE_FLAT));
-    
-    // ========================================================================
-    // STEP 3: Detect static regions
-    // ========================================================================
-    float prevCenterLuma = PrevLuma.Load(int3(base, 0));
-    float frameDiff = abs(centerLuma - prevCenterLuma);
-    
-    float maxLocalDiff = frameDiff;
-    [unroll]
-    for (int sy = -1; sy <= 1; ++sy) {
-        [unroll]
-        for (int sx = -1; sx <= 1; ++sx) {
-            int2 sPos = clamp(base + int2(sx, sy), int2(0, 0), int2(width - 1, height - 1));
-            float c = CurrLuma.Load(int3(sPos, 0));
-            float p = PrevLuma.Load(int3(sPos, 0));
-            maxLocalDiff = max(maxLocalDiff, abs(c - p));
+
+    return sad;
+}
+
+float EvalSadFrac(int2 pos, int2 localPos, float2 mv, float2 invSize, float cutoff) {
+    float sad = 0.0;
+
+    [loop]
+    for (int by = -BLOCK_R_FRAC; by <= BLOCK_R_FRAC; ++by) {
+        [loop]
+        for (int bx = -BLOCK_R_FRAC; bx <= BLOCK_R_FRAC; ++bx) {
+            int2 sp = localPos + int2(bx, by);
+            float cVal = gs_Curr[sp.y][sp.x];
+            float2 pPos = float2(pos + int2(bx, by)) + 0.5 + mv;
+            float2 pUv = clamp(pPos * invSize, 0.0, 0.999);
+            float pVal = PrevLuma.SampleLevel(LinearClamp, pUv, 0);
+            sad += RobustDiff(cVal, pVal) * KernelWeight5x5(bx, by);
+            if (sad > cutoff) {
+                return sad;
+            }
         }
     }
-    
-    // Static detection
-    bool isStatic = (maxLocalDiff < 0.018) && (flatness > 0.5 || variance < 0.02);
-    if (isStatic) {
-        MotionOut[id.xy] = float2(0, 0);
-        ConfidenceOut[id.xy] = 0.92;
+
+    return sad;
+}
+
+void UpdateBest(float cost, float2 mv, inout float bestCost, inout float2 bestMV, inout float secondCost) {
+    if (cost < bestCost) {
+        secondCost = bestCost;
+        bestCost = cost;
+        bestMV = mv;
+    } else if (cost < secondCost) {
+        secondCost = cost;
+    }
+}
+
+[numthreads(BLOCK_SIZE, BLOCK_SIZE, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid : SV_GroupThreadID) {
+    uint w, h;
+    CurrLuma.GetDimensions(w, h);
+
+    int2 groupBase = int2(gid.xy) * BLOCK_SIZE - BLOCK_R_INT;
+    uint tid = gtid.y * BLOCK_SIZE + gtid.x;
+
+    // Load current frame tile + apron into shared memory.
+    [loop]
+    for (int i = 0; i < SHARED_LOAD_ITERS; ++i) {
+        uint pIdx = tid + i * 256;
+        if (pIdx < SHARED_PIXELS) {
+            int ly = int(pIdx / BLOCK_EXTENT);
+            int lx = int(pIdx % BLOCK_EXTENT);
+            int2 loadPos = clamp(groupBase + int2(lx, ly), int2(0, 0), int2(int(w) - 1, int(h) - 1));
+            gs_Curr[ly][lx] = CurrLuma.Load(int3(loadPos, 0));
+        }
+    }
+
+    GroupMemoryBarrierWithGroupSync();
+
+    if (id.x >= w || id.y >= h) {
         return;
     }
-    
-    // ========================================================================
-    // STEP 4: Initialize search
-    // ========================================================================
-    float bestCost = 1e9;
-    int2 bestOffset = int2(0, 0);
-    
-    // ========================================================================
-    // STEP 5: Evaluate candidates
-    // ========================================================================
-    
-    #define EVAL_CANDIDATE(offset, bonus) { \
-        float cost = ComputeBlockCost(base, offset, centerLuma, cachedBlock, width, height, gradient); \
-        cost *= bonus; \
-        if (cost < bestCost) { bestCost = cost; bestOffset = offset; } \
-    }
-    
-    // Zero motion
-    float staticBonus = lerp(0.95, 0.80, flatness); // Stronger bias for flat regions
-    if (isStatic) staticBonus *= 0.5; // Strong preference for static if detected
-    EVAL_CANDIDATE(int2(0, 0), staticBonus);
-    
-    // TEMPORAL PREDICTION (SAFE)
-    if (usePrediction) {
-        // 1. Center Prediction - Moderate trust to avoid "sticking"
-        float2 pred = MotionPred.Load(int3(base, 0));
-        int2 prevVec = int2(round(pred));
-        prevVec = clamp(prevVec, int2(-maxMag, -maxMag), int2(maxMag, maxMag));
-        
-        if (any(prevVec != int2(0, 0))) {
-            EVAL_CANDIDATE(prevVec, 0.94); // Restored to safe value (was 0.85)
-        }
 
-        // 2. Neighborhood Prediction (catch incoming objects)
-        // WEAKENED: Only trust neighbor vectors if they are an EXCELLENT match.
-        // Prevents motion bleeding from moving foreground to static background.
-        int2 nbOffsets[4] = { int2(-4, -4), int2(4, -4), int2(-4, 4), int2(4, 4) };
+    int2 pos = int2(id.xy);
+    int2 localPos = int2(gtid.xy) + BLOCK_R_INT;
+    float2 invSize = 1.0 / float2(w, h);
+    float2 uv = (float2(pos) + 0.5) * invSize;
+
+    float currCenter = gs_Curr[localPos.y][localPos.x];
+    float prevCenter = PrevLuma.Load(int3(pos, 0));
+    float frameDiff = abs(currCenter - prevCenter);
+
+    int lxL = max(localPos.x - 1, 0);
+    int lxR = min(localPos.x + 1, BLOCK_EXTENT - 1);
+    int lyU = max(localPos.y - 1, 0);
+    int lyD = min(localPos.y + 1, BLOCK_EXTENT - 1);
+    float gx = abs(gs_Curr[localPos.y][lxR] - gs_Curr[localPos.y][lxL]);
+    float gy = abs(gs_Curr[lyD][localPos.x] - gs_Curr[lyU][localPos.x]);
+    float textureStrength = saturate((gx + gy) * 6.0);
+
+    int maxR = max(1, int(min(w, h) / 4));
+    int baseR = clamp(radius, 1, maxR);
+    float motionHint = max(smoothstep(0.01, 0.2, frameDiff), textureStrength * 0.75);
+    int searchR = clamp(int(round(lerp(float(baseR), float(baseR) * 1.5, motionHint))), 1, maxR);
+
+    float bestSad = 1e9;
+    float secondSad = 1e9;
+    float2 bestMV = float2(0.0, 0.0);
+
+    float motionPenaltyBase = lerp(0.16, 0.04, textureStrength);
+    float2 pred = float2(0.0, 0.0);
+    bool hasPred = false;
+    if (usePrediction != 0) {
+        pred = MotionPred.SampleLevel(LinearClamp, uv, 0).xy * predictionScale;
+        hasPred = (dot(pred, pred) > 0.05);
+    }
+
+    // Fast-path for near-static pixels.
+    if (frameDiff < 0.0035 && textureStrength < 0.08) {
+        if (!hasPred || dot(pred, pred) < 0.04) {
+            MotionOut[id.xy] = float2(0.0, 0.0);
+            ConfidenceOut[id.xy] = 0.96;
+            return;
+        }
+    }
+
+    // Zero motion candidate.
+    float zeroSad = EvalSadInt(pos, localPos, int2(0, 0), w, h, 1e30);
+    float zeroBias = lerp(0.88, 0.98, textureStrength);
+    UpdateBest(zeroSad * zeroBias, float2(0.0, 0.0), bestSad, bestMV, secondSad);
+
+    // Predicted candidate.
+    if (usePrediction != 0) {
+        pred = clamp(pred, -float2(searchR, searchR), float2(searchR, searchR));
+        if (hasPred) {
+            int2 predMV = int2(round(pred));
+            float predSad = EvalSadInt(pos, localPos, predMV, w, h, secondSad);
+            if (predSad < secondSad) {
+                predSad += MotionPenalty(float2(predMV)) * motionPenaltyBase;
+                UpdateBest(predSad, float2(predMV), bestSad, bestMV, secondSad);
+            }
+        }
+    }
+
+    static const int2 kDiamond[4] = {
+        int2(0, -1),
+        int2(1, 0),
+        int2(0, 1),
+        int2(-1, 0)
+    };
+
+    // Coarse-to-fine diamond search.
+    float2 searchCenter = bestMV;
+    uint step = max(1u, (uint(searchR) + 1u) >> 1u);
+    while (step >= 1u) {
+        bool foundBetter = false;
+        float stepBestSad = bestSad;
+        float2 stepBestMV = searchCenter;
+        int2 centerMV = int2(round(searchCenter));
+
         [unroll]
-        for(int i=0; i<4; ++i) {
-            int2 samplePos = clamp(base + nbOffsets[i], int2(0,0), int2(width-1, height-1));
-            float2 nbPred = MotionPred.Load(int3(samplePos, 0));
-            int2 nbVec = int2(round(nbPred));
-            nbVec = clamp(nbVec, int2(-maxMag, -maxMag), int2(maxMag, maxMag));
-            
-            if (any(nbVec != int2(0, 0)) && any(nbVec != prevVec)) {
-                EVAL_CANDIDATE(nbVec, 0.98); // Very slight bias
+        for (int d = 0; d < 4; ++d) {
+            int2 testMV = centerMV + kDiamond[d] * int(step);
+            testMV = clamp(testMV, -int2(searchR, searchR), int2(searchR, searchR));
+
+            float sad = EvalSadInt(pos, localPos, testMV, w, h, secondSad);
+            if (sad >= secondSad) {
+                continue;
             }
+            sad += MotionPenalty(float2(testMV)) * motionPenaltyBase;
+            if (sad >= secondSad) {
+                continue;
+            }
+            UpdateBest(sad, float2(testMV), bestSad, bestMV, secondSad);
+
+            if (sad < stepBestSad) {
+                stepBestSad = sad;
+                stepBestMV = float2(testMV);
+                foundBetter = true;
+            }
+        }
+
+        if (foundBetter) {
+            searchCenter = stepBestMV;
+        } else {
+            if (step == 1u) {
+                break;
+            }
+            step >>= 1u;
         }
     }
 
-    // ========================================================================
-    // STEP 6: Local search refinement
-    // ========================================================================
-    int searchRadius = clamp(radius, 2, 16);
-    int2 searchCenter = bestOffset;
-    int step = 1;
-    if (searchRadius > 6) step = 2; // Capped at Step 2 to avoid aliasing artifacts
-    
-    // Regularization constant - higher = cleaner field
-    float lambdaDist = 0.005; 
-
-    for (int dy = -searchRadius; dy <= searchRadius; dy += step) {
-        for (int dx = -searchRadius; dx <= searchRadius; dx += step) {
-            int2 testOffset = searchCenter + int2(dx, dy);
-            testOffset = clamp(testOffset, int2(-maxMag, -maxMag), int2(maxMag, maxMag));
-            
-            float cost = ComputeBlockCost(base, testOffset, centerLuma, cachedBlock, width, height, gradient);
-            
-            float dist = length(float2(dx, dy));
-            // Apply distance penalty (regularization)
-            cost += dist * lambdaDist;
-            
-            if (flatness > 0.5) {
-                // In flat regions, penalize motion heavily to prevent noise tracking
-                cost += dist * 0.03 * flatness;
+    // Integer local refinement.
+    int2 bestIntMV = int2(round(bestMV));
+    [loop]
+    for (int dyI = -1; dyI <= 1; ++dyI) {
+        [loop]
+        for (int dxI = -1; dxI <= 1; ++dxI) {
+            int2 testMV = bestIntMV + int2(dxI, dyI);
+            testMV = clamp(testMV, -int2(searchR, searchR), int2(searchR, searchR));
+            float sad = EvalSadInt(pos, localPos, testMV, w, h, secondSad);
+            if (sad >= secondSad) {
+                continue;
             }
-            
-            if (cost < bestCost) {
-                bestCost = cost;
-                bestOffset = testOffset;
+            sad += MotionPenalty(float2(testMV)) * motionPenaltyBase;
+            if (sad >= secondSad) {
+                continue;
             }
+            UpdateBest(sad, float2(testMV), bestSad, bestMV, secondSad);
         }
     }
-    
-    // Fine search
-    if (step > 1) {
-        searchCenter = bestOffset;
-        for (int dy = -1; dy <= 1; ++dy) {
-            for (int dx = -1; dx <= 1; ++dx) {
-                if (dx == 0 && dy == 0) continue;
-                
-                int2 testOffset = searchCenter + int2(dx, dy);
-                float cost = ComputeBlockCost(base, testOffset, centerLuma, cachedBlock, width, height, gradient);
-                
-                // Consistency: Apply same regularization in fine search
-                float dist = length(float2(testOffset));
-                cost += dist * lambdaDist;
-                
-                if (cost < bestCost) {
-                    bestCost = cost;
-                    bestOffset = testOffset;
+
+    // Half-pixel refinement.
+    float halfStartSad = bestSad;
+    float2 halfCenter = bestMV;
+    [loop]
+    for (int dyH = -1; dyH <= 1; ++dyH) {
+        [loop]
+        for (int dxH = -1; dxH <= 1; ++dxH) {
+            if (dxH == 0 && dyH == 0) {
+                continue;
+            }
+            float2 testMV = halfCenter + float2(dxH, dyH) * 0.5;
+            testMV = clamp(testMV, -float2(searchR, searchR), float2(searchR, searchR));
+            float sad = EvalSadFrac(pos, localPos, testMV, invSize, secondSad);
+            if (sad >= secondSad) {
+                continue;
+            }
+            sad += MotionPenalty(testMV) * (motionPenaltyBase * 0.75);
+            if (sad >= secondSad) {
+                continue;
+            }
+            UpdateBest(sad, testMV, bestSad, bestMV, secondSad);
+        }
+    }
+
+    // Quarter-pixel refinement can be skipped when half-pixel already converged.
+    float halfGain = halfStartSad - bestSad;
+    bool runQuarter = (halfGain > (halfStartSad * 0.0025)) || (dot(bestMV, bestMV) > 0.1225) || (textureStrength > 0.2);
+    if (runQuarter) {
+        float2 quarterCenter = bestMV;
+        [loop]
+        for (int dyQ = -1; dyQ <= 1; ++dyQ) {
+            [loop]
+            for (int dxQ = -1; dxQ <= 1; ++dxQ) {
+                if (dxQ == 0 && dyQ == 0) {
+                    continue;
                 }
+                float2 testMV = quarterCenter + float2(dxQ, dyQ) * 0.25;
+                testMV = clamp(testMV, -float2(searchR, searchR), float2(searchR, searchR));
+                float sad = EvalSadFrac(pos, localPos, testMV, invSize, secondSad);
+                if (sad >= secondSad) {
+                    continue;
+                }
+                sad += MotionPenalty(testMV) * (motionPenaltyBase * 0.6);
+                if (sad >= secondSad) {
+                    continue;
+                }
+                UpdateBest(sad, testMV, bestSad, bestMV, secondSad);
             }
         }
     }
-    
-    #undef EVAL_CANDIDATE
-    
-    // ========================================================================
-    // STEP 8: Compute confidence
-    // ========================================================================
-    float matchConf = exp(-bestCost * CONF_SCALE);
-    
-    float regionMod = 1.0;
-    regionMod *= lerp(1.0, 0.7, flatness);
-    regionMod *= lerp(1.0, 0.85, textureness);
-    regionMod *= lerp(1.0, 1.1, saturate(edgeness / GRADIENT_EDGE));
-    
-    float confidence = clamp(matchConf * regionMod, CONF_MIN, CONF_MAX);
-    
-    // ========================================================================
-    // OUTPUT
-    // ========================================================================
-    MotionOut[id.xy] = float2(bestOffset);
+
+    float uniqueness = saturate((secondSad - bestSad) / max(secondSad, 1e-4));
+    float staticRegion = 1.0 - smoothstep(0.02, 0.14, frameDiff);
+    float ambiguity = 1.0 - uniqueness;
+    float damping = ambiguity * (1.0 - textureStrength) * staticRegion;
+    bestMV *= (1.0 - 0.70 * damping);
+
+    float photoSad = EvalSadFrac(pos, localPos, bestMV, invSize, 1e30);
+    float sampleCount = float((2 * BLOCK_R_FRAC + 1) * (2 * BLOCK_R_FRAC + 1));
+    float avgDiff = photoSad / sampleCount;
+    float matchConf = exp(-avgDiff * 9.0);
+    float confidence = matchConf;
+    confidence *= (0.35 + 0.65 * uniqueness);
+    confidence *= lerp(0.55, 1.0, textureStrength);
+    if (frameDiff < 0.02 && dot(bestMV, bestMV) < 0.25) {
+        confidence = max(confidence, 0.90);
+    }
+    confidence = clamp(confidence, 0.05, 0.98);
+
+    MotionOut[id.xy] = bestMV;
     ConfidenceOut[id.xy] = confidence;
 }

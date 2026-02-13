@@ -1820,6 +1820,7 @@ void App::Render() {
       }
       m_interpolator.SetMotionModel(m_motionModel);
       m_interpolator.SetMotionSmoothing(m_motionEdgeScale, m_confidencePower);
+      m_interpolator.SetMinimalMotionPipeline(m_minimalMotionPipeline);
       m_interpolator.SetTemporalStabilization(m_temporalStabilization,
                                               m_temporalHistoryWeight,
                                               m_temporalConfInfluence,
@@ -1861,6 +1862,7 @@ void App::Render() {
         m_interpolator.SetMotionModel(m_motionModel);
         m_interpolator.SetMotionSmoothing(m_motionEdgeScale, m_confidencePower);
         m_interpolator.SetQualityMode(m_interpolationQuality);
+        m_interpolator.SetMinimalMotionPipeline(m_minimalMotionPipeline);
         m_interpolator.SetTemporalStabilization(m_temporalStabilization,
                                                 m_temporalHistoryWeight,
                                                 m_temporalConfInfluence,
@@ -2600,6 +2602,8 @@ void App::RenderUi() {
   }
   ImGui::Checkbox("Interpolation", &m_interpolationEnabled);
   if (ImGui::IsItemHovered()) ImGui::SetTooltip("Enable motion-compensated frame interpolation.\nGenerates new frames between captured frames for smoother output.\nDisable for passthrough (no frame generation).");
+  ImGui::Checkbox("Minimal Motion Pipeline (Fast)", &m_minimalMotionPipeline);
+  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Use only Downsample + Tiny Forward/Backward Motion + Warp.\nSkips refine/smooth/temporal passes for lower GPU load.");
   
   ImGui::Checkbox("Low Latency", &m_lowLatencyMode);
   if (ImGui::IsItemHovered()) ImGui::SetTooltip("Minimize input-to-display latency.\nUses smaller frame buffer and faster timing.\nMay cause occasional stutter if capture is inconsistent.");
@@ -3047,6 +3051,7 @@ void App::ExportDiagnostics() {
   ss << "Never Drop Frames: " << (m_neverDropFrames ? "Yes" : "No") << std::endl;
   ss << "Max Queue Size: " << m_maxQueueSize << std::endl;
   ss << "Temporal Stabilization: " << (m_temporalStabilization ? "Enabled" : "Disabled") << std::endl;
+  ss << "Minimal Motion Pipeline: " << (m_minimalMotionPipeline ? "Enabled" : "Disabled") << std::endl;
 
   std::string filename = "TrueMotion_Diagnostics_" + std::to_string(std::chrono::system_clock::now().time_since_epoch().count()) + ".txt";
   std::ofstream file(filename);

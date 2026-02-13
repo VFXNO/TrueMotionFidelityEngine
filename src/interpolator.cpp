@@ -241,14 +241,15 @@ void Interpolator::Execute(
     confPower = 4.0f;
   }
   interpConstants.confPower = confPower;
-  interpConstants.qualityMode = m_qualityMode;
+  // Minimal mode always uses the cheapest warp sampling path (bilinear).
+  interpConstants.qualityMode = m_useMinimalMotionPipeline ? 0 : m_qualityMode;
   float historyWeight = m_temporalHistoryWeight;
   if (historyWeight < 0.0f) {
     historyWeight = 0.0f;
   } else if (historyWeight > 0.99f) {
     historyWeight = 0.99f;
   }
-  interpConstants.useHistory = m_historyValid ? 1 : 0;
+  interpConstants.useHistory = (!m_useMinimalMotionPipeline && m_historyValid) ? 1 : 0;
   interpConstants.historyWeight = historyWeight;
   float textProtect = m_textProtectStrength;
   if (textProtect < 0.0f) {
@@ -264,17 +265,27 @@ void Interpolator::Execute(
   }
   interpConstants.textProtect = textProtect;
   interpConstants.edgeThreshold = edgeThreshold;
-  // Scale motion vectors from luma-space to color-space (luma is half resolution)
-  interpConstants.motionSampleScale = static_cast<float>(m_inputWidth) / static_cast<float>(m_lumaWidth);
+  if (m_useMinimalMotionPipeline && m_tinyWidth > 0) {
+    // Minimal pipeline: motion comes from tiny pyramid level.
+    interpConstants.motionSampleScale = static_cast<float>(m_inputWidth) / static_cast<float>(m_tinyWidth);
+  } else {
+    // Full pipeline: motion comes from full luma level.
+    interpConstants.motionSampleScale = static_cast<float>(m_inputWidth) / static_cast<float>(m_lumaWidth);
+  }
   m_context->UpdateSubresource(m_interpConstants.Get(), 0, nullptr, &interpConstants, 0, 0);
 
-  // Pure warp path: use direct motion/confidence output without temporal/smoothing blend selection.
-  ID3D11ShaderResourceView* motionSrv = m_motionSrv.Get();
-  ID3D11ShaderResourceView* confSrv = m_confidenceSrv.Get();
+  ID3D11ShaderResourceView* motionSrv =
+      (m_useMinimalMotionPipeline && m_motionTinySrv) ? m_motionTinySrv.Get() : m_motionSrv.Get();
+  ID3D11ShaderResourceView* confSrv =
+      (m_useMinimalMotionPipeline && m_confidenceTinySrv) ? m_confidenceTinySrv.Get() : m_confidenceSrv.Get();
+  ID3D11ShaderResourceView* backwardMotionSrv =
+      (m_useMinimalMotionPipeline && m_motionTinyBackwardSrv) ? m_motionTinyBackwardSrv.Get() : nullptr;
+  ID3D11ShaderResourceView* backwardConfSrv =
+      (m_useMinimalMotionPipeline && m_confidenceTinyBackwardSrv) ? m_confidenceTinyBackwardSrv.Get() : nullptr;
   int historyReadIndex = m_historyIndex;
   ID3D11ShaderResourceView* historySrv =
       (m_historyValid && m_historyColorSrv[historyReadIndex]) ? m_historyColorSrv[historyReadIndex].Get() : nullptr;
-  ID3D11ShaderResourceView* interpSrvs[] = {prev, curr, motionSrv, confSrv, prevDepth, currDepth, historySrv};
+  ID3D11ShaderResourceView* interpSrvs[] = {prev, curr, motionSrv, confSrv, backwardMotionSrv, backwardConfSrv, historySrv};
   ID3D11UnorderedAccessView* interpUavs[] = {m_outputUav.Get()};
   ID3D11Buffer* interpCbs[] = {m_interpConstants.Get()};
   ID3D11SamplerState* samplers[] = {m_linearSampler.Get()};
@@ -293,13 +304,15 @@ void Interpolator::Execute(
   m_context->CSSetSamplers(0, 1, nullSamplers);
   m_context->CSSetShader(nullptr, nullptr, 0);
 
-  if (m_outputTexture && m_historyColor[0]) {
+  if (!m_useMinimalMotionPipeline && m_outputTexture && m_historyColor[0]) {
     int writeIndex = (m_historyIndex + 1) % kHistorySize;
     if (m_historyColor[writeIndex]) {
       m_context->CopyResource(m_historyColor[writeIndex].Get(), m_outputTexture.Get());
       m_historyIndex = writeIndex;
       m_historyValid = true;
     }
+  } else if (m_useMinimalMotionPipeline) {
+    m_historyValid = false;
   }
 }
 
@@ -333,13 +346,15 @@ void Interpolator::Blit(ID3D11ShaderResourceView* src) {
   m_context->CSSetSamplers(0, 1, nullSamplers);
   m_context->CSSetShader(nullptr, nullptr, 0);
 
-  if (m_outputTexture && m_historyColor[0]) {
+  if (!m_useMinimalMotionPipeline && m_outputTexture && m_historyColor[0]) {
     int writeIndex = (m_historyIndex + 1) % kHistorySize;
     if (m_historyColor[writeIndex]) {
       m_context->CopyResource(m_historyColor[writeIndex].Get(), m_outputTexture.Get());
       m_historyIndex = writeIndex;
       m_historyValid = true;
     }
+  } else if (m_useMinimalMotionPipeline) {
+    m_historyValid = false;
   }
 }
 
@@ -369,12 +384,19 @@ void Interpolator::Debug(
   debugConstants.diffScale = diffScale;
   m_context->UpdateSubresource(m_debugConstants.Get(), 0, nullptr, &debugConstants, 0, 0);
 
-  ID3D11ShaderResourceView* motionSrv = m_motionSmoothSrv ? m_motionSmoothSrv.Get() : m_motionSrv.Get();
-  ID3D11ShaderResourceView* confSrv = m_confidenceSmoothSrv ? m_confidenceSmoothSrv.Get() : m_confidenceSrv.Get();
-  if (m_temporalEnabled && m_temporalValid && m_motionTemporalSrv[m_temporalIndex] &&
-      m_confidenceTemporalSrv[m_temporalIndex]) {
-    motionSrv = m_motionTemporalSrv[m_temporalIndex].Get();
-    confSrv = m_confidenceTemporalSrv[m_temporalIndex].Get();
+  ID3D11ShaderResourceView* motionSrv = nullptr;
+  ID3D11ShaderResourceView* confSrv = nullptr;
+  if (m_useMinimalMotionPipeline) {
+    motionSrv = m_motionTinySrv.Get();
+    confSrv = m_confidenceTinySrv.Get();
+  } else {
+    motionSrv = m_motionSmoothSrv ? m_motionSmoothSrv.Get() : m_motionSrv.Get();
+    confSrv = m_confidenceSmoothSrv ? m_confidenceSmoothSrv.Get() : m_confidenceSrv.Get();
+    if (m_temporalEnabled && m_temporalValid && m_motionTemporalSrv[m_temporalIndex] &&
+        m_confidenceTemporalSrv[m_temporalIndex]) {
+      motionSrv = m_motionTemporalSrv[m_temporalIndex].Get();
+      confSrv = m_confidenceTemporalSrv[m_temporalIndex].Get();
+    }
   }
   ID3D11ShaderResourceView* srvs[] = {prev, curr, motionSrv, confSrv};
   ID3D11UnorderedAccessView* uavs[] = {m_outputUav.Get()};
@@ -672,7 +694,12 @@ bool Interpolator::ComputeMotion(
   int refineSmallRadius = 3;
   int refineFullRadius = 2;
 
-  if (model == 0) { // Adaptive
+  if (m_useMinimalMotionPipeline) {
+    // Minimal mode keeps only tiny forward/backward search.
+    // Slightly stronger forward search improves warp quality with modest extra cost.
+    tinyRadiusForward = 2;
+    tinyRadiusBackward = 1;
+  } else if (model == 0) { // Adaptive
     bool hasPrediction = m_useMotionPrediction && m_prevMotionCoarseValid;
     if (!hasPrediction) {
       tinyRadiusForward = 2;
@@ -785,7 +812,7 @@ bool Interpolator::ComputeMotion(
   {
       MotionConstants tinyConstants = {};
       tinyConstants.radius = tinyRadiusForward;
-      tinyConstants.usePrediction = (m_useMotionPrediction && m_prevMotionCoarseValid) ? 1 : 0;
+      tinyConstants.usePrediction = (!m_useMinimalMotionPipeline && m_useMotionPrediction && m_prevMotionCoarseValid) ? 1 : 0;
       tinyConstants.pad[0] = 0.5f; // Prediction Scale: Coarse (1/4) -> Tiny (1/8) is 0.5x
       m_context->UpdateSubresource(m_motionConstants.Get(), 0, nullptr, &tinyConstants, 0, 0);
 
@@ -837,6 +864,14 @@ bool Interpolator::ComputeMotion(
       m_context->CSSetUnorderedAccessViews(0, 2, nullUavs, nullptr);
       ID3D11SamplerState* nullSamplers[] = {nullptr};
       m_context->CSSetSamplers(0, 1, nullSamplers);
+  }
+
+  if (m_useMinimalMotionPipeline) {
+    // Minimal pipeline requested: keep only downsample pyramid + forward/backward motion + warp.
+    m_temporalValid = false;
+    m_temporalIndex = 0;
+    m_prevMotionCoarseValid = false;
+    return true;
   }
 
   // PASS 2: MEDIUM Refine

@@ -1,6 +1,6 @@
 // ============================================================================
-// MOTION SMOOTH v2 - Bilateral Filter (AI-Like Structure Awareness)
-// 5x5 window with Spatial, Color (Luma), and Confidence weights.
+// MOTION SMOOTHING - Light Edge-Preserving Filter
+// Small kernel for minimal smoothing
 // ============================================================================
 
 Texture2D<float2> MotionIn : register(t0);
@@ -15,105 +15,74 @@ cbuffer SmoothCB : register(b0) {
     float2 pad;
 };
 
-// Controls the Gaussian falloff for spatial distance.
-// Specified as denominator D in exp(-dist^2 / D).
-// Value ~2.0 keeps immediate neighbors strong, corners weaker.
-static const float SIGMA_S = 2.0;
-
-// Base denominator for color difference.
-// exp(-diff^2 / sigmaR).
-// Value ~0.1 makes it sensitive to edges (diff > 0.3 becomes negligible).
-static const float BASE_SIGMA_R = 0.1;
-
 [numthreads(16, 16, 1)]
-void CSMain(uint3 id : SV_DispatchThreadID)
-{
+void CSMain(uint3 id : SV_DispatchThreadID) {
     uint w, h;
     MotionIn.GetDimensions(w, h);
     if (id.x >= w || id.y >= h) return;
 
-    int2 centerPos = int2(id.xy);
-
-    // Modulate Sigma Color by Edge Scale.
-    // If edgeScale is high, we allow more blurring (higher sigma).
-    // If edgeScale is low, we preserve edges strictly.
-    // We clamp minimum to avoid division by zero or extreme sensitivity.
-    float sigmaR = BASE_SIGMA_R * max(0.01, edgeScale);
-
-    // Center Data for Comparisons
-    float centerLuma = LumaIn.Load(int3(centerPos, 0));
+    int2 pos = int2(id.xy);
     
-    // Accumulators
-    float2 sumMotion = float2(0, 0);
+    float2 centerMV = MotionIn.Load(int3(pos, 0));
+    float centerConf = ConfIn.Load(int3(pos, 0));
+    float centerLuma = LumaIn.Load(int3(pos, 0));
+    
+    float lL = LumaIn.Load(int3(clamp(pos + int2(-1, 0), int2(0, 0), int2(w - 1, h - 1)), 0));
+    float lR = LumaIn.Load(int3(clamp(pos + int2(1, 0), int2(0, 0), int2(w - 1, h - 1)), 0));
+    float lU = LumaIn.Load(int3(clamp(pos + int2(0, -1), int2(0, 0), int2(w - 1, h - 1)), 0));
+    float lD = LumaIn.Load(int3(clamp(pos + int2(0, 1), int2(0, 0), int2(w - 1, h - 1)), 0));
+    
+    float edgeStrength = abs(lR - lL) + abs(lU - lD);
+    
+    float2 sumMV = float2(0, 0);
     float sumConf = 0.0;
-    float totalWeight = 0.0;
-
-    // 5x5 Window
-    // Loop y: -2 to +2, x: -2 to +2
-    [unroll]
-    for (int y = -2; y <= 2; ++y)
-    {
-        [unroll]
-        for (int x = -2; x <= 2; ++x)
-        {
-            int2 offset = int2(x, y);
-            int2 samplePos = centerPos + offset;
+    float sumW = 0.0;
+    
+    // Optimized: 5x5 Kernel (-2..2) - Sufficient for smoothing, 9x9 was redundant
+    for (int dy = -2; dy <= 2; ++dy) {
+        for (int dx = -2; dx <= 2; ++dx) {
+            int2 sp = clamp(pos + int2(dx, dy), int2(0, 0), int2(w - 1, h - 1));
             
-            // Bounds Check / Clamping
-            // Critical for sampling edges of screen correctly
-            samplePos = clamp(samplePos, int2(0, 0), int2(w - 1, h - 1));
-
-            // Load Neighbor Properties
-            float2 nMotion = MotionIn.Load(int3(samplePos, 0));
-            float nConf = ConfIn.Load(int3(samplePos, 0)); // Confidence 0..1
-            float nLuma = LumaIn.Load(int3(samplePos, 0));
-
-            // 1. Spatial Weight: exp(-dist^2 / sigmaS)
-            // Distance squared from center (0,0) of the window
-            float distSq = dot(float2(offset), float2(offset));
-            float wSpatial = exp(-distSq / SIGMA_S);
-
-            // 2. Color Weight: exp(-diff^2 / sigmaR)
-            // Bilateral component: prevents smoothing across luma edges
-            float lumaDiff = centerLuma - nLuma;
-            float wColor = exp(-(lumaDiff * lumaDiff) / sigmaR);
-
-            // 3. Confidence Weight
-            // Multiply by neighbor's confidence. 
-            // Neighbors with 0 confidence contribute 0 to the sum.
-            // This naturally fills holes (low conf pixels) with data from valid neighbors.
-            float wConf = nConf;
-            // (Optional) Apply power curve from CB if needed: pow(nConf, confPower)
-            // but linear multiplication is robust and stable.
-
-            // Combine weights
-            float weight = wSpatial * wColor * wConf;
-
-            // Accumulate
-            sumMotion += nMotion * weight;
-            sumConf += nConf * weight; 
-            totalWeight += weight;
+            float2 mv = MotionIn.Load(int3(sp, 0));
+            float conf = ConfIn.Load(int3(sp, 0));
+            float luma = LumaIn.Load(int3(sp, 0));
+            
+            // Adjusted sigma for smaller kernel (sigma^2 = 4.0)
+            float spatialW = exp(-float(dx * dx + dy * dy) / 4.0);
+            float lumaDiff = abs(luma - centerLuma);
+            
+            // Restore Edge Awareness to prevent Halos around bright lights
+            // Use a softer Falloff but DO NOT allow free bleeding across high contrast edges
+            float lumaW = exp(-lumaDiff * 4.0); 
+            
+            float2 mvDiff = mv - centerMV;
+            
+            // Re-introduce mild motion similarity weight to prevent blending distinct objects
+            float mvW = exp(-dot(mvDiff, mvDiff) / 64.0); // Very loose tolerance (8px diff)
+            
+            float confW = 0.5 + 4.0 * conf; // Give high confidence pixels DOMINANT weight
+            
+            float weight = spatialW * lumaW * mvW * confW;
+            
+            sumMV += mv * weight;
+            sumConf += conf * weight;
+            sumW += weight;
         }
     }
-
-    // Normalize and Output
-    float2 finalMotion;
-    float finalConf;
-
-    // If we gathered valid data (weight > 0), normalize.
-    if (totalWeight > 1e-6)
-    {
-        finalMotion = sumMotion / totalWeight;
-        finalConf = sumConf / totalWeight;
+    
+    if (sumW > 0.001) {
+        float2 smoothedMV = sumMV / sumW;
+        float smoothedConf = sumConf / sumW;
+        
+        // Use smooth motion almost everywhere, only preserve center if it was VERY confident
+        // and part of a structural edge
+        float preserve = centerConf * smoothstep(0.05, 0.2, edgeStrength);
+        preserve = clamp(preserve, 0.0, 0.4); 
+        
+        MotionOut[id.xy] = lerp(smoothedMV, centerMV, preserve);
+        ConfOut[id.xy] = lerp(smoothedConf, centerConf, preserve * 0.5);
+    } else {
+        MotionOut[id.xy] = centerMV;
+        ConfOut[id.xy] = centerConf;
     }
-    else
-    {
-        // Fallback: If area is completely invalid (all 0 confidence)
-        // or weights excessively suppressed, pass through center.
-        finalMotion = MotionIn.Load(int3(centerPos, 0));
-        finalConf = ConfIn.Load(int3(centerPos, 0));
-    }
-
-    MotionOut[id.xy] = finalMotion;
-    ConfOut[id.xy] = finalConf;
 }

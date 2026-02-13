@@ -1,13 +1,14 @@
 // ============================================================================
-// PROFESSIONAL MOTION REFINEMENT - Full Resolution
-// Sub-pixel accurate refinement with artifact prevention
-// Author: Professional Shader Engineer
+// MOTION REFINEMENT - Robust local refinement with consistency checks
+// Tuned for lower cost while preserving visual quality.
 // ============================================================================
 
-Texture2D<float> PrevLuma : register(t0);
-Texture2D<float> CurrLuma : register(t1);
+Texture2D<float> CurrLuma : register(t0);
+Texture2D<float> PrevLuma : register(t1);
 Texture2D<float2> CoarseMotion : register(t2);
 Texture2D<float> CoarseConf : register(t3);
+Texture2D<float2> BackwardMotion : register(t4);
+Texture2D<float> BackwardConf : register(t5);
 RWTexture2D<float2> MotionOut : register(u0);
 RWTexture2D<float> ConfidenceOut : register(u1);
 
@@ -16,274 +17,234 @@ SamplerState LinearClamp : register(s0);
 cbuffer RefineCB : register(b0) {
     int radius;
     float motionScale;
-    float2 pad;
+    int useBackward;
+    float backwardScale;
 };
 
-// ============================================================================
-// CONSTANTS - Tuned for smooth, artifact-free motion
-// ============================================================================
-static const float SUBPIXEL_STEP = 0.5;
-static const float CONF_SCALE = 4.5;
-static const float SMALL_OBJECT_WEIGHT = 3.0;      // Center pixel importance
-static const float SMOOTHNESS_PENALTY = 0.0015;    // Deviation from coarse penalty
-static const float NEIGHBOR_CONSISTENCY_WEIGHT = 0.4;  // Weight for neighbor agreement
+#define REFINE_R_INT 2
+#define REFINE_R_FRAC 2
 
-// Gaussian weights for 5x5 patch (sigma=1.2) - wider for smoother matching
-static const float kGaussian5x5[25] = {
-    0.0183, 0.0335, 0.0415, 0.0335, 0.0183,
-    0.0335, 0.0613, 0.0760, 0.0613, 0.0335,
-    0.0415, 0.0760, 0.0943, 0.0760, 0.0415,
-    0.0335, 0.0613, 0.0760, 0.0613, 0.0335,
-    0.0183, 0.0335, 0.0415, 0.0335, 0.0183
+static const float kKernel5x5[25] = {
+    0.30, 0.30, 0.30, 0.30, 0.30,
+    0.30, 0.55, 0.55, 0.55, 0.30,
+    0.30, 0.55, 1.00, 0.55, 0.30,
+    0.30, 0.55, 0.55, 0.55, 0.30,
+    0.30, 0.30, 0.30, 0.30, 0.30
 };
 
-// ============================================================================
-// HELPER: Bilinear luma sampling
-// ============================================================================
-float SampleLuma(Texture2D<float> tex, float2 pos, float2 size) {
-    float2 clamped = clamp(pos, float2(0.5, 0.5), size - float2(0.5, 0.5));
-    float2 uv = clamped / size;
-    return tex.SampleLevel(LinearClamp, uv, 0);
+float KernelWeight5x5(int bx, int by) {
+    return kKernel5x5[(by + 2) * 5 + (bx + 2)];
 }
 
-// ============================================================================
-// HELPER: Enhanced patch cost with adaptive weighting
-// ============================================================================
-float ComputePatchCost(int2 currBase, float2 offset, float centerLuma,
-                       uint width, uint height, float localVariance)
-{
-    float2 size = float2(width, height);
-    
-    // Sample center for DC offset (zero-mean matching)
-    float2 prevCenterPos = float2(currBase) + offset;
-    float prevCenterLuma = SampleLuma(PrevLuma, prevCenterPos, size);
-    float dcOffset = prevCenterLuma - centerLuma;
-    
-    float cost = 0.0;
-    float weightSum = 0.0;
-    
-    // Adaptive patch size based on local variance
-    // Low variance (flat) = larger effective patch for stability
-    // High variance (texture) = smaller effective patch for accuracy
-    float patchSizeModifier = lerp(1.2, 0.9, saturate(localVariance * 10.0));
-    
-    // 5x5 patch matching with Gaussian weighting
-    [unroll]
-    for (int dy = -2; dy <= 2; ++dy) {
-        [unroll]
-        for (int dx = -2; dx <= 2; ++dx) {
-            int idx = (dy + 2) * 5 + (dx + 2);
-            float baseWeight = kGaussian5x5[idx];
-            
-            // Extra weight for center region (helps small objects)
-            float centerBoost = (abs(dx) <= 1 && abs(dy) <= 1) ? SMALL_OBJECT_WEIGHT : 1.0;
-            float weight = baseWeight * centerBoost * patchSizeModifier;
-            
-            // Sample current and previous
-            int2 currPos = clamp(currBase + int2(dx, dy), int2(0, 0), int2(width - 1, height - 1));
-            float currVal = CurrLuma.Load(int3(currPos, 0));
-            
-            float2 prevPos = float2(currBase) + offset + float2(dx, dy);
-            float prevVal = SampleLuma(PrevLuma, prevPos, size);
-            
-            // Zero-mean SAD with SSD component for robustness
-            float diff = (prevVal - currVal) - dcOffset;
-            float sad = abs(diff);
-            float ssd = diff * diff;
-            
-            // Combine SAD and SSD (SSD penalizes large errors more)
-            cost += (sad * 0.6 + sqrt(ssd) * 0.4) * weight;
-            weightSum += weight;
-        }
-    }
-    
-    return cost / max(weightSum, 0.001);
+float RobustDiff(float a, float b) {
+    return min(abs(a - b), 0.30);
 }
 
-// ============================================================================
-// HELPER: Compute local variance for adaptive processing
-// ============================================================================
-float ComputeLocalVariance(int2 base, float centerLuma, uint width, uint height)
-{
-    float variance = 0.0;
-    
-    [unroll]
-    for (int dy = -1; dy <= 1; ++dy) {
-        [unroll]
-        for (int dx = -1; dx <= 1; ++dx) {
-            int2 pos = clamp(base + int2(dx, dy), int2(0, 0), int2(width - 1, height - 1));
-            float val = CurrLuma.Load(int3(pos, 0));
-            variance += abs(val - centerLuma);
-        }
-    }
-    
-    return variance / 9.0;
+float MotionPenalty(float2 mv) {
+    float2 a = abs(mv);
+    float hi = max(a.x, a.y);
+    float lo = min(a.x, a.y);
+    return hi + lo * 0.5;
 }
 
-// ============================================================================
-// HELPER: Sub-pixel refinement using parabola fitting
-// ============================================================================
-float2 SubPixelRefine(int2 base, float2 intOffset, uint width, uint height, 
-                      float centerLuma, float localVariance)
-{
-    // Sample costs at half-pixel offsets
-    float costC = ComputePatchCost(base, intOffset, centerLuma, width, height, localVariance);
-    float costL = ComputePatchCost(base, intOffset + float2(-SUBPIXEL_STEP, 0), centerLuma, width, height, localVariance);
-    float costR = ComputePatchCost(base, intOffset + float2(SUBPIXEL_STEP, 0), centerLuma, width, height, localVariance);
-    float costU = ComputePatchCost(base, intOffset + float2(0, -SUBPIXEL_STEP), centerLuma, width, height, localVariance);
-    float costD = ComputePatchCost(base, intOffset + float2(0, SUBPIXEL_STEP), centerLuma, width, height, localVariance);
-    
-    // Parabola fitting
-    float denomX = costL + costR - 2.0 * costC;
-    float denomY = costU + costD - 2.0 * costC;
-    
-    float subX = (abs(denomX) > 1e-5) ? (SUBPIXEL_STEP * (costL - costR) / denomX) : 0.0;
-    float subY = (abs(denomY) > 1e-5) ? (SUBPIXEL_STEP * (costU - costD) / denomY) : 0.0;
-    
-    // Clamp sub-pixel offset and apply confidence-based damping
-    // Larger sub-pixel corrections are less reliable
-    float subMag = length(float2(subX, subY));
-    float damping = saturate(1.0 - subMag * 0.5);
-    
-    subX = clamp(subX * damping, -SUBPIXEL_STEP, SUBPIXEL_STEP);
-    subY = clamp(subY * damping, -SUBPIXEL_STEP, SUBPIXEL_STEP);
-    
-    return intOffset + float2(subX, subY);
-}
+float EvalSadInt(int2 pos, int2 mv, uint w, uint h, float cutoff) {
+    float sad = 0.0;
+    int2 maxPos = int2(int(w) - 1, int(h) - 1);
 
-// ============================================================================
-// HELPER: Check neighbor motion consistency
-// ============================================================================
-float ComputeNeighborConsistency(float2 motion, float2 uv, float2 invSize)
-{
-    float2 neighbors[4];
-    neighbors[0] = CoarseMotion.SampleLevel(LinearClamp, uv + float2(-1, 0) * invSize, 0);
-    neighbors[1] = CoarseMotion.SampleLevel(LinearClamp, uv + float2(1, 0) * invSize, 0);
-    neighbors[2] = CoarseMotion.SampleLevel(LinearClamp, uv + float2(0, -1) * invSize, 0);
-    neighbors[3] = CoarseMotion.SampleLevel(LinearClamp, uv + float2(0, 1) * invSize, 0);
-    
-    float consistency = 0.0;
-    float motionMag = length(motion);
-    
-    [unroll]
-    for (int i = 0; i < 4; ++i) {
-        float nMag = length(neighbors[i]);
-        float magSim = 1.0 - abs(motionMag - nMag) / (max(motionMag, nMag) + 0.5);
-        
-        float dirSim = 1.0;
-        if (motionMag > 0.3 && nMag > 0.3) {
-            dirSim = dot(normalize(motion), normalize(neighbors[i])) * 0.5 + 0.5;
-        }
-        
-        consistency += magSim * dirSim * 0.25;
-    }
-    
-    return consistency;
-}
-
-// ============================================================================
-// MAIN ENTRY POINT
-// ============================================================================
-[numthreads(16, 16, 1)]
-void CSMain(uint3 id : SV_DispatchThreadID) {
-    uint width, height;
-    CurrLuma.GetDimensions(width, height);
-    
-    if (id.x >= width || id.y >= height) return;
-    
-    int2 base = int2(id.xy);
-    float centerLuma = CurrLuma.Load(int3(base, 0));
-    
-    // Compute local variance for adaptive processing
-    float localVariance = ComputeLocalVariance(base, centerLuma, width, height);
-    
-    // ========================================================================
-    // STEP 1: Get coarse motion prediction (upscaled with bilinear interpolation)
-    // ========================================================================
-    uint cw, ch;
-    CoarseMotion.GetDimensions(cw, ch);
-    
-    float2 uv = (float2(id.xy) + 0.5) / float2(width, height);
-    float2 invSize = 1.0 / float2(width, height);
-    float2 coarse = CoarseMotion.SampleLevel(LinearClamp, uv, 0);
-    float coarseConf = CoarseConf.SampleLevel(LinearClamp, uv, 0);
-    
-    // Scale coarse motion to full resolution
-    float2 pred = coarse * motionScale;
-    int2 baseOffset = int2(round(pred));
-    
-    // ========================================================================
-    // STEP 2: Adaptive search radius based on coarse confidence
-    // Low confidence = wider search, high confidence = narrow search
-    // ========================================================================
-    int searchRadius = (int)lerp(float(max(radius, 2)), float(max((uint)radius / 2u, 1u)), coarseConf);
-    searchRadius = clamp(searchRadius, 1, 5);
-    
-    // ========================================================================
-    // STEP 3: Integer-pixel search around prediction
-    // ========================================================================
-    float bestCost = 1e9;
-    int2 bestOffset = baseOffset;
-    
-    for (int dy = -searchRadius; dy <= searchRadius; ++dy) {
-        for (int dx = -searchRadius; dx <= searchRadius; ++dx) {
-            int2 offset = baseOffset + int2(dx, dy);
-            float cost = ComputePatchCost(base, float2(offset), centerLuma, width, height, localVariance);
-            
-            // Distance penalty - prefer staying close to coarse prediction for smoothness
-            float dist = length(float2(dx, dy));
-            cost += dist * SMOOTHNESS_PENALTY;
-            
-            // Higher penalty for low-confidence coarse predictions
-            cost += dist * (1.0 - coarseConf) * SMOOTHNESS_PENALTY * 2.0;
-            
-            if (cost < bestCost) {
-                bestCost = cost;
-                bestOffset = offset;
+    [loop]
+    for (int by = -REFINE_R_INT; by <= REFINE_R_INT; ++by) {
+        [loop]
+        for (int bx = -REFINE_R_INT; bx <= REFINE_R_INT; ++bx) {
+            int2 cPos = clamp(pos + int2(bx, by), int2(0, 0), maxPos);
+            int2 pPos = clamp(pos + int2(bx, by) + mv, int2(0, 0), maxPos);
+            float cVal = CurrLuma.Load(int3(cPos, 0));
+            float pVal = PrevLuma.Load(int3(pPos, 0));
+            sad += RobustDiff(cVal, pVal) * KernelWeight5x5(bx, by);
+            if (sad > cutoff) {
+                return sad;
             }
         }
     }
-    
-    // ========================================================================
-    // STEP 4: Sub-pixel refinement
-    // ========================================================================
-    float2 refined = SubPixelRefine(base, float2(bestOffset), width, height, centerLuma, localVariance);
-    
-    // ========================================================================
-    // STEP 5: Compute confidence with multiple factors
-    // ========================================================================
-    float finalCost = ComputePatchCost(base, refined, centerLuma, width, height, localVariance);
-    float matchConf = exp(-finalCost * CONF_SCALE);
-    
-    // Check neighbor consistency for artifact suppression
-    float neighborConsistency = ComputeNeighborConsistency(refined, uv, invSize);
-    
-    // Combine confidence factors
-    float confidence = matchConf;
-    
-    // Reduce confidence if motion disagrees with neighbors (potential artifact)
-    confidence *= lerp(0.5, 1.0, neighborConsistency);
-    
-    // Blend with coarse confidence (provides temporal stability)
-    float coarseWeight = saturate(coarseConf * 0.6 + 0.4);
-    confidence *= coarseWeight;
-    
-    // Low-texture regions need lower confidence (less reliable matching)
-    float textureConf = saturate(localVariance * 15.0 + 0.3);
-    confidence *= textureConf;
-    
-    confidence = saturate(confidence);
-    
-    // ========================================================================
-    // STEP 6: Smooth blend with coarse motion for stability
-    // If our refinement is uncertain, stay closer to coarse prediction
-    // ========================================================================
-    float blendWeight = saturate(confidence * neighborConsistency);
-    float2 finalMotion = lerp(pred, refined, blendWeight * 0.7 + 0.3);
-    
-    // ========================================================================
-    // OUTPUT
-    // ========================================================================
-    MotionOut[id.xy] = finalMotion;
+
+    return sad;
+}
+
+float EvalSadFrac(int2 pos, float2 mv, uint w, uint h, float2 invSize, float cutoff) {
+    float sad = 0.0;
+    int2 maxPos = int2(int(w) - 1, int(h) - 1);
+
+    [loop]
+    for (int by = -REFINE_R_FRAC; by <= REFINE_R_FRAC; ++by) {
+        [loop]
+        for (int bx = -REFINE_R_FRAC; bx <= REFINE_R_FRAC; ++bx) {
+            int2 cPos = clamp(pos + int2(bx, by), int2(0, 0), maxPos);
+            float cVal = CurrLuma.Load(int3(cPos, 0));
+
+            float2 pPos = float2(cPos) + 0.5 + mv;
+            float2 pUv = clamp(pPos * invSize, 0.0, 0.999);
+            float pVal = PrevLuma.SampleLevel(LinearClamp, pUv, 0);
+
+            sad += RobustDiff(cVal, pVal) * KernelWeight5x5(bx, by);
+            if (sad > cutoff) {
+                return sad;
+            }
+        }
+    }
+
+    return sad;
+}
+
+float EvalBackwardPenalty(float2 mv, int2 pos, float2 invSize) {
+    if (useBackward == 0) {
+        return 0.0;
+    }
+
+    float2 matchPos = float2(pos) + 0.5 + mv;
+    float2 matchUv = clamp(matchPos * invSize, 0.0, 0.999);
+    float2 backMV = BackwardMotion.SampleLevel(LinearClamp, matchUv, 0).xy * backwardScale;
+    float backConf = saturate(BackwardConf.SampleLevel(LinearClamp, matchUv, 0));
+    float consistency = MotionPenalty(mv + backMV);
+    return consistency * lerp(0.06, 0.20, backConf);
+}
+
+void UpdateBest(float cost, float2 mv, inout float bestCost, inout float2 bestMV, inout float secondCost) {
+    if (cost < bestCost) {
+        secondCost = bestCost;
+        bestCost = cost;
+        bestMV = mv;
+    } else if (cost < secondCost) {
+        secondCost = cost;
+    }
+}
+
+[numthreads(16, 16, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID) {
+    uint w, h;
+    CurrLuma.GetDimensions(w, h);
+    if (id.x >= w || id.y >= h) {
+        return;
+    }
+
+    int2 pos = int2(id.xy);
+    float2 invSize = 1.0 / float2(w, h);
+    float2 uv = (float2(pos) + 0.5) * invSize;
+
+    float2 coarseMV = CoarseMotion.SampleLevel(LinearClamp, uv, 0).xy * motionScale;
+    float coarseConf = saturate(CoarseConf.SampleLevel(LinearClamp, uv, 0));
+
+    int searchR = clamp(radius, 1, 4);
+    if (coarseConf > 0.85) {
+        searchR = min(searchR, 2);
+    } else if (coarseConf > 0.70) {
+        searchR = min(searchR, 3);
+    }
+    float regWeight = lerp(0.10, 0.03, coarseConf);
+
+    float bestSad = 1e9;
+    float secondSad = 1e9;
+    float2 bestMV = coarseMV;
+
+    // Fast-path: high-confidence near-static coarse vectors usually do not need expensive refinement.
+    if (coarseConf > 0.94 && dot(coarseMV, coarseMV) < 0.04) {
+        MotionOut[id.xy] = coarseMV;
+        ConfidenceOut[id.xy] = max(coarseConf, 0.95);
+        return;
+    }
+
+    float coarseSad = EvalSadFrac(pos, coarseMV, w, h, invSize, 1e30);
+    coarseSad += EvalBackwardPenalty(coarseMV, pos, invSize);
+    UpdateBest(coarseSad, coarseMV, bestSad, bestMV, secondSad);
+
+    // Integer neighborhood around coarse estimate.
+    int2 baseMV = int2(round(coarseMV));
+    [loop]
+    for (int dyI = -searchR; dyI <= searchR; ++dyI) {
+        [loop]
+        for (int dxI = -searchR; dxI <= searchR; ++dxI) {
+            int2 testMV = baseMV + int2(dxI, dyI);
+            float2 testMVf = float2(testMV);
+            float sad = EvalSadInt(pos, testMV, w, h, secondSad);
+            if (sad >= secondSad) {
+                continue;
+            }
+            sad += MotionPenalty(testMVf - coarseMV) * regWeight;
+            if (sad >= secondSad) {
+                continue;
+            }
+            sad += EvalBackwardPenalty(testMVf, pos, invSize);
+            UpdateBest(sad, testMVf, bestSad, bestMV, secondSad);
+        }
+    }
+
+    // Half-pixel refinement around current best.
+    float halfStartSad = bestSad;
+    float2 halfCenter = bestMV;
+    float2 mvLimit = float2(searchR + 1, searchR + 1);
+    [loop]
+    for (int dyH = -1; dyH <= 1; ++dyH) {
+        [loop]
+        for (int dxH = -1; dxH <= 1; ++dxH) {
+            if (dxH == 0 && dyH == 0) {
+                continue;
+            }
+
+            float2 testMV = halfCenter + float2(dxH, dyH) * 0.5;
+            testMV = clamp(testMV, coarseMV - mvLimit, coarseMV + mvLimit);
+            float sad = EvalSadFrac(pos, testMV, w, h, invSize, secondSad);
+            if (sad >= secondSad) {
+                continue;
+            }
+            sad += MotionPenalty(testMV - coarseMV) * (regWeight * 0.75);
+            if (sad >= secondSad) {
+                continue;
+            }
+            sad += EvalBackwardPenalty(testMV, pos, invSize);
+            UpdateBest(sad, testMV, bestSad, bestMV, secondSad);
+        }
+    }
+
+    // Quarter-pixel refinement can be skipped on stable converged pixels.
+    float halfGain = halfStartSad - bestSad;
+    bool runQuarter = (halfGain > (halfStartSad * 0.003)) || (coarseConf < 0.70) || (dot(bestMV - coarseMV, bestMV - coarseMV) > 0.04);
+    if (runQuarter) {
+        float2 quarterCenter = bestMV;
+        [loop]
+        for (int dyQ = -1; dyQ <= 1; ++dyQ) {
+            [loop]
+            for (int dxQ = -1; dxQ <= 1; ++dxQ) {
+                if (dxQ == 0 && dyQ == 0) {
+                    continue;
+                }
+
+                float2 testMV = quarterCenter + float2(dxQ, dyQ) * 0.25;
+                testMV = clamp(testMV, coarseMV - mvLimit, coarseMV + mvLimit);
+                float sad = EvalSadFrac(pos, testMV, w, h, invSize, secondSad);
+                if (sad >= secondSad) {
+                    continue;
+                }
+                sad += MotionPenalty(testMV - coarseMV) * (regWeight * 0.6);
+                if (sad >= secondSad) {
+                    continue;
+                }
+                sad += EvalBackwardPenalty(testMV, pos, invSize);
+                UpdateBest(sad, testMV, bestSad, bestMV, secondSad);
+            }
+        }
+    }
+
+    float uniqueness = saturate((secondSad - bestSad) / max(secondSad, 1e-4));
+    float ambiguity = 1.0 - uniqueness;
+    float snapBack = ambiguity * (1.0 - coarseConf);
+    bestMV = lerp(bestMV, coarseMV, snapBack * 0.6);
+
+    float photoSad = EvalSadFrac(pos, bestMV, w, h, invSize, 1e30);
+    float sampleCount = float((2 * REFINE_R_FRAC + 1) * (2 * REFINE_R_FRAC + 1));
+    float avgDiff = photoSad / sampleCount;
+    float matchConf = exp(-avgDiff * 8.0);
+    float confidence = matchConf * (0.4 + 0.6 * uniqueness);
+    confidence = lerp(confidence, coarseConf, 0.35);
+    confidence = clamp(confidence, 0.05, 0.98);
+
+    MotionOut[id.xy] = bestMV;
     ConfidenceOut[id.xy] = confidence;
 }

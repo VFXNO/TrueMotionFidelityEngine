@@ -1,0 +1,9 @@
+
+=== StartWindowCapture called ===
+hwnd: 00000000001304C4
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC capture started successfully
+StartWindowCapture returning true

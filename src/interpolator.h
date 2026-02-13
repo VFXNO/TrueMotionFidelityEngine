@@ -27,6 +27,7 @@ public:
     m_smoothConfPower = confPower;
   }
   void SetQualityMode(int qualityMode) { m_qualityMode = qualityMode; }
+  void SetMinimalMotionPipeline(bool enabled) { m_useMinimalMotionPipeline = enabled; }
   void SetTemporalStabilization(bool enabled, float historyWeight, float confInfluence, int neighborhoodSize) {
     m_temporalEnabled = enabled;
     m_temporalHistoryWeight = historyWeight;
@@ -183,6 +184,7 @@ private:
   float m_confPower = 1.0f;
   float m_smoothEdgeScale = 6.0f;
   float m_smoothConfPower = 1.0f;
+  bool m_useMinimalMotionPipeline = true;
   bool m_temporalEnabled = true;
   bool m_temporalValid = false;
   int m_temporalIndex = 0;
