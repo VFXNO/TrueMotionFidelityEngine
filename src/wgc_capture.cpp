@@ -133,7 +133,7 @@ bool WgcCapture::StartCapture(HWND hwnd) {
     m_height = size.Height;
 
     // Use appropriate frame pool size based on latency mode
-    int poolSize = m_lowLatencyMode ? kFramePoolSizeLowLatency : kFramePoolSizeNormal;
+    int poolSize = kFramePoolSizeLowLatency;
     
     m_framePool = Direct3D11CaptureFramePool::CreateFreeThreaded(
         m_winrtDevice,
@@ -186,11 +186,6 @@ bool WgcCapture::StartCapture(HWND hwnd) {
     m_prevFrameQpc = 0;
     m_frameIntervalSum = 0.0;
     m_frameIntervalCount = 0;
-
-    // Start the dedicated capture thread
-    m_stopThread = false;
-    m_threadActive = true;
-    m_captureThread = std::thread(&WgcCapture::CaptureThreadLoop, this);
 
     return true;
   } catch (const winrt::hresult_error& e) {
@@ -247,7 +242,7 @@ bool WgcCapture::StartCaptureMonitor(HMONITOR monitor) {
     m_height = size.Height;
 
     // Use appropriate frame pool size based on latency mode
-    int poolSize = m_lowLatencyMode ? kFramePoolSizeLowLatency : kFramePoolSizeNormal;
+    int poolSize = kFramePoolSizeLowLatency;
 
     m_framePool = Direct3D11CaptureFramePool::CreateFreeThreaded(
         m_winrtDevice,
@@ -288,11 +283,6 @@ bool WgcCapture::StartCaptureMonitor(HMONITOR monitor) {
     m_frameIntervalSum = 0.0;
     m_frameIntervalCount = 0;
     
-    // Start the dedicated capture thread
-    m_stopThread = false;
-    m_threadActive = true;
-    m_captureThread = std::thread(&WgcCapture::CaptureThreadLoop, this);
-
     return true;
   } catch (...) {
     m_hasError = true;
@@ -302,14 +292,6 @@ bool WgcCapture::StartCaptureMonitor(HMONITOR monitor) {
 }
 
 void WgcCapture::StopCapture() {
-  // Signal thread to stop
-  m_stopThread = true;
-  m_frameCv.notify_all();
-  if (m_captureThread.joinable()) {
-    m_captureThread.join();
-  }
-  m_threadActive = false;
-
   if (m_framePool) {
     m_framePool.FrameArrived(m_frameArrivedToken);
   }
@@ -321,9 +303,6 @@ void WgcCapture::StopCapture() {
   if (m_framePool) {
     m_framePool.Close();
   }
-
-  m_nextFrame = nullptr;
-  m_nextFrameReady = false;
 
   m_item = nullptr;
   m_session = nullptr;
@@ -380,25 +359,20 @@ void WgcCapture::UpdateFrameTiming(int64_t frameQpc) {
 }
 
 bool WgcCapture::AcquireNextFrame(CapturedFrame& frame) {
-  // Check if the capture thread has provided a new frame
-  winrt::Windows::Graphics::Capture::Direct3D11CaptureFrame captureFrame{nullptr};
+  if (!m_framePool) return false;
+
+  winrt::Windows::Graphics::Capture::Direct3D11CaptureFrame latestFrame{nullptr};
   
-  {
-      std::lock_guard<std::mutex> lock(m_frameMutex);
-      if (!m_nextFrameReady) {
-          return false;
-      }
-      captureFrame = m_nextFrame;
-      m_nextFrameReady = false; // Consumed
-      // We keep m_nextFrame holding the object until next replacement or here? 
-      // Actually we should clear it so we don't hold prolonged references, 
-      // BUT we want the thread to be able to overwrite it efficiently.
-      m_nextFrame = nullptr; 
+  // Drain the pool to get the absolute latest frame
+  while (true) {
+      auto f = m_framePool.TryGetNextFrame();
+      if (!f) break;
+      latestFrame = f;
   }
 
-  if (!captureFrame) return false;
+  if (!latestFrame) return false;
 
-  return ProcessFrame(captureFrame, frame);
+  return ProcessFrame(latestFrame, frame);
 }
 
 bool WgcCapture::ProcessFrame(winrt::Windows::Graphics::Capture::Direct3D11CaptureFrame const& captureFrame, CapturedFrame& frame) {
@@ -408,7 +382,7 @@ bool WgcCapture::ProcessFrame(winrt::Windows::Graphics::Capture::Direct3D11Captu
   if (size.Width != m_width || size.Height != m_height) {
     m_width = size.Width;
     m_height = size.Height;
-    int poolSize = m_lowLatencyMode ? kFramePoolSizeLowLatency : kFramePoolSizeNormal;
+    int poolSize = kFramePoolSizeLowLatency;
     // Note: Recreating pool might race with the capture thread if not careful.
     // Ideally we should signal the thread to pause, but WGC handles pool recreation fairly robustly.
     // However, since we are on the Main Thread here, and Capture Thread uses m_framePool...
@@ -468,12 +442,7 @@ bool WgcCapture::AcquireLatestFrame(CapturedFrame& frame) {
 void WgcCapture::OnFrameArrived(
     Direct3D11CaptureFramePool const&,
     winrt::Windows::Foundation::IInspectable const&) {
-  // Just notify the dedicated thread
-  {
-      std::lock_guard<std::mutex> lock(m_frameMutex);
-      m_newFrameEvent = true;
-  }
-  m_frameCv.notify_one();
+  // No-op: we drain the pool directly in AcquireNextFrame
 }
 
 void WgcCapture::EnsureCaptureTexture(int width, int height) {
@@ -496,34 +465,4 @@ void WgcCapture::EnsureCaptureTexture(int width, int height) {
   desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 
   m_device->CreateTexture2D(&desc, nullptr, &m_captureTexture);
-}
-
-void WgcCapture::CaptureThreadLoop() {
-  while (!m_stopThread) {
-    std::unique_lock<std::mutex> lock(m_frameMutex);
-    m_frameCv.wait(lock, [this] { return m_stopThread || m_newFrameEvent; });
-
-    if (m_stopThread) break;
-    
-    m_newFrameEvent = false;
-
-    if (!m_framePool) {
-        continue;
-    }
-
-    // Use TryGetNextFrame loop to drain old frames and get the NEWEST one immediately
-    winrt::Windows::Graphics::Capture::Direct3D11CaptureFrame latestFrame{nullptr};
-    
-    // We only want the absolute latest frame. Discard older ones.
-    while (true) {
-        auto frame = m_framePool.TryGetNextFrame();
-        if (!frame) break;
-        latestFrame = frame;
-    }
-
-    if (latestFrame) {
-        m_nextFrame = latestFrame;
-        m_nextFrameReady = true;
-    }
-  }
 }

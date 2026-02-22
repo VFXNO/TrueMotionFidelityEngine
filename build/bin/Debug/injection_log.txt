@@ -1,0 +1,6 @@
+InjectByHook: threadId=13092, dllPath=C:\Users\vfxno\Downloads\TrueMotionFidelityEngine-main\build\bin\Debug\graphics_hook64_v2.dll
+DLL loaded into self: module=00007FFDFEF80000
+Found DummyHookProc at 00007FFDFEF81109
+Hook installed successfully: hook=000000001E750B59
+Posted WM_NULL to window 00000000002704FE on thread 13092
+Hook injection completed (hook removed, dll freed locally)

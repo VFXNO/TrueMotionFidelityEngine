@@ -362,6 +362,7 @@ bool App::StartWindowCapture(HWND hwnd) {
   m_windowCaptureUsingWgc = false;
   m_captureWindowBehindOutput = false;
   m_zOrderCaptureWindow = nullptr;
+  m_lastSmoothedTime = 0;
 
   HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
   log << "Monitor handle: " << (void*)monitor << "\n";
@@ -374,8 +375,6 @@ bool App::StartWindowCapture(HWND hwnd) {
 
   if (useWgc) {
     log << "Trying WGC capture...\n";
-    m_capture.SetLowLatencyMode(m_wgcLowLatencyMode);
-    m_capture.SetPreferNewestFrame(m_wgcPreferNewest);
     if (m_capture.StartCapture(hwnd)) {
       m_windowCaptureUsingWgc = true;
       log << "WGC capture started successfully\n";
@@ -405,9 +404,6 @@ bool App::StartWindowCapture(HWND hwnd) {
       return false;
     }
     log << "OutputForMonitor succeeded\n";
-
-    // Apply Low Latency settings to DXGI capture as well
-    m_dupCapture.SetPreferNewestFrame(m_wgcPreferNewest);
 
     if (!m_dupCapture.StartCapture(hwnd, output, outputRect)) {
       log << "Error: dupCapture.StartCapture failed\n";
@@ -461,8 +457,6 @@ bool App::StartMonitorCapture(HMONITOR monitor) {
       return false;
     }
 
-    m_dupCapture.SetPreferNewestFrame(m_wgcPreferNewest);
-
     // Pass the window we're cropping to, if available
     HWND hwnd = m_captureWindow;
     if (!hwnd || !IsWindow(hwnd)) {
@@ -472,8 +466,6 @@ bool App::StartMonitorCapture(HMONITOR monitor) {
 
   } else {
     // Windows Graphics Capture
-    m_capture.SetLowLatencyMode(m_wgcLowLatencyMode);
-    m_capture.SetPreferNewestFrame(m_wgcPreferNewest);
     return m_capture.StartCaptureMonitor(monitor);
   }
 }
@@ -492,6 +484,7 @@ void App::ResetCaptureState() {
   m_currFrameTime100ns = 0;
   m_timeOffsetValid = false;
   m_timeOffset100ns = 0.0;
+  m_lastSmoothedTime = 0;
   m_avgFrameInterval = 0.0;
   m_wgcFrameArrivalTime = 0.0;
   m_wgcFrameArrivalCount = 0;
@@ -508,14 +501,12 @@ void App::ResetCaptureState() {
   m_previewInputActive = false;
   m_captureWindowBehindOutput = false;
   m_zOrderCaptureWindow = nullptr;
-  m_interpolator.ResetTemporal();
   
   // Release cursor confinement when stopping capture
   if (m_cursorConfined) {
     ClipCursor(nullptr);
     m_cursorConfined = false;
   }
-  m_lastMousePos = {0, 0};
 }
 
 void App::UpdateOutputOverlayWindow() {
@@ -1097,15 +1088,6 @@ void App::Update() {
      m_monitorDirty = false;
    }
 
-   // Text Preservation Mode - adjust parameters for reduced text flickering
-   if (m_textPreservationMode) {
-     m_temporalHistoryWeight = 0.05f;
-     m_temporalConfInfluence = 0.3f;
-     m_temporalNeighborhoodSize = 1;
-     m_motionEdgeScale = 10.0f;
-     m_confidencePower = 2.0f;
-   }
-
    // Removed explicit waitable object wait here as it was causing sluggishness.
   // We rely on Present() for pacing (if VSync is on) or run unlocked (if VSync is off).
 
@@ -1116,13 +1098,7 @@ void App::UpdateCapture() {
   int processed = 0;
   constexpr int kMaxFramesPerUpdate = 180;
   int maxFramesPerUpdate = kMaxFramesPerUpdate;
-  bool neverDropMode = m_neverDropFrames;
-  int maxQueueSize = neverDropMode ? m_maxQueueSize : 3;
-  if (maxQueueSize < 2) {
-    maxQueueSize = 2;
-  } else if (maxQueueSize > kFrameQueueSize) {
-    maxQueueSize = kFrameQueueSize;
-  }
+  int maxQueueSize = 3;
 
   if (m_captureMode == 0 && m_captureWindow) {
     if (!IsWindow(m_captureWindow)) {
@@ -1160,9 +1136,6 @@ void App::UpdateCapture() {
   }
 
   while (processed < maxFramesPerUpdate) {
-    if (neverDropMode && static_cast<int>(m_frameQueue.size()) >= maxQueueSize) {
-      break;
-    }
     CapturedFrame frame;
     bool gotFrame = false;
     if (m_captureMode == 0) {
@@ -1343,7 +1316,7 @@ void App::UpdateCapture() {
       }
     }
 
-    if (!neverDropMode && static_cast<int>(m_frameQueue.size()) >= maxQueueSize) {
+    if (static_cast<int>(m_frameQueue.size()) >= maxQueueSize) {
       while (static_cast<int>(m_frameQueue.size()) >= maxQueueSize) {
         m_frameQueue.pop_front();
       }
@@ -1354,23 +1327,20 @@ void App::UpdateCapture() {
 
     m_device.Context()->CopyResource(m_frameTextures[slot].Get(), frame.texture.Get());
     
-    // DE-JITTER: Virtualize the timestamp (Improved V2)
+    // DE-JITTER: Virtualize the timestamp to eliminate capture jitter.
+    // WGC/DXGI timestamps are often jittery (e.g. 15ms, 18ms instead of 16.6ms).
+    // This jitter causes the interpolation alpha to jump around, creating micro-stutter.
     int64_t smoothedTime = frame.systemTime100ns;
-    
-    if (m_avgFrameInterval > 0.0 && m_lastSmoothedTime > 0) {
-        int64_t expectedInterval = static_cast<int64_t>(m_avgFrameInterval * 1e7);
-        int64_t expectedTime = m_lastSmoothedTime + expectedInterval;
-        int64_t diff = std::abs(frame.systemTime100ns - expectedTime);
+    if (m_lastSmoothedTime > 0 && m_avgFrameInterval > 0.0) {
+        int64_t expectedTime = m_lastSmoothedTime + static_cast<int64_t>(m_avgFrameInterval * 1e7);
+        int64_t diff = frame.systemTime100ns - expectedTime;
         
-        // Tolerance: Adjusted by user (default 20%)
-        // This swallows almost all Windows scheduling jitter
-        double tolerance = static_cast<double>(expectedInterval) * static_cast<double>(m_jitterSuppression);
-        if (m_jitterSuppression > 0.0f && static_cast<double>(diff) < tolerance) {
-            smoothedTime = expectedTime;
+        // Phase-Locked Loop (PLL): Pull the expected time towards the actual time by 5% each frame.
+        // This completely absorbs frame-to-frame jitter while preventing long-term drift.
+        if (std::abs(diff) > static_cast<int64_t>(m_avgFrameInterval * 1e7 * 2.0)) {
+            smoothedTime = frame.systemTime100ns; // Snap on large gaps (e.g. game paused)
         } else {
-            // If it's a genuine drop/spike, accept it to avoid desync
-            // But blend it slightly to soften the blow
-            smoothedTime = (frame.systemTime100ns + expectedTime) / 2;
+            smoothedTime = expectedTime + (diff / 20);
         }
     }
     
@@ -1406,10 +1376,6 @@ void App::UpdateCapture() {
           m_maxFrameInterval = static_cast<float>(intervalMs);
         }
       }
-    }
-
-    if (neverDropMode && static_cast<int>(m_frameQueue.size()) > maxQueueSize) {
-      m_frameQueue.pop_front();
     }
   }
 }
@@ -1464,8 +1430,21 @@ void App::Render() {
   int multiplier = (m_outputMultiplier < 1) ? 1 : m_outputMultiplier;
   double captureFps = (m_avgFrameInterval > 0.0) ? (1.0 / m_avgFrameInterval) : 0.0;
   bool lowFpsSource = (captureFps > 0.0 && captureFps < 30.0);
+  bool veryLowFpsSource = (captureFps > 0.0 && captureFps < 20.0);
   float monitorHz = m_device.RefreshHz(m_selectedMonitor);
   bool useMonitorSync = (m_outputMode == 1);
+  int alphaStepCount = multiplier;
+  if (veryLowFpsSource && monitorHz > 0.0f && captureFps > 0.0) {
+    int desiredSteps = static_cast<int>(std::round(static_cast<double>(monitorHz) / captureFps));
+    if (desiredSteps < 2) {
+      desiredSteps = 2;
+    } else if (desiredSteps > 24) {
+      desiredSteps = 24;
+    }
+    if (desiredSteps > alphaStepCount) {
+      alphaStepCount = desiredSteps;
+    }
+  }
 
   if (useMonitorSync && monitorHz > 0.0f) {
     m_targetFps = monitorHz;
@@ -1473,10 +1452,6 @@ void App::Render() {
     m_targetFps = static_cast<float>(static_cast<double>(multiplier) / m_avgFrameInterval);
   } else {
     m_targetFps = 0.0f;
-  }
-  // Sub-30 FPS sources benefit from stable pacing near display refresh instead of very high multiplier targets.
-  if (!useMonitorSync && lowFpsSource && monitorHz > 0.0f && m_targetFps > monitorHz) {
-    m_targetFps = monitorHz;
   }
 
   LARGE_INTEGER now = {};
@@ -1495,16 +1470,16 @@ void App::Render() {
   
   bool limitOutput = m_limitOutputFps && !useMonitorSync;
   if (limitOutput && m_targetFps > 0.0f && freq > 0.0) {
-    // Use precise floating point interval from target FPS (do not snap to integer)
     double targetFps = static_cast<double>(m_targetFps);
     intervalQpc = static_cast<int64_t>(freq / targetFps);
-    if (intervalQpc < 1) {
-      intervalQpc = 1;
-    }
+    if (intervalQpc < 1) intervalQpc = 1;
+    
     if (m_nextOutputQpc == 0) {
       m_nextOutputQpc = now.QuadPart;
     } else {
-        if (now.QuadPart > m_nextOutputQpc + intervalQpc * 2) {
+        // If we fall behind by more than 1 frame, just reset to now to avoid rapid-fire catchup
+        // Rapid-fire catchup causes severe stutter when VSync is also active
+        if (now.QuadPart > m_nextOutputQpc + intervalQpc) {
              m_nextOutputQpc = now.QuadPart;
         }
     }
@@ -1516,18 +1491,19 @@ void App::Render() {
          double seconds = static_cast<double>(remainingQpc) / freq;
          int64_t hundredsNs = static_cast<int64_t>(seconds * 10000000.0);
          
-         if (hundredsNs > 5000) { // Sleep if > 0.5ms using precise timer
+         if (hundredsNs > 20000) { // Sleep if > 2.0ms
              LARGE_INTEGER performWait = {};
-             performWait.QuadPart = -hundredsNs;
+             performWait.QuadPart = -(hundredsNs - 10000); // Wake up 1ms early
              SetWaitableTimer(m_waitTimer, &performWait, 0, nullptr, nullptr, 0);
              WaitForSingleObject(m_waitTimer, INFINITE);
-         } else {
-             while(now.QuadPart < m_nextOutputQpc) {
-                 YieldProcessor();
-                 QueryPerformanceCounter(&now);
-             }
          }
+         
+         // Spin for the last <1ms for precision
          QueryPerformanceCounter(&now);
+         while(now.QuadPart < m_nextOutputQpc) {
+             YieldProcessor();
+             QueryPerformanceCounter(&now);
+         }
          
          // Recalculate time after wait
          if (freq > 0.0) {
@@ -1543,17 +1519,14 @@ void App::Render() {
     m_nextOutputQpc = 0;
   }
 
-  bool neverDropMode = m_neverDropFrames;
-  int maxQueueSize = neverDropMode ? m_maxQueueSize : (lowFpsSource ? 4 : 3);
+  int maxQueueSize = 5; // Increased to 5 to support 1.5x interval delay
   if (maxQueueSize < 2) {
     maxQueueSize = 2;
   } else if (maxQueueSize > kFrameQueueSize) {
     maxQueueSize = kFrameQueueSize;
   }
-  if (!neverDropMode) {
-    while (m_frameQueue.size() > static_cast<size_t>(maxQueueSize)) {
-      m_frameQueue.pop_front();
-    }
+  while (m_frameQueue.size() > static_cast<size_t>(maxQueueSize)) {
+    m_frameQueue.pop_front();
   }
 
   ID3D11Texture2D* output = nullptr;
@@ -1573,45 +1546,16 @@ void App::Render() {
       m_pairCurrTime100ns = 0;
     }
 
-    double delayScale = (m_delayScale < 0.25f) ? 0.25f : m_delayScale;
-    double delay = (m_avgFrameInterval > 0.0) ? (m_avgFrameInterval * delayScale) : 0.0;
-    if (m_adaptiveDelay && neverDropMode && m_avgFrameInterval > 0.0) {
-      int targetDepth = m_targetQueueDepth;
-      if (targetDepth < 2) {
-        targetDepth = 2;
-      } else if (targetDepth > kFrameQueueSize) {
-        targetDepth = kFrameQueueSize;
-      }
-      double depthError = static_cast<double>(targetDepth - static_cast<int>(m_frameQueue.size()));
-      double adjust = depthError * (m_avgFrameInterval * 0.35);
-      double maxAdjust = m_avgFrameInterval * 3.0;
-      if (adjust > maxAdjust) {
-        adjust = maxAdjust;
-      } else if (adjust < -maxAdjust) {
-        adjust = -maxAdjust;
-      }
-      delay += adjust;
-      if (delay < 0.0) {
-        delay = 0.0;
-      }
-    }
+    // Delay by 1.1 frame intervals to ensure the next frame is always in the queue
+    // before we need to interpolate towards it. This absorbs capture jitter.
+    // Reduced from 1.5 to 1.1 to significantly lower latency while maintaining smoothness.
+    double delay = (m_avgFrameInterval > 0.0) ? (m_avgFrameInterval * 1.1) : 0.0;
     m_outputDelayMs = static_cast<float>(delay * 1000.0);
     
-    // PREDICTED TIME: If pacing is active, use the *intended* output time for alpha calculation.
-    // This decouples thread scheduling jitter from the visual animation state.
-     double displayTime100ns = 0.0;
-    if (limitOutput && m_nextOutputQpc > 0 && freq > 0.0) {
-        double qpcTo100ns = 1e7 / freq;
-        double predictedNext100ns = 0.0;
-        if (m_timeOffsetValid) {
-            predictedNext100ns = static_cast<double>(m_nextOutputQpc) * qpcTo100ns + m_timeOffset100ns;
-        } else {
-            predictedNext100ns = static_cast<double>(m_nextOutputQpc) * qpcTo100ns;
-        }
-        displayTime100ns = predictedNext100ns - delay * 1e7;
-    } else {
-        displayTime100ns = nowTime100ns - delay * 1e7;
-    }
+    // ALWAYS use actual current time for display time.
+    // This ensures alpha is perfectly synced with real-world time,
+    // preventing stutter if pacing or VSync causes thread delays.
+    double displayTime100ns = nowTime100ns - delay * 1e7;
 
     if (displayTime100ns < 0.0) {
       displayTime100ns = 0.0;
@@ -1628,14 +1572,11 @@ void App::Render() {
           continue;
         }
         if (displayTime100ns >= cTime) {
-          if (!neverDropMode) {
-            m_frameQueue.pop_front();
-            continue;
-          }
-          break;
+          m_frameQueue.pop_front();
+          continue;
         }
         
-        if (!neverDropMode && !lowFpsSource && m_frameQueue.size() > 2) {
+        if (!lowFpsSource && m_frameQueue.size() > 2) {
           int nextSlot = m_frameQueue[2];
           double nextTime = static_cast<double>(m_frameTime100ns[nextSlot]);
           if (nextTime > cTime && (nextTime - cTime) < (m_avgFrameInterval * 0.8)) {
@@ -1665,7 +1606,7 @@ void App::Render() {
         m_pairPrevTime100ns = prevTime100ns;
         m_pairCurrTime100ns = currTime100ns;
         m_outputStepIndex = 0;
-        m_interpolator.ResetTemporal();
+        m_pairMotionComputed = false;
       }
     } else {
       m_pairPrevSlot = -1;
@@ -1676,229 +1617,99 @@ void App::Render() {
     bool canInterpolate = m_interpolationEnabled && hasPair && hasPrevSrv && hasCurrSrv;
     bool needScale = (m_outputWidth != m_frameWidth) || (m_outputHeight != m_frameHeight);
 
+    // ----------------------------------------------------------------
+    // ALPHA COMPUTATION (single path, no duplication)
+    // ----------------------------------------------------------------
     float alpha = 1.0f;
     double intervalSec = 0.0;
     double useInterval = 0.0;
-    int stepCount = (canInterpolate && multiplier > 0) ? multiplier : 1;
-    if (stepCount < 1) {
-      stepCount = 1;
-    }
+    int stepCount = std::max(1, (canInterpolate && alphaStepCount > 0) ? alphaStepCount : 1);
+
     if (hasPair) {
       double prevTime = static_cast<double>(m_frameTime100ns[prevSlot]);
       double currTime = static_cast<double>(m_frameTime100ns[currSlot]);
       intervalSec = (currTime - prevTime) * 1e-7;
-      
-      // IMPOROVED JITTER HANDLING:
-      // Instead of hard snapping (which causes stutters when hovering near the threshold),
-      // we now use a "Soft Knee" blend.
-      // - Inside threshold: Locked to Average (Butter Smooth)
-      // - Just outside: Blends smoothly to Real Time (Absorbs drift)
-      // - Way outside: Uses Real Time (Responding to lag spikes)
       useInterval = intervalSec;
-      
-      if (m_avgFrameInterval > 0.0) {
-          if (lowFpsSource) {
-              // For low-FPS capture, lock to the running average interval to avoid visible cadence jitter.
-              useInterval = m_avgFrameInterval;
-          } else if (m_forceInterpolation) {
-              useInterval = m_avgFrameInterval;
-          } else if (intervalSec > 0.0) {
-              double diff = std::abs(intervalSec - m_avgFrameInterval);
-              double errorRatio = diff / m_avgFrameInterval;
-              double limit = static_cast<double>(m_jitterSuppression);
-              
-              if (limit > 0.001) { // Avoid divide by zero
-                  if (errorRatio <= limit) {
-                      // Perfect Lock
-                      useInterval = m_avgFrameInterval;
-                  } else if (errorRatio < (limit * 2.0)) {
-                      // Soft Blend Zone: Fade from Average to Real
-                      // This eliminates the "Pop" artifact when jitter increases slightly
-                      double blendFactor = (errorRatio - limit) / limit;
-                      useInterval = m_avgFrameInterval * (1.0 - blendFactor) + intervalSec * blendFactor;
-                  }
-              }
-          }
-      }
+
+      // Fallback
+      if (useInterval <= 0.0) useInterval = intervalSec;
 
       if (useInterval > 0.0) {
-        if (neverDropMode) {
-          if (m_outputStepIndex < 0 || m_outputStepIndex > stepCount) {
-            m_outputStepIndex = 0;
-          }
-          alpha = static_cast<float>(m_outputStepIndex) / static_cast<float>(stepCount);
-        } else {
-          double t = (displayTime100ns - prevTime) * 1e-7;
-          if (t < 0.0) {
-            t = 0.0;
-          }
-          if (canInterpolate) {
-            // UNLOCKED SMOOTHNESS:
-            // Instead of stepping (0.0, 0.5, 1.0), calculate exact alpha based on time.
-            // This eliminates judder when Monitor Hz != Target Hz.
-            float rawAlpha = static_cast<float>(t / useInterval);
-            if (rawAlpha < 0.0f) rawAlpha = 0.0f;
-            if (rawAlpha > 1.0f) rawAlpha = 1.0f;
-
-            // In multiplier mode, quantize alpha to stable sub-steps.
-            // This removes phase jitter that is very visible at 2x.
-            // Low-FPS sources look smoother with continuous alpha (no multiplier quantization).
-            bool lockAlphaToMultiplier = (!useMonitorSync && multiplier > 1 && !lowFpsSource);
-            if (lockAlphaToMultiplier) {
-              int quantStep = static_cast<int>(rawAlpha * static_cast<float>(multiplier));
-              if (quantStep < 0) {
-                quantStep = 0;
-              } else if (quantStep > multiplier) {
-                quantStep = multiplier;
-              }
-              alpha = static_cast<float>(quantStep) / static_cast<float>(multiplier);
-              m_outputStepIndex = quantStep;
-            } else {
-              alpha = rawAlpha;
-              m_outputStepIndex = static_cast<int>(alpha * static_cast<float>(multiplier));
-            }
-          } else {
-            alpha = static_cast<float>(t / useInterval);
-            if (alpha < 0.0f) {
-              alpha = 0.0f;
-            } else if (alpha > 1.0f) {
-              alpha = 1.0f;
-            }
-            m_outputStepIndex = static_cast<int>(alpha * static_cast<float>(multiplier));
-          }
-        }
+        // Time-based alpha from display time relative to frame pair
+        double t = std::max(0.0, (displayTime100ns - prevTime) * 1e-7);
+        alpha = std::clamp(static_cast<float>(t / useInterval), 0.0f, 1.0f);
+        m_outputStepIndex = static_cast<int>(alpha * static_cast<float>(stepCount));
       }
     } else {
       m_outputStepIndex = 0;
     }
 
-    // Fallback if needed
-    if (useInterval <= 0.0 && intervalSec > 0.0) useInterval = intervalSec; 
-    
-    if (alpha < 0.0f) {
-      alpha = 0.0f;
-    } else if (alpha > 1.0f) {
-      alpha = 1.0f;
-    }
+    alpha = std::clamp(alpha, 0.0f, 1.0f);
 
+    // ----------------------------------------------------------------
+    // STABILITY DETECTION
+    // ----------------------------------------------------------------
     bool unstable = false;
     if (hasPair && m_qpcFreq.QuadPart > 0 && intervalSec > 0.0) {
       m_lastIntervalMs = static_cast<float>(useInterval * 1000.0);
       if (m_avgFrameInterval > 0.0) {
         m_lastAvgIntervalMs = static_cast<float>(m_avgFrameInterval * 1000.0);
       }
-      if (m_lowLatencyMode && m_avgFrameInterval > 0.0) {
-        double delta = std::abs(intervalSec - m_avgFrameInterval);
-        unstable = delta > (m_avgFrameInterval * 0.5);
-      }
     }
-
-    bool allowInterpolation = canInterpolate;
 
     m_lastUnstable = unstable;
     m_lastAlpha = alpha;
-    
-    // WORKLOAD SMOOTHING:
-    // If we skip interpolation at alpha=0 or alpha=1, the GPU load fluctuates wildly (0% vs 90%).
-    // This causes "Spikes" in the frame time graph and thermal throttling issues.
-    // We now report "Interpolated" as true even if alpha is 0/1, so we run the shader pipeline.
-    // This keeps the GPU clock high and frame times consistent (e.g. always 8ms instead of alternating 1ms/8ms).
-    m_lastInterpolated = allowInterpolation; 
+    m_lastInterpolated = canInterpolate;
 
-    if (allowInterpolation && m_outputStepIndex >= multiplier) {
+    if (canInterpolate && m_outputStepIndex >= stepCount) {
       m_holdEndFrame = true;
     }
 
+    // ----------------------------------------------------------------
+    // INTERPOLATOR CONFIGURATION (unified, applied once for all paths)
+    // ----------------------------------------------------------------
+    m_interpolator.SetMotionModel(m_motionModel);
+    m_interpolator.SetMotionSmoothing(m_motionEdgeScale, m_confidencePower);
+    m_interpolator.SetQualityMode(m_interpolationQuality);
+    m_interpolator.SetMinimalMotionPipeline(m_minimalMotionPipeline);
+
+    // ----------------------------------------------------------------
+    // DISPATCH: Debug view / Interpolation / Blit fallback
+    // ----------------------------------------------------------------
     auto debugMode = static_cast<Interpolator::DebugViewMode>(m_debugView);
+
     if (debugMode != Interpolator::DebugViewMode::None && hasCurrSrv) {
+      // Debug visualization path
       ID3D11ShaderResourceView* currSrv = m_frameSrvs[currSlot].Get();
       ID3D11ShaderResourceView* prevSrv = hasPrevSrv ? m_frameSrvs[prevSlot].Get() : currSrv;
+      // Disable motion-dependent debug modes when no prev frame available
       if (!hasPrevSrv && (debugMode == Interpolator::DebugViewMode::MotionFlow ||
                           debugMode == Interpolator::DebugViewMode::ConfidenceHeatmap ||
                           debugMode == Interpolator::DebugViewMode::ResidualError)) {
         debugMode = Interpolator::DebugViewMode::None;
       }
-      m_interpolator.SetMotionModel(m_motionModel);
-      m_interpolator.SetMotionSmoothing(m_motionEdgeScale, m_confidencePower);
-      m_interpolator.SetMinimalMotionPipeline(m_minimalMotionPipeline);
-      m_interpolator.SetTemporalStabilization(m_temporalStabilization,
-                                              m_temporalHistoryWeight,
-                                              m_temporalConfInfluence,
-                                              m_temporalNeighborhoodSize);
       m_interpolator.Debug(prevSrv, currSrv, debugMode, m_debugMotionScale, m_debugDiffScale);
       output = m_interpolator.OutputTexture();
-    } else if (allowInterpolation) {
-        // Keep alpha in sync with output timing.
-        // In never-drop mode we keep the explicit step alpha.
-        if (!neverDropMode) {
-          double prevTime = static_cast<double>(m_frameTime100ns[prevSlot]);
-          double t = (displayTime100ns - prevTime) * 1e-7;
-          if (t < 0.0) {
-            t = 0.0;
-          }
-          float rawAlpha = 0.0f;
-          if (useInterval > 0.0) {
-            rawAlpha = static_cast<float>(t / useInterval);
-          }
-          if (rawAlpha < 0.0f) rawAlpha = 0.0f;
-          if (rawAlpha > 1.0f) rawAlpha = 1.0f;
 
-          bool lockAlphaToMultiplier = (!useMonitorSync && multiplier > 1 && !lowFpsSource);
-          if (lockAlphaToMultiplier) {
-            int quantStep = static_cast<int>(rawAlpha * static_cast<float>(multiplier));
-            if (quantStep < 0) {
-              quantStep = 0;
-            } else if (quantStep > multiplier) {
-              quantStep = multiplier;
-            }
-            alpha = static_cast<float>(quantStep) / static_cast<float>(multiplier);
-            m_outputStepIndex = quantStep;
-          } else {
-            alpha = rawAlpha;
-          }
-        }
-        m_lastAlpha = alpha;
-        
-        m_interpolator.SetMotionModel(m_motionModel);
-        m_interpolator.SetMotionSmoothing(m_motionEdgeScale, m_confidencePower);
-        m_interpolator.SetQualityMode(m_interpolationQuality);
-        m_interpolator.SetMinimalMotionPipeline(m_minimalMotionPipeline);
-        m_interpolator.SetTemporalStabilization(m_temporalStabilization,
-                                                m_temporalHistoryWeight,
-                                                m_temporalConfInfluence,
-                                                m_temporalNeighborhoodSize);
-        m_interpolator.SetMotionVectorPrediction(m_useMotionPrediction);
-        float textProtect = m_textPreservationMode ? m_textPreservationStrength : 0.0f;
-        m_interpolator.SetTextPreservation(textProtect, m_textPreservationEdgeThreshold);
-        
-        // ALWAYS EXECUTE if allowInterpolation is true.
-        // Even if alpha is 0.0 or 1.0, we want the GPU to do the work.
-        // This ensures the pipeline (including motion history) stays valid and hot.
+    } else if (canInterpolate) {
+      // Interpolation path
+      // First sub-frame of a new pair: full motion estimation + interpolation
+      // Subsequent sub-frames: re-warp only (reuse cached motion field)
+      if (!m_pairMotionComputed) {
         m_interpolator.Execute(m_frameSrvs[prevSlot].Get(), m_frameSrvs[currSlot].Get(), alpha);
-        
-        output = m_interpolator.OutputTexture();
+        m_pairMotionComputed = true;
+      } else {
+        m_interpolator.InterpolateOnly(m_frameSrvs[prevSlot].Get(), m_frameSrvs[currSlot].Get(), alpha);
+      }
+      output = m_interpolator.OutputTexture();
+
     } else {
+      // No interpolation - blit with scaling or pass-through
       if (needScale && hasCurrSrv) {
         m_interpolator.Blit(m_frameSrvs[currSlot].Get());
         output = m_interpolator.OutputTexture();
       } else {
         output = m_frameTextures[currSlot].Get();
-      }
-    }
-
-    if (neverDropMode && hasPair) {
-      int advanceSteps = (allowInterpolation && multiplier > 1) ? multiplier : 1;
-      if (advanceSteps < 1) {
-        advanceSteps = 1;
-      }
-      if (!allowInterpolation) {
-        m_frameQueue.pop_front();
-        m_outputStepIndex = 0;
-      } else if (m_outputStepIndex >= advanceSteps) {
-        m_outputStepIndex = 0;
-        m_frameQueue.pop_front();
-      } else {
-        m_outputStepIndex++;
       }
     }
   }
@@ -2554,15 +2365,6 @@ void App::RenderUi() {
     
     ImGui::Checkbox("Unlock App FPS (High CPU)", &m_unlockAppFps);
     if (ImGui::IsItemHovered()) ImGui::SetTooltip("Removes frame pacing limits.\nAllows the capture loop to run as fast as possible (1000+ FPS).\nEssential for capturing >60FPS on some systems.\nWARNING: Increases CPU usage.");
-     
-    ImGui::Checkbox("Force Interpolation", &m_forceInterpolation);
-    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Bypass framerate safety checks.\nForces interpolation even if Capture FPS matches Monitor FPS (which normally disables it).\nEnable this if game looks like 'base fps'.");
-
-    ImGui::Checkbox("Capture Low Latency Mode", &m_wgcLowLatencyMode);
-    if (ImGui::IsItemHovered()) ImGui::SetTooltip("WGC: Use smaller frame pool (2 frames).\nDXGI: Use aggressive cleanup.\nDisable if you experience frame drops with high-FPS content.");
-     
-    ImGui::Checkbox("Capture Prefer Newest Frame", &m_wgcPreferNewest);
-    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Always use the most recent frame, dropping older buffered frames.\nReduces latency but may increase dropped frame count.\nRecommended for gaming.");
     
     if (m_forceWgcCapture) {
       ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "WARNING: Force WGC will not fallback to Desktop Duplication");
@@ -2605,42 +2407,6 @@ void App::RenderUi() {
   ImGui::Checkbox("Minimal Motion Pipeline (Fast)", &m_minimalMotionPipeline);
   if (ImGui::IsItemHovered()) ImGui::SetTooltip("Use only Downsample + Tiny Forward/Backward Motion + Warp.\nSkips refine/smooth/temporal passes for lower GPU load.");
   
-  ImGui::Checkbox("Low Latency", &m_lowLatencyMode);
-  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Minimize input-to-display latency.\nUses smaller frame buffer and faster timing.\nMay cause occasional stutter if capture is inconsistent.");
-  
-  /* Never Drop Frames removed
-  if (m_neverDropFrames) {
-    ImGui::SliderInt("Max Queue Size", &m_maxQueueSize, 4, kFrameQueueSize);
-    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Maximum frames to buffer before forcing output.\nHigher = smoother but more latency.\nLower = less latency but may stutter.");
-  }
-  */
-  ImGui::Checkbox("Temporal Stabilization", &m_temporalStabilization);
-  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Blend motion vectors across frames for stability.\nReduces flickering in motion estimation.\nSlightly increases smoothness at cost of responsiveness.");
-  
-  if (m_temporalStabilization) {
-    ImGui::SliderFloat("Temporal History", &m_temporalHistoryWeight, 0.0f, 0.99f, "%.2f");
-    if (ImGui::IsItemHovered()) ImGui::SetTooltip("How much to blend with previous frame's motion.\n0 = No history (current only)\nHigher = More stable but less responsive to changes.");
-    
-    ImGui::SliderFloat("Temporal Conf Influence", &m_temporalConfInfluence, 0.0f, 1.0f, "%.2f");
-    if (ImGui::IsItemHovered()) ImGui::SetTooltip("How much confidence affects temporal blending.\nHigher = Only trust history when confident.\nLower = Always blend with history.");
-
-    ImGui::SliderInt("Neighbor Size", &m_temporalNeighborhoodSize, 1, 5);
-    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Size of the clamping box (Kernel Radius).\n1 = 3x3 (Sharpest)\n2 = 5x5 (Balanced)\n3 = 7x7 (Smoother)\n4 = 9x9 (Very Stable)\n5 = 11x11 (Maximum Stability)");
-  }
-  
-  ImGui::Checkbox("Motion Prediction (Multi-Frame)", &m_useMotionPrediction);
-  const char* predictionHelp = "Uses previous frame's motion to help find the next motion.\nImproves quality for fast moving objects.";
-  if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", predictionHelp);
-
-  ImGui::Checkbox("Text Preservation Mode", &m_textPreservationMode);
-  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Optimize settings for text rendering.\nReduces flickering on text by adjusting temporal stabilization and motion smoothing.\nMay reduce smoothness for fast-moving content.");
-  ImGui::BeginDisabled(!m_textPreservationMode);
-  ImGui::SliderFloat("Text Preserve Strength", &m_textPreservationStrength, 0.0f, 1.0f, "%.2f");
-  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Bias interpolation toward unwarped frames on sharp edges (text/hud).\nHigher reduces shimmer but can look less smooth.");
-  ImGui::SliderFloat("Text Edge Threshold", &m_textPreservationEdgeThreshold, 0.0f, 0.2f, "%.3f");
-  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Edge sensitivity for text protection.\nLower protects more edges; higher limits protection to only the sharpest text.");
-  ImGui::EndDisabled();
-
   // Smooth Blend removed
 
   ImGui::Checkbox("Limit Output FPS", &m_limitOutputFps);
@@ -2655,22 +2421,7 @@ void App::RenderUi() {
   
   ImGui::SliderInt("Output Multiplier", &m_outputMultiplier, 1, 20);
   if (ImGui::IsItemHovered()) ImGui::SetTooltip("Frame rate multiplier.\n1x = No interpolation (passthrough)\n2x = Double frame rate (60->120)\n3x = Triple (60->180)\n4x = Quadruple (60->240)\n5-20x = Extreme multipliers (quality/latency may degrade)");
-  
-  ImGui::SliderFloat("Delay Scale", &m_delayScale, 0.5f, 1.5f, "%.2f");
-  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Scale the timing delay for frame presentation.\n<1.0 = Show frames earlier (lower latency, may stutter)\n>1.0 = Show frames later (smoother, more latency)\n1.0 = Default timing.");
-  
-  ImGui::SliderFloat("Jitter Suppression", &m_jitterSuppression, 0.0f, 1.0f, "%.2f");
-  const char* jitterHelp = "Tolerance for using average frame interval (0.0 = Off, 0.2 = 20%).\nIncreases smoothness but might drift if source fps fluctuates.";
-  if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", jitterHelp);
 
-  ImGui::Checkbox("Adaptive Delay", &m_adaptiveDelay);
-  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Automatically adjust timing based on frame queue depth.\nHelps maintain smooth output when capture rate varies.\nRecommended for variable frame rate sources.");
-  
-  if (m_adaptiveDelay) {
-    ImGui::SliderInt("Target Queue Depth", &m_targetQueueDepth, 2, kFrameQueueSize);
-    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Target number of frames to keep buffered.\nHigher = Smoother but more latency.\nLower = Less latency but may stutter.");
-  }
-  
   ImGui::SliderFloat("Conf Power", &m_confidencePower, 0.5f, 3.0f, "%.2f");
   if (ImGui::IsItemHovered()) ImGui::SetTooltip("Confidence curve power for motion reliability.\nHigher = Only trust very confident motion estimates\nLower = Trust motion more liberally\nRecommended: 1.0-1.5");
   
@@ -2906,7 +2657,6 @@ void App::ResizeForCapture(int width, int height) {
   if (m_outputWidth > 0 && m_outputHeight > 0) {
     m_interpolator.Resize(m_frameWidth, m_frameHeight, m_outputWidth, m_outputHeight);
   }
-  m_interpolator.ResetTemporal();
 }
 
 LRESULT CALLBACK App::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -3002,7 +2752,6 @@ void App::ExportDiagnostics() {
   std::ostringstream ss;
   ss << "=== True Motion Fidelity Engine Diagnostics ===" << std::endl;
   ss << "Capture Backend: " << (m_windowCaptureUsingWgc ? "WGC" : "Desktop Duplication") << std::endl;
-  ss << "WGC Low Latency Mode: " << (m_wgcLowLatencyMode ? "Enabled" : "Disabled") << std::endl;
   if (m_windowCaptureUsingWgc) {
     auto stats = m_capture.GetStatistics();
     ss << "WGC Captured Frames: " << stats.capturedFrames << std::endl;
@@ -3048,9 +2797,6 @@ void App::ExportDiagnostics() {
   if (motionModel < 0) motionModel = 0;
   if (motionModel > 3) motionModel = 3;
   ss << "Motion Model: " << kMotionModelNames[motionModel] << std::endl;
-  ss << "Never Drop Frames: " << (m_neverDropFrames ? "Yes" : "No") << std::endl;
-  ss << "Max Queue Size: " << m_maxQueueSize << std::endl;
-  ss << "Temporal Stabilization: " << (m_temporalStabilization ? "Enabled" : "Disabled") << std::endl;
   ss << "Minimal Motion Pipeline: " << (m_minimalMotionPipeline ? "Enabled" : "Disabled") << std::endl;
 
   std::string filename = "TrueMotion_Diagnostics_" + std::to_string(std::chrono::system_clock::now().time_since_epoch().count()) + ".txt";

@@ -1,0 +1,7 @@
+D3DCompileFromFile failed
+Path: C:\Users\vfxno\Downloads\TrueMotionFidelityEngine-main\build\bin\Release\shaders\Interpolate.hlsl
+Entry: CSMain
+Target: cs_5_0
+HRESULT: 0x80004005
+Error: C:\Users\vfxno\Downloads\TrueMotionFidelityEngine-main\build\bin\Release\shaders\Interpolate.hlsl(174,29-41): error X3004: undeclared identifier 'centerFeature'
+

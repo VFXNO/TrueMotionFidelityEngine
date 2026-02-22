@@ -94,15 +94,6 @@ private:
   bool m_previewInputActive = false;
 
   bool m_interpolationEnabled = true;
-  bool m_lowLatencyMode = true;
-  bool m_neverDropFrames = false;
-  bool m_temporalStabilization = true;
-  float m_temporalHistoryWeight = 0.2f;
-  float m_temporalConfInfluence = 0.6f;
-  int m_temporalNeighborhoodSize = 2;
-  bool m_textPreservationMode = false;
-  float m_textPreservationStrength = 1.0f;
-  float m_textPreservationEdgeThreshold = 0.03f;
   bool m_useMotionPrediction = true;
   bool m_minimalMotionPipeline = true;
   bool m_limitOutputFps = true;
@@ -135,13 +126,8 @@ private:
   float m_confidencePower = 1.5f;
   float m_motionEdgeScale = 6.0f;
   int m_interpolationQuality = 1; // 0=Standard, 1=High
-  float m_delayScale = 1.0f;
-  float m_jitterSuppression = 0.2f;
-  bool m_forceInterpolation = false;
   
   HANDLE m_waitTimer = nullptr;
-  bool m_adaptiveDelay = true;
-  int m_targetQueueDepth = 4;
   float m_outputDelayMs = 0.0f;
   float m_lastAlpha = 0.0f;
   bool m_lastInterpolated = false;
@@ -158,8 +144,6 @@ private:
   float m_captureFps = 0.0f;
   bool m_forceWgcCapture = false;
   bool m_unlockAppFps = false;     // SKips waitable object sync
-  bool m_wgcLowLatencyMode = true; // Default true for lower latency
-  bool m_wgcPreferNewest = true;   // Default true for lowest latency
   
   // DXGI Crop mode state
   bool m_dxgiCropModeActive = false;      // Track if DXGI Crop mode is active
@@ -192,6 +176,7 @@ private:
   int m_pairCurrSlot = -1;
   int64_t m_pairPrevTime100ns = 0;
   int64_t m_pairCurrTime100ns = 0;
+  bool m_pairMotionComputed = false;
   bool m_holdEndFrame = false;
   int m_maxQueueSize = 12;
   int m_frameWidth = 0;
@@ -214,7 +199,6 @@ private:
   std::deque<int> m_frameQueue;
   int m_queueWrite = 0;
   int m_outputMouseIgnore = 0;
-  POINT m_lastMousePos = {0, 0};  // For relative mouse mode
   bool m_cursorConfined = false;   // Track cursor confinement state
 
   LARGE_INTEGER m_qpcFreq = {};

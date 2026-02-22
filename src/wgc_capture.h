@@ -46,14 +46,6 @@ public:
   bool IsCapturing() const { return m_isCapturing; }
   bool HasError() const { return m_hasError; }
 
-  // Low latency mode - uses smaller frame pool
-  void SetLowLatencyMode(bool enabled) { m_lowLatencyMode = enabled; }
-  bool IsLowLatencyMode() const { return m_lowLatencyMode; }
-  
-  // Prefer newest frame - always get latest, drop intermediate
-  void SetPreferNewestFrame(bool enabled) { m_preferNewestFrame = enabled; }
-  bool IsPreferNewestFrame() const { return m_preferNewestFrame; }
-  
   // Frame statistics
   int GetDroppedFrameCount() const { return m_droppedFrames; }
   int GetCapturedFrameCount() const { return m_capturedFrames; }
@@ -74,24 +66,9 @@ private:
   bool ProcessFrame(winrt::Windows::Graphics::Capture::Direct3D11CaptureFrame const& captureFrame, CapturedFrame& frame);
   void UpdateFrameTiming(int64_t frameTime);
 
-  // Dedicated capture thread logic
-  void CaptureThreadLoop();
-  
   Microsoft::WRL::ComPtr<ID3D11Device> m_device;
   Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_context;
   Microsoft::WRL::ComPtr<ID3D11Texture2D> m_captureTexture;
-
-  // Threading synchronization
-  std::thread m_captureThread;
-  std::mutex m_frameMutex; // Protects access to m_nextFrame
-  std::condition_variable m_frameCv;
-  std::atomic<bool> m_stopThread{ false };
-  bool m_threadActive = false;
-  
-  // Hand-off slot for the dedicated thread
-  winrt::Windows::Graphics::Capture::Direct3D11CaptureFrame m_nextFrame{ nullptr };
-  bool m_nextFrameReady = false;
-  bool m_newFrameEvent = false; // Event flag for the capture thread
 
   winrt::Windows::Graphics::DirectX::Direct3D11::IDirect3DDevice m_winrtDevice{nullptr};
   winrt::Windows::Graphics::Capture::Direct3D11CaptureFramePool m_framePool{nullptr};
@@ -103,8 +80,6 @@ private:
   std::atomic<int> m_pendingFrameCount{0};  // Track how many frames are waiting
    std::mutex m_mutex;
 
-   bool m_lowLatencyMode = true;  // Default to low latency
-   bool m_preferNewestFrame = true;  // Default to newest frame
    bool m_isCapturing = false;
   bool m_hasError = false;
   int m_width = 0;

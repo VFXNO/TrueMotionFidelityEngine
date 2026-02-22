@@ -22,7 +22,6 @@ public:
 
   // Configuration (Mirroring WGC features)
   void SetPollingMode(bool enabled) { m_pollingMode = enabled; }
-  void SetPreferNewestFrame(bool enabled) { m_preferNewestFrame = enabled; }
   void SetSpinWaitMode(bool enabled) { m_spinWaitMode = enabled; }
   void SetSpinWaitMs(int ms) { m_spinWaitMs = ms; }
   bool IsSpinWaitMode() const { return m_spinWaitMode; }
@@ -48,7 +47,6 @@ private:
 
   // Settings
   bool m_pollingMode = false;       // If false, use blocking wait (up to 50ms)
-  bool m_preferNewestFrame = true;  // Skip intermediate frames
   bool m_spinWaitMode = false;      // Busy loop for lowest latency
   int m_spinWaitMs = 10;            // 10ms wait for high-FPS capture (180fps = 5.5ms per frame)
 
