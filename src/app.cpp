@@ -496,6 +496,8 @@ void App::ResetCaptureState() {
   m_timeOffset100ns = 0.0;
   m_lastSmoothedTime = 0;
   m_avgFrameInterval = 0.0;
+  m_nextOutputTime100ns = 0.0;
+  m_currentAlpha = 0.0f;
   m_wgcFrameArrivalTime = 0.0;
   m_wgcFrameArrivalCount = 0;
   m_wgcArrivalRate = 0.0f;
@@ -1108,7 +1110,6 @@ void App::UpdateCapture() {
   int processed = 0;
   constexpr int kMaxFramesPerUpdate = 180;
   int maxFramesPerUpdate = kMaxFramesPerUpdate;
-  int maxQueueSize = 3;
 
   if (m_captureMode == 0 && m_captureWindow) {
     if (!IsWindow(m_captureWindow)) {
@@ -1288,26 +1289,54 @@ void App::UpdateCapture() {
     }
     m_currFrameTime100ns = frame.systemTime100ns;
 
-    // Moved Timestamps Logic UP for access in averaging
-    m_frameTimestamps.push_back(frame.systemTime100ns);
-    if (m_frameTimestamps.size() > 360) {
-      m_frameTimestamps.erase(m_frameTimestamps.begin());
-    }
-
     if (m_prevFrameTime100ns != 0 && m_currFrameTime100ns != m_prevFrameTime100ns) {
-      // SMOOTHNESS: Use precise Sliding Window Average of last 20 frames
-      if (m_frameTimestamps.size() >= 21) {
-          constexpr size_t kWindowSize = 20;
-          size_t idxStart = m_frameTimestamps.size() - 1 - kWindowSize;
-          int64_t diffNs = m_frameTimestamps.back() - m_frameTimestamps[idxStart];
-          if (diffNs > 0) {
-             m_avgFrameInterval = (static_cast<double>(diffNs) * 1e-7) / static_cast<double>(kWindowSize);
+      // Moved Timestamps Logic UP for access in averaging
+      m_frameTimestamps.push_back(frame.systemTime100ns);
+      if (m_frameTimestamps.size() > 60) {
+        m_frameTimestamps.erase(m_frameTimestamps.begin());
+      }
+
+      // Use a trimmed-mean interval estimate over recent frames.
+      // This avoids over-reporting FPS from short jitter and avoids under-reporting from dropped-frame spikes.
+      if (m_frameTimestamps.size() >= 2) {
+          std::vector<double> intervals;
+          intervals.reserve(m_frameTimestamps.size() - 1);
+          for (size_t i = 1; i < m_frameTimestamps.size(); ++i) {
+              double interval = static_cast<double>(m_frameTimestamps[i] - m_frameTimestamps[i-1]) * 1e-7;
+              if (interval > 0.0) {
+                intervals.push_back(interval);
+              }
+          }
+
+          if (!intervals.empty()) {
+            std::sort(intervals.begin(), intervals.end());
+
+            size_t trimCount = intervals.size() / 10; // trim 10% from each side
+            size_t begin = trimCount;
+            size_t end = intervals.size() - trimCount;
+            if (end <= begin) {
+              begin = 0;
+              end = intervals.size();
+            }
+
+            double sum = 0.0;
+            for (size_t i = begin; i < end; ++i) {
+              sum += intervals[i];
+            }
+            double baseInterval = sum / static_cast<double>(end - begin);
+
+            if (baseInterval > 0.0) {
+              if (m_avgFrameInterval <= 0.0) m_avgFrameInterval = baseInterval;
+              else m_avgFrameInterval = m_avgFrameInterval * 0.95 + baseInterval * 0.05;
+            }
           }
       } else {
          double interval = static_cast<double>(m_currFrameTime100ns - m_prevFrameTime100ns) * 1e-7;
          if (m_avgFrameInterval <= 0.0) m_avgFrameInterval = interval;
          else m_avgFrameInterval = m_avgFrameInterval * 0.9 + interval * 0.1;
       }
+    } else if (m_prevFrameTime100ns == 0) {
+      m_frameTimestamps.push_back(frame.systemTime100ns);
     }
 
     if (m_qpcFreq.QuadPart > 0 && frame.qpcTime != 0) {
@@ -1326,10 +1355,8 @@ void App::UpdateCapture() {
       }
     }
 
-    if (static_cast<int>(m_frameQueue.size()) >= maxQueueSize) {
-      while (static_cast<int>(m_frameQueue.size()) >= maxQueueSize) {
-        m_frameQueue.pop_front();
-      }
+    while (m_frameQueue.size() >= 4) {
+      m_frameQueue.pop_front();
     }
 
     int slot = m_queueWrite;
@@ -1337,20 +1364,27 @@ void App::UpdateCapture() {
 
     m_device.Context()->CopyResource(m_frameTextures[slot].Get(), frame.texture.Get());
     
-    // DE-JITTER: Virtualize the timestamp to eliminate capture jitter.
-    // WGC/DXGI timestamps are often jittery (e.g. 15ms, 18ms instead of 16.6ms).
-    // This jitter causes the interpolation alpha to jump around, creating micro-stutter.
-    int64_t smoothedTime = frame.systemTime100ns;
-    if (m_lastSmoothedTime > 0 && m_avgFrameInterval > 0.0) {
-        int64_t expectedTime = m_lastSmoothedTime + static_cast<int64_t>(m_avgFrameInterval * 1e7);
-        int64_t diff = frame.systemTime100ns - expectedTime;
+    // PERFECT PACING: Virtualize timestamps to eliminate capture jitter.
+    // We count exact frame intervals to handle game stutters perfectly,
+    // and apply a tiny 2% drift correction to stay synced with real time.
+    int64_t rawTime = frame.systemTime100ns;
+    int64_t smoothedTime = rawTime;
+    
+    if (m_lastSmoothedTime > 0 && m_avgFrameInterval > 0.0 && m_prevFrameTime100ns > 0) {
+        int64_t interval100ns = static_cast<int64_t>(m_avgFrameInterval * 1e7);
+        int64_t rawDelta = rawTime - m_prevFrameTime100ns;
         
-        // Phase-Locked Loop (PLL): Pull the expected time towards the actual time by 5% each frame.
-        // This completely absorbs frame-to-frame jitter while preventing long-term drift.
-        if (std::abs(diff) > static_cast<int64_t>(m_avgFrameInterval * 1e7 * 2.0)) {
-            smoothedTime = frame.systemTime100ns; // Snap on large gaps (e.g. game paused)
+        int64_t numIntervals = (rawDelta + interval100ns / 2) / interval100ns;
+        if (numIntervals < 1) numIntervals = 1;
+        if (numIntervals > 10) numIntervals = 10;
+        
+        int64_t expectedTime = m_lastSmoothedTime + numIntervals * interval100ns;
+        int64_t drift = rawTime - expectedTime;
+        
+        if (std::abs(drift) > interval100ns * 5) {
+            smoothedTime = rawTime;
         } else {
-            smoothedTime = expectedTime + (diff / 20);
+            smoothedTime = expectedTime + (drift / 50);
         }
     }
     
@@ -1361,7 +1395,8 @@ void App::UpdateCapture() {
     // Timestamps update moved up
 
     m_captureFrameCount++;
-    double nowSec = frame.systemTime100ns * 1e-9;
+    // systemTime100ns is in 100ns units.
+    double nowSec = frame.systemTime100ns * 1e-7;
     if (m_captureFpsTime > 0.0) {
       double elapsed = nowSec - m_captureFpsTime;
       if (elapsed >= 1.0) {
@@ -1438,23 +1473,8 @@ void App::Render() {
   }
 
   int multiplier = (m_outputMultiplier < 1) ? 1 : m_outputMultiplier;
-  double captureFps = (m_avgFrameInterval > 0.0) ? (1.0 / m_avgFrameInterval) : 0.0;
-  bool lowFpsSource = (captureFps > 0.0 && captureFps < 30.0);
-  bool veryLowFpsSource = (captureFps > 0.0 && captureFps < 20.0);
   float monitorHz = m_device.RefreshHz(m_selectedMonitor);
   bool useMonitorSync = (m_outputMode == 1);
-  int alphaStepCount = multiplier;
-  if (veryLowFpsSource && monitorHz > 0.0f && captureFps > 0.0) {
-    int desiredSteps = static_cast<int>(std::round(static_cast<double>(monitorHz) / captureFps));
-    if (desiredSteps < 2) {
-      desiredSteps = 2;
-    } else if (desiredSteps > 24) {
-      desiredSteps = 24;
-    }
-    if (desiredSteps > alphaStepCount) {
-      alphaStepCount = desiredSteps;
-    }
-  }
 
   if (useMonitorSync && monitorHz > 0.0f) {
     m_targetFps = monitorHz;
@@ -1501,12 +1521,12 @@ void App::Render() {
          double seconds = static_cast<double>(remainingQpc) / freq;
          int64_t hundredsNs = static_cast<int64_t>(seconds * 10000000.0);
          
-         if (hundredsNs > 20000) { // Sleep if > 2.0ms
-             LARGE_INTEGER performWait = {};
-             performWait.QuadPart = -(hundredsNs - 10000); // Wake up 1ms early
-             SetWaitableTimer(m_waitTimer, &performWait, 0, nullptr, nullptr, 0);
-             WaitForSingleObject(m_waitTimer, INFINITE);
-         }
+        if (hundredsNs > 20000) { // Sleep if > 2.0ms
+            LARGE_INTEGER performWait = {};
+            performWait.QuadPart = -hundredsNs;
+            SetWaitableTimer(m_waitTimer, &performWait, 0, nullptr, nullptr, 0);
+            WaitForSingleObject(m_waitTimer, INFINITE);
+        }
          
          // Spin for the last <1ms for precision
          QueryPerformanceCounter(&now);
@@ -1529,14 +1549,11 @@ void App::Render() {
     m_nextOutputQpc = 0;
   }
 
-  int maxQueueSize = 5; // Increased to 5 to support 1.5x interval delay
-  if (maxQueueSize < 2) {
-    maxQueueSize = 2;
-  } else if (maxQueueSize > kFrameQueueSize) {
-    maxQueueSize = kFrameQueueSize;
-  }
-  while (m_frameQueue.size() > static_cast<size_t>(maxQueueSize)) {
+  // Keep a deeper pacing buffer to avoid end-of-pair stalls under capture jitter.
+  constexpr size_t kPacingQueueSize = 4;
+  while (m_frameQueue.size() > kPacingQueueSize) {
     m_frameQueue.pop_front();
+    m_pairMotionComputed = false;
   }
 
   ID3D11Texture2D* output = nullptr;
@@ -1554,48 +1571,35 @@ void App::Render() {
       m_pairCurrSlot = -1;
       m_pairPrevTime100ns = 0;
       m_pairCurrTime100ns = 0;
+      m_nextOutputTime100ns = 0.0;
     }
 
-    // Delay by 1.1 frame intervals to ensure the next frame is always in the queue
-    // before we need to interpolate towards it. This absorbs capture jitter.
-    // Reduced from 1.5 to 1.1 to significantly lower latency while maintaining smoothness.
-    double delay = (m_avgFrameInterval > 0.0) ? (m_avgFrameInterval * 1.1) : 0.0;
-    m_outputDelayMs = static_cast<float>(delay * 1000.0);
-    
-    // ALWAYS use actual current time for display time.
-    // This ensures alpha is perfectly synced with real-world time,
-    // preventing stutter if pacing or VSync causes thread delays.
-    double displayTime100ns = nowTime100ns - delay * 1e7;
-
+    double baseIntervalSec = (m_avgFrameInterval > 0.0) ? m_avgFrameInterval : 0.0166666;
+    double outputDelaySec = std::clamp(
+        baseIntervalSec * static_cast<double>(m_pacingDelayFactor), 0.001, 0.080);
+    m_outputDelayMs = static_cast<float>(outputDelaySec * 1000.0);
+    double displayTime100ns = nowTime100ns - outputDelaySec * 1e7;
     if (displayTime100ns < 0.0) {
       displayTime100ns = 0.0;
     }
 
-    if (freq > 0.0) {
-      while (m_frameQueue.size() >= 2) {
-        int p = m_frameQueue[0];
-        int c = m_frameQueue[1];
-        double pTime = static_cast<double>(m_frameTime100ns[p]);
-        double cTime = static_cast<double>(m_frameTime100ns[c]);
-        if (cTime <= pTime) {
-          m_frameQueue.pop_front();
-          continue;
-        }
-        if (displayTime100ns >= cTime) {
-          m_frameQueue.pop_front();
-          continue;
-        }
-        
-        if (!lowFpsSource && m_frameQueue.size() > 2) {
-          int nextSlot = m_frameQueue[2];
-          double nextTime = static_cast<double>(m_frameTime100ns[nextSlot]);
-          if (nextTime > cTime && (nextTime - cTime) < (m_avgFrameInterval * 0.8)) {
-            m_frameQueue.pop_front();
-            continue;
-          }
-        }
-        break;
+    // Drop only stale frames when we have additional buffered data.
+    while (m_frameQueue.size() >= 2) {
+      int p = m_frameQueue[0];
+      int c = m_frameQueue[1];
+      int64_t pTime100ns = m_frameTime100ns[p];
+      int64_t cTime100ns = m_frameTime100ns[c];
+      if (cTime100ns <= pTime100ns) {
+        m_frameQueue.pop_front();
+        m_pairMotionComputed = false;
+        continue;
       }
+      if (displayTime100ns >= static_cast<double>(cTime100ns) && m_frameQueue.size() > 2) {
+        m_frameQueue.pop_front();
+        m_pairMotionComputed = false;
+        continue;
+      }
+      break;
     }
 
     int prevSlot = m_frameQueue.front();
@@ -1603,6 +1607,7 @@ void App::Render() {
     bool hasPair = (m_frameQueue.size() >= 2);
     bool hasPrevSrv = (m_frameSrvs[prevSlot] != nullptr);
     bool hasCurrSrv = (m_frameSrvs[currSlot] != nullptr);
+
     if (hasPair) {
       int64_t prevTime100ns = m_frameTime100ns[prevSlot];
       int64_t currTime100ns = m_frameTime100ns[currSlot];
@@ -1615,7 +1620,6 @@ void App::Render() {
         m_pairCurrSlot = currSlot;
         m_pairPrevTime100ns = prevTime100ns;
         m_pairCurrTime100ns = currTime100ns;
-        m_outputStepIndex = 0;
         m_pairMotionComputed = false;
       }
     } else {
@@ -1623,44 +1627,48 @@ void App::Render() {
       m_pairCurrSlot = -1;
       m_pairPrevTime100ns = 0;
       m_pairCurrTime100ns = 0;
-    }
-    bool canInterpolate = m_interpolationEnabled && hasPair && hasPrevSrv && hasCurrSrv;
-    bool needScale = (m_outputWidth != m_frameWidth) || (m_outputHeight != m_frameHeight);
-
-    // ----------------------------------------------------------------
-    // ALPHA COMPUTATION (single path, no duplication)
-    // ----------------------------------------------------------------
-    float alpha = 1.0f;
-    double intervalSec = 0.0;
-    double useInterval = 0.0;
-    int stepCount = std::max(1, (canInterpolate && alphaStepCount > 0) ? alphaStepCount : 1);
-
-    if (hasPair) {
-      double prevTime = static_cast<double>(m_frameTime100ns[prevSlot]);
-      double currTime = static_cast<double>(m_frameTime100ns[currSlot]);
-      intervalSec = (currTime - prevTime) * 1e-7;
-      useInterval = intervalSec;
-
-      // Fallback
-      if (useInterval <= 0.0) useInterval = intervalSec;
-
-      if (useInterval > 0.0) {
-        // Time-based alpha from display time relative to frame pair
-        double t = std::max(0.0, (displayTime100ns - prevTime) * 1e-7);
-        alpha = std::clamp(static_cast<float>(t / useInterval), 0.0f, 1.0f);
-        m_outputStepIndex = static_cast<int>(alpha * static_cast<float>(stepCount));
-      }
-    } else {
+      m_pairMotionComputed = false;
       m_outputStepIndex = 0;
     }
 
+    bool canInterpolate = m_interpolationEnabled && hasPair && hasPrevSrv && hasCurrSrv;
+    bool needScale = (m_outputWidth != m_frameWidth) || (m_outputHeight != m_frameHeight);
+
+    double rawIntervalSec = 0.0;
+    if (hasPair && m_qpcFreq.QuadPart > 0) {
+      rawIntervalSec = (static_cast<double>(m_frameTime100ns[currSlot]) -
+                        static_cast<double>(m_frameTime100ns[prevSlot])) * 1e-7;
+    }
+
+    double intervalSec = rawIntervalSec;
+    if (intervalSec <= 0.0 || intervalSec > 0.5) {
+      intervalSec = baseIntervalSec;
+    }
+    if (m_avgFrameInterval > 0.0) {
+      double minInterval = m_avgFrameInterval * 0.75;
+      double maxInterval = m_avgFrameInterval * 1.35;
+      intervalSec = std::clamp(intervalSec, minInterval, maxInterval);
+    }
+
+    float alpha = 0.0f;
+    if (hasPair && intervalSec > 0.0) {
+      double prevTime100ns = static_cast<double>(m_frameTime100ns[prevSlot]);
+      double elapsedSec = (displayTime100ns - prevTime100ns) * 1e-7;
+      alpha = static_cast<float>(elapsedSec / intervalSec);
+    }
+
+    m_currentAlpha = alpha;
     alpha = std::clamp(alpha, 0.0f, 1.0f);
+    if (alpha < 0.001f) alpha = 0.0f;
+    if (alpha > 0.999f) alpha = 1.0f;
+    m_outputStepIndex = static_cast<int>(alpha * static_cast<float>(multiplier));
 
     // ----------------------------------------------------------------
     // STABILITY DETECTION
     // ----------------------------------------------------------------
     bool unstable = false;
-    if (hasPair && m_qpcFreq.QuadPart > 0 && intervalSec > 0.0) {
+    double useInterval = intervalSec;
+    if (hasPair && m_qpcFreq.QuadPart > 0) {
       m_lastIntervalMs = static_cast<float>(useInterval * 1000.0);
       if (m_avgFrameInterval > 0.0) {
         m_lastAvgIntervalMs = static_cast<float>(m_avgFrameInterval * 1000.0);
@@ -1671,9 +1679,7 @@ void App::Render() {
     m_lastAlpha = alpha;
     m_lastInterpolated = canInterpolate;
 
-    if (canInterpolate && m_outputStepIndex >= stepCount) {
-      m_holdEndFrame = true;
-    }
+    m_holdEndFrame = canInterpolate && alpha >= 1.0f;
 
     // ----------------------------------------------------------------
     // INTERPOLATOR CONFIGURATION (unified, applied once for all paths)
@@ -2432,6 +2438,9 @@ void App::RenderUi() {
   ImGui::SliderInt("Output Multiplier", &m_outputMultiplier, 1, 20);
   if (ImGui::IsItemHovered()) ImGui::SetTooltip("Frame rate multiplier.\n1x = No interpolation (passthrough)\n2x = Double frame rate (60->120)\n3x = Triple (60->180)\n4x = Quadruple (60->240)\n5-20x = Extreme multipliers (quality/latency may degrade)");
 
+  ImGui::SliderFloat("Pacing Delay Factor", &m_pacingDelayFactor, 0.25f, 1.50f, "%.2f");
+  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Controls interpolation pacing buffer.\nLower = lower latency, can stutter on jittery capture.\nHigher = smoother motion, more latency.\nEffective delay is auto-clamped to 1-80 ms.");
+
   ImGui::SliderFloat("Conf Power", &m_confidencePower, 0.5f, 3.0f, "%.2f");
   if (ImGui::IsItemHovered()) ImGui::SetTooltip("Confidence curve power for motion reliability.\nHigher = Only trust very confident motion estimates\nLower = Trust motion more liberally\nRecommended: 1.0-1.5");
   
@@ -2810,6 +2819,7 @@ void App::ExportDiagnostics() {
   ss << std::endl << "=== Capture Configuration ===" << std::endl;
   ss << "Interpolation: " << (m_interpolationEnabled ? "Enabled" : "Disabled") << std::endl;
   ss << "Output Multiplier: " << m_outputMultiplier << "x" << std::endl;
+  ss << "Pacing Delay Factor: " << m_pacingDelayFactor << std::endl;
   static const char* kMotionModelNames[] = {"Adaptive", "Stable", "Balanced", "Coverage"};
   int motionModel = m_motionModel;
   if (motionModel < 0) motionModel = 0;

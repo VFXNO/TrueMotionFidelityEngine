@@ -44,9 +44,10 @@ static bool SupportsMinUpdateInterval() {
 
 namespace {
 
-// Frame pool sizes: larger = more buffering (smoother), smaller = lower latency
+// Frame pool sizes: slightly larger pool helps avoid startup starvation where
+// no frame is available on the first few polls.
 constexpr int kFramePoolSizeNormal = 4;      // Balanced
-constexpr int kFramePoolSizeLowLatency = 2;  // Minimum for double-buffering
+constexpr int kFramePoolSizeLowLatency = 4;  // Robust startup/steady polling
 
 // QPC frequency for timing calculations
 int64_t GetQpcFrequency() {
@@ -176,6 +177,10 @@ bool WgcCapture::StartCapture(HWND hwnd) {
     m_session.StartCapture();
     m_hasNewFrame.store(false);
     m_pendingFrameCount.store(0);
+    {
+      std::lock_guard<std::mutex> lock(m_mutex);
+      m_latestFrame = nullptr;
+    }
     m_isCapturing = true;
     m_hasError = false;
     m_droppedFrames = 0;
@@ -272,6 +277,10 @@ bool WgcCapture::StartCaptureMonitor(HMONITOR monitor) {
     m_session.StartCapture();
     m_hasNewFrame.store(false);
     m_pendingFrameCount.store(0);
+    {
+      std::lock_guard<std::mutex> lock(m_mutex);
+      m_latestFrame = nullptr;
+    }
     m_isCapturing = true;
     m_hasError = false;
     m_droppedFrames = 0;
@@ -310,6 +319,10 @@ void WgcCapture::StopCapture() {
   m_isCapturing = false;
   m_hasNewFrame.store(false);
   m_pendingFrameCount.store(0);
+  {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_latestFrame = nullptr;
+  }
   m_lastFrameTime = 0;
   m_lastFrameAgeMs = 0.0;
 }
@@ -362,15 +375,30 @@ bool WgcCapture::AcquireNextFrame(CapturedFrame& frame) {
   if (!m_framePool) return false;
 
   winrt::Windows::Graphics::Capture::Direct3D11CaptureFrame latestFrame{nullptr};
-  
-  // Drain the pool to get the absolute latest frame
-  while (true) {
-      auto f = m_framePool.TryGetNextFrame();
-      if (!f) break;
-      latestFrame = f;
+
+  // Prefer callback-buffered frame first.
+  {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (m_latestFrame) {
+      latestFrame = m_latestFrame;
+      m_latestFrame = nullptr;
+    }
   }
 
-  if (!latestFrame) return false;
+  // Fallback: if callback hasn't delivered yet, drain pool non-blocking and
+  // keep only the newest frame to avoid backlog latency.
+  if (!latestFrame) {
+    while (auto f = m_framePool.TryGetNextFrame()) {
+      latestFrame = f;
+    }
+  }
+
+  if (!latestFrame) {
+    return false;
+  }
+
+  m_pendingFrameCount.store(0, std::memory_order_release);
+  m_hasNewFrame.store(false, std::memory_order_release);
 
   return ProcessFrame(latestFrame, frame);
 }
@@ -440,9 +468,28 @@ bool WgcCapture::AcquireLatestFrame(CapturedFrame& frame) {
 }
 
 void WgcCapture::OnFrameArrived(
-    Direct3D11CaptureFramePool const&,
+    Direct3D11CaptureFramePool const& sender,
     winrt::Windows::Foundation::IInspectable const&) {
-  // No-op: we drain the pool directly in AcquireNextFrame
+  try {
+    winrt::Windows::Graphics::Capture::Direct3D11CaptureFrame newest{nullptr};
+    while (auto frame = sender.TryGetNextFrame()) {
+      newest = frame;
+    }
+
+    if (!newest) {
+      return;
+    }
+
+    {
+      std::lock_guard<std::mutex> lock(m_mutex);
+      // Keep only the latest frame to avoid backlog latency.
+      m_latestFrame = newest;
+    }
+    m_hasNewFrame.store(true, std::memory_order_release);
+    m_pendingFrameCount.store(1, std::memory_order_release);
+  } catch (...) {
+    // Ignore callback errors; polling path remains as fallback.
+  }
 }
 
 void WgcCapture::EnsureCaptureTexture(int width, int height) {

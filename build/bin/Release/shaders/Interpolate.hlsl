@@ -284,7 +284,9 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     
     // Combine the temporal alpha with the structural energy weight
     // We don't want to completely override alpha, just bias it by up to 30%
-    float blendWeight = lerp(alpha, energyWeight, 0.3);
+    // Fade out the energy bias near alpha=0 and alpha=1 to ensure pure real frames
+    float biasStrength = 0.3 * (1.0 - abs(alpha * 2.0 - 1.0)); // 0 at alpha=0/1, 0.3 at alpha=0.5
+    float blendWeight = lerp(alpha, energyWeight, biasStrength);
 
     // We use the feature-aware blend to ensure we never "cancel" the warping,
     // but intelligently preserve sharp edges and corners during the warp.
@@ -299,7 +301,15 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     float blendedDetail = lerp(detailPrev, detailCurr, blendWeight);
     
     // Add the details back to the luma of the result to recover sharpness lost during bicubic warping
-    result += blendedDetail * 0.05; // Subtle sharpening
+    // Fade out sharpening near alpha=0 and alpha=1 to avoid altering real frames
+    result += blendedDetail * 0.05 * (1.0 - abs(alpha * 2.0 - 1.0));
+
+    // Fast path for pure real frames to avoid any floating point inaccuracies
+    if (alpha <= 0.001) {
+        result = SampleColor(PrevColor, inputUv, inSize);
+    } else if (alpha >= 0.999) {
+        result = SampleColor(CurrColor, inputUv, inSize);
+    }
 
     OutColor[id.xy] = float4(saturate(result), 1.0);
 }

@@ -98,6 +98,7 @@ private:
   bool m_minimalMotionPipeline = true;
   bool m_limitOutputFps = true;
   bool m_useVsync = false;
+  bool m_cadenceVsyncOverrideActive = false;
   bool m_fullscreenWindowOutput = false;
   bool m_hideCaptureWindow = false;
   bool m_passthroughOverlay = false;
@@ -129,14 +130,19 @@ private:
   
   HANDLE m_waitTimer = nullptr;
   float m_outputDelayMs = 0.0f;
+  float m_pacingDelayFactor = 0.9f;
   float m_lastAlpha = 0.0f;
   bool m_lastInterpolated = false;
   float m_lastIntervalMs = 0.0f;
   float m_lastAvgIntervalMs = 0.0f;
   bool m_lastUnstable = false;
   float m_targetFps = 0.0f;
+  float m_smoothedCaptureFps = 0.0f;
+  float m_smoothedTargetFps = 0.0f;
   int64_t m_lastPresentQpc = 0;
   int64_t m_nextOutputQpc = 0;
+  double m_nextOutputQpcD = 0.0;
+  int64_t m_lastUiRenderQpc = 0;
   double m_presentAvgInterval = 0.0;
   float m_presentFps = 0.0f;
   int m_captureFrameCount = 0;
@@ -178,7 +184,7 @@ private:
   int64_t m_pairCurrTime100ns = 0;
   bool m_pairMotionComputed = false;
   bool m_holdEndFrame = false;
-  int m_maxQueueSize = 12;
+  int m_holdFrameCount = 0;
   int m_frameWidth = 0;
   int m_frameHeight = 0;
   int m_outputWidth = 0;
@@ -207,6 +213,9 @@ private:
   double m_avgFrameInterval = 0.0;
   double m_timeOffset100ns = 0.0;
   bool m_timeOffsetValid = false;
+  
+  double m_nextOutputTime100ns = 0.0;
+  float m_currentAlpha = 0.0f;
   
   // HOTKEYS
   int m_hotkeyToggleOverlay = VK_F9;

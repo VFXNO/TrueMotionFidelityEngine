@@ -15,5 +15,6 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     if (id.x >= outW || id.y >= outH) return;
 
     float2 uv = (float2(id.xy) + 0.5) / float2(outW, outH);
-    OutColor[id.xy] = Src.SampleLevel(LinearClamp, uv, 0);
+    float4 c = Src.SampleLevel(LinearClamp, uv, 0);
+    OutColor[id.xy] = float4(c.rgb, 1.0);
 }

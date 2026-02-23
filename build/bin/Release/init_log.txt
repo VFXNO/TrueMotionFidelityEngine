@@ -1,3 +1,1151 @@
 Interpolator::Initialize started
 LoadShaders succeeded
 Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon RX 6700
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded

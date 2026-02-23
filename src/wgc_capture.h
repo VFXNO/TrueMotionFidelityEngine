@@ -74,13 +74,14 @@ private:
   winrt::Windows::Graphics::Capture::Direct3D11CaptureFramePool m_framePool{nullptr};
   winrt::Windows::Graphics::Capture::GraphicsCaptureSession m_session{nullptr};
   winrt::Windows::Graphics::Capture::GraphicsCaptureItem m_item{nullptr};
+  winrt::Windows::Graphics::Capture::Direct3D11CaptureFrame m_latestFrame{nullptr};
 
   winrt::event_token m_frameArrivedToken{};
   std::atomic<bool> m_hasNewFrame{false};
   std::atomic<int> m_pendingFrameCount{0};  // Track how many frames are waiting
-   std::mutex m_mutex;
+  std::mutex m_mutex;
 
-   bool m_isCapturing = false;
+  bool m_isCapturing = false;
   bool m_hasError = false;
   int m_width = 0;
   int m_height = 0;
