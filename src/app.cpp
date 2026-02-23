@@ -168,7 +168,7 @@ bool App::Initialize(HINSTANCE hInstance) {
   }
 
   if (!m_device.Initialize(m_hwnd)) {
-    MessageBoxW(nullptr, L"Error: Failed to initialize D3D11 device. Check GPU drivers and that D3D11 is supported.", L"True Motion Fidelity Engine Error", MB_OK);
+    MessageBoxW(nullptr, L"Error: Failed to initialize D3D11 device.\n\nCheck GPU drivers and that D3D11 is supported.\nSee init_log.txt in the app folder for detailed failure info.", L"True Motion Fidelity Engine Error", MB_OK);
     return false;
   }
 
@@ -400,6 +400,11 @@ bool App::StartWindowCapture(HWND hwnd) {
     RECT outputRect = {};
     if (!m_device.OutputForMonitor(monitor, output, outputRect)) {
       log << "Error: OutputForMonitor failed\n";
+      if (!m_device.HasDxgiOutputs()) {
+        m_captureStatus = "Desktop Duplication unavailable on selected GPU. Use WGC mode, or set TMFE_GPU_PREFERENCE=display.";
+      } else {
+        m_captureStatus = "Desktop Duplication failed to map monitor output.";
+      }
       log.close();
       return false;
     }
@@ -454,6 +459,11 @@ bool App::StartMonitorCapture(HMONITOR monitor) {
     Microsoft::WRL::ComPtr<IDXGIOutput> output;
     RECT outputRect = {};
     if (!m_device.OutputForMonitor(monitor, output, outputRect)) {
+      if (!m_device.HasDxgiOutputs()) {
+        m_captureStatus = "DXGI Crop unavailable on selected GPU. Use Window/Monitor WGC, or set TMFE_GPU_PREFERENCE=display.";
+      } else {
+        m_captureStatus = "DXGI Crop failed to map monitor output.";
+      }
       return false;
     }
 
@@ -2454,6 +2464,11 @@ void App::RenderUi() {
   ImGui::Text("Output FPS: %.1f", m_presentFps);
   ImGui::Text("Monitor Hz: %.1f", monitorHz);
   ImGui::Text("Monitor Max Hz: %.1f", maxHz);
+  ImGui::Text("Render GPU: %s", m_device.ActiveAdapterName().empty() ? "Unknown" : m_device.ActiveAdapterName().c_str());
+  ImGui::Text("DXGI Outputs: %s", m_device.HasDxgiOutputs() ? "yes" : "no");
+  if (!m_device.HasDxgiOutputs()) {
+    ImGui::TextWrapped("Hybrid GPU path detected: this GPU has no direct display outputs. WGC capture works; DXGI Crop/Desktop Dup may fail.");
+  }
   if (m_captureMode == 0) {
     float captureMonitorHz = 0.0f;
     HMONITOR captureMonitor = nullptr;
@@ -2758,6 +2773,9 @@ void App::ExportDiagnostics() {
     ss << "WGC Dropped Frames: " << stats.droppedFrames << std::endl;
   }
   ss << "Force WGC: " << (m_forceWgcCapture ? "Yes" : "No") << std::endl;
+  ss << "Render GPU: " << (m_device.ActiveAdapterName().empty() ? "Unknown" : m_device.ActiveAdapterName()) << std::endl;
+  ss << "DXGI Outputs Available: " << (m_device.HasDxgiOutputs() ? "Yes" : "No") << std::endl;
+  ss << "System Monitor Fallback: " << (m_device.UsingSystemMonitorFallback() ? "Yes" : "No") << std::endl;
   ss << "Monitor Refresh Rate: " << m_device.RefreshHz(m_selectedMonitor) << " Hz" << std::endl;
   ss << "Monitor Max Hz: " << m_device.MaxRefreshHz(m_selectedMonitor) << " Hz" << std::endl;
   ss << "Capture FPS: " << ((m_avgFrameInterval > 0.0) ? (1.0 / m_avgFrameInterval) : 0.0) << std::endl;

@@ -1,0 +1,10 @@
+^C:\USERS\VFXNO\DOCUMENTS\GITHUB\TRUEMOTIONFIDELITYENGINE\BUILD_FRESH\_DEPS\IMGUI-SUBBUILD\CMAKEFILES\80677D324795966FA1A49934DB848F41\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/build_fresh/_deps/imgui-subbuild -BC:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/build_fresh/_deps/imgui-subbuild --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/build_fresh/_deps/imgui-subbuild/imgui-populate.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

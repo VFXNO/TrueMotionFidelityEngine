@@ -1,0 +1,4 @@
+C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/build_fresh/CMakeFiles/graphics_hook.dir
+C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/build_fresh/CMakeFiles/TrueMotionFidelityEngine.dir
+C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/build_fresh/CMakeFiles/ALL_BUILD.dir
+C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/build_fresh/CMakeFiles/ZERO_CHECK.dir

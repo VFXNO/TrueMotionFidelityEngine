@@ -132,6 +132,14 @@ private:
   Microsoft::WRL::ComPtr<ID3D11Texture2D> m_confidenceSmooth;
   Microsoft::WRL::ComPtr<ID3D11Texture2D> m_outputTexture;
 
+  // Temporal attention priors (dynamic online adaptation)
+  Microsoft::WRL::ComPtr<ID3D11Texture2D> m_attnSmall1;
+  Microsoft::WRL::ComPtr<ID3D11Texture2D> m_attnSmall2;
+  Microsoft::WRL::ComPtr<ID3D11Texture2D> m_attnSmall3;
+  Microsoft::WRL::ComPtr<ID3D11Texture2D> m_attnFull1;
+  Microsoft::WRL::ComPtr<ID3D11Texture2D> m_attnFull2;
+  Microsoft::WRL::ComPtr<ID3D11Texture2D> m_attnFull3;
+
   // SRV / UAV views (luma pyramid)
   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_prevLumaSrv;
   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_currLumaSrv;
@@ -201,6 +209,12 @@ private:
   Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_motionSmoothUav;
   Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_confidenceSmoothUav;
   Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_outputUav;
+  Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_attnSmall1Uav;
+  Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_attnSmall2Uav;
+  Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_attnSmall3Uav;
+  Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_attnFull1Uav;
+  Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_attnFull2Uav;
+  Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_attnFull3Uav;
 
   // Constant buffers
   Microsoft::WRL::ComPtr<ID3D11Buffer> m_motionConstants;

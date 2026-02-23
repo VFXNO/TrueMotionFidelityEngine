@@ -38,6 +38,10 @@ struct RefineConstants {
   float motionScale   = 2.0f;
   int   useBackward   = 0;
   float backwardScale = 1.0f;
+  float attnLearnRate = 0.08f;
+  float attnPriorMix  = 0.45f;
+  float attnStability = 0.35f;
+  float pad0          = 0.0f;
 };
 
 struct SmoothConstants {
@@ -81,10 +85,10 @@ void Interpolator::Dispatch(int w, int h) {
 
 void Interpolator::ClearCS(int srvCount, int uavCount) {
   ID3D11ShaderResourceView*  nullSrvs[8] = {};
-  ID3D11UnorderedAccessView* nullUavs[4] = {};
+  ID3D11UnorderedAccessView* nullUavs[8] = {};
   ID3D11SamplerState*        nullSamp[1] = {};
   m_context->CSSetShaderResources(0, (srvCount > 8) ? 8 : srvCount, nullSrvs);
-  m_context->CSSetUnorderedAccessViews(0, (uavCount > 4) ? 4 : uavCount, nullUavs, nullptr);
+  m_context->CSSetUnorderedAccessViews(0, (uavCount > 8) ? 8 : uavCount, nullUavs, nullptr);
   m_context->CSSetSamplers(0, 1, nullSamp);
   m_context->CSSetShader(nullptr, nullptr, 0);
 }
@@ -93,7 +97,7 @@ void Interpolator::ClearCS(int srvCount, int uavCount) {
 // Initialization
 // -----------------------------------------------------------------------
 bool Interpolator::Initialize(ID3D11Device* device, ID3D11DeviceContext* context) {
-  std::ofstream log("init_log.txt");
+  std::ofstream log("init_log.txt", std::ios::app);
   log << "Interpolator::Initialize started\n";
 
   if (!device || !context) {
@@ -463,6 +467,12 @@ void Interpolator::CreateResources() {
   m_confidenceCoarse.Reset(); m_confidenceCoarseSrv.Reset(); m_confidenceCoarseUav.Reset();
   m_motionSmooth.Reset(); m_motionSmoothSrv.Reset(); m_motionSmoothUav.Reset();
   m_confidenceSmooth.Reset(); m_confidenceSmoothSrv.Reset(); m_confidenceSmoothUav.Reset();
+  m_attnSmall1.Reset(); m_attnSmall1Uav.Reset();
+  m_attnSmall2.Reset(); m_attnSmall2Uav.Reset();
+  m_attnSmall3.Reset(); m_attnSmall3Uav.Reset();
+  m_attnFull1.Reset(); m_attnFull1Uav.Reset();
+  m_attnFull2.Reset(); m_attnFull2Uav.Reset();
+  m_attnFull3.Reset(); m_attnFull3Uav.Reset();
 
   m_outputTexture.Reset(); m_outputSrv.Reset(); m_outputUav.Reset();
 
@@ -484,6 +494,23 @@ void Interpolator::CreateResources() {
     if (FAILED(m_device->CreateTexture2D(&desc, nullptr, &tex))) return;
     if (FAILED(m_device->CreateShaderResourceView(tex.Get(), nullptr, &srv)))  { tex.Reset(); return; }
     if (FAILED(m_device->CreateUnorderedAccessView(tex.Get(), nullptr, &uav))) { tex.Reset(); srv.Reset(); return; }
+  };
+
+  auto createUavTex = [&](int w, int h, DXGI_FORMAT fmt,
+                          Microsoft::WRL::ComPtr<ID3D11Texture2D>& tex,
+                          Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView>& uav) {
+    if (w <= 0 || h <= 0) return;
+    D3D11_TEXTURE2D_DESC desc = {};
+    desc.Width = static_cast<UINT>(w);
+    desc.Height = static_cast<UINT>(h);
+    desc.MipLevels = 1;
+    desc.ArraySize = 1;
+    desc.Format = fmt;
+    desc.SampleDesc.Count = 1;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+    if (FAILED(m_device->CreateTexture2D(&desc, nullptr, &tex))) return;
+    if (FAILED(m_device->CreateUnorderedAccessView(tex.Get(), nullptr, &uav))) { tex.Reset(); return; }
   };
 
   // Luma pyramid (now storing 4-channel CNN features)
@@ -523,6 +550,26 @@ void Interpolator::CreateResources() {
   createTex(m_lumaWidth, m_lumaHeight, DXGI_FORMAT_R16G16_FLOAT, m_motionSmooth, m_motionSmoothSrv, m_motionSmoothUav);
   createTex(m_lumaWidth, m_lumaHeight, DXGI_FORMAT_R16_FLOAT, m_confidenceSmooth, m_confidenceSmoothSrv, m_confidenceSmoothUav);
 
+  // Attention priors are writable state buffers (UAV-only), one float4 per feature set
+  createUavTex(m_smallWidth, m_smallHeight, DXGI_FORMAT_R16G16B16A16_FLOAT, m_attnSmall1, m_attnSmall1Uav);
+  createUavTex(m_smallWidth, m_smallHeight, DXGI_FORMAT_R16G16B16A16_FLOAT, m_attnSmall2, m_attnSmall2Uav);
+  createUavTex(m_smallWidth, m_smallHeight, DXGI_FORMAT_R16G16B16A16_FLOAT, m_attnSmall3, m_attnSmall3Uav);
+  createUavTex(m_lumaWidth, m_lumaHeight, DXGI_FORMAT_R16G16B16A16_FLOAT, m_attnFull1, m_attnFull1Uav);
+  createUavTex(m_lumaWidth, m_lumaHeight, DXGI_FORMAT_R16G16B16A16_FLOAT, m_attnFull2, m_attnFull2Uav);
+  createUavTex(m_lumaWidth, m_lumaHeight, DXGI_FORMAT_R16G16B16A16_FLOAT, m_attnFull3, m_attnFull3Uav);
+
+  if (m_context) {
+    const float baseW1[4] = {0.15f, 0.10f, 0.10f, 0.20f};
+    const float baseW2[4] = {0.10f, 0.10f, 0.15f, 0.10f};
+    const float baseW3[4] = {0.10f, 0.10f, 0.10f, 0.10f};
+    if (m_attnSmall1Uav) m_context->ClearUnorderedAccessViewFloat(m_attnSmall1Uav.Get(), baseW1);
+    if (m_attnSmall2Uav) m_context->ClearUnorderedAccessViewFloat(m_attnSmall2Uav.Get(), baseW2);
+    if (m_attnSmall3Uav) m_context->ClearUnorderedAccessViewFloat(m_attnSmall3Uav.Get(), baseW3);
+    if (m_attnFull1Uav) m_context->ClearUnorderedAccessViewFloat(m_attnFull1Uav.Get(), baseW1);
+    if (m_attnFull2Uav) m_context->ClearUnorderedAccessViewFloat(m_attnFull2Uav.Get(), baseW2);
+    if (m_attnFull3Uav) m_context->ClearUnorderedAccessViewFloat(m_attnFull3Uav.Get(), baseW3);
+  }
+
   createTex(m_outputWidth, m_outputHeight, DXGI_FORMAT_B8G8R8A8_UNORM, m_outputTexture, m_outputSrv, m_outputUav);
 
   // Validate critical resources
@@ -532,7 +579,9 @@ void Interpolator::CreateResources() {
       !m_motionCoarseUav || !m_confidenceCoarseUav ||
       !m_motionTinyUav || !m_motionTinyBackwardUav ||
       !m_confidenceTinyUav || !m_confidenceTinyBackwardUav ||
-      !m_motionSmoothUav || !m_confidenceSmoothUav) {
+      !m_motionSmoothUav || !m_confidenceSmoothUav ||
+      !m_attnSmall1Uav || !m_attnSmall2Uav || !m_attnSmall3Uav ||
+      !m_attnFull1Uav || !m_attnFull2Uav || !m_attnFull3Uav) {
     return;
   }
 }
@@ -550,7 +599,9 @@ bool Interpolator::ComputeMotion(
       !m_motionUav || !m_confidenceUav ||
       !m_motionCoarseUav || !m_confidenceCoarseUav ||
       !m_motionTinyUav || !m_motionTinyBackwardUav ||
-      !m_confidenceTinyUav || !m_confidenceTinyBackwardUav)
+      !m_confidenceTinyUav || !m_confidenceTinyBackwardUav ||
+      !m_attnSmall1Uav || !m_attnSmall2Uav || !m_attnSmall3Uav ||
+      !m_attnFull1Uav || !m_attnFull2Uav || !m_attnFull3Uav)
     return false;
   if (!m_motionCs || !m_motionRefineCs || !m_motionSmoothCs ||
       !m_motionConstants || !m_refineConstants || !m_smoothConstants)
@@ -562,15 +613,30 @@ bool Interpolator::ComputeMotion(
   int model = std::clamp(m_motionModel, 0, 3);
   int tinyRadiusFwd = 12, tinyRadiusBwd = 12;
   int refineSmallR = 8, refineFullR = 6;
+  float attnLearnRate = 0.08f;
+  float attnPriorMix = 0.45f;
+  float attnStability = 0.35f;
 
   if (m_useMinimalMotionPipeline) {
     tinyRadiusFwd = 4; tinyRadiusBwd = 4;
+    attnLearnRate = 0.03f;
+    attnPriorMix = 0.30f;
+    attnStability = 0.65f;
   } else if (model == 0) { // Adaptive
     tinyRadiusFwd = 16; tinyRadiusBwd = 16; refineSmallR = 12; refineFullR = 8;
+    attnLearnRate = 0.09f;
+    attnPriorMix = 0.55f;
+    attnStability = 0.28f;
   } else if (model == 1) { // Stable
     tinyRadiusFwd = 8; tinyRadiusBwd = 8; refineSmallR = 6; refineFullR = 4;
+    attnLearnRate = 0.04f;
+    attnPriorMix = 0.65f;
+    attnStability = 0.70f;
   } else if (model == 3) { // Coverage
     tinyRadiusFwd = 24; tinyRadiusBwd = 24; refineSmallR = 16; refineFullR = 12;
+    attnLearnRate = 0.11f;
+    attnPriorMix = 0.40f;
+    attnStability = 0.22f;
   }
 
   // =======================================================================
@@ -699,6 +765,9 @@ bool Interpolator::ComputeMotion(
     rc.motionScale = static_cast<float>(m_smallWidth) / static_cast<float>(m_tinyWidth);
     rc.useBackward = 1;
     rc.backwardScale = rc.motionScale;
+    rc.attnLearnRate = attnLearnRate;
+    rc.attnPriorMix = attnPriorMix;
+    rc.attnStability = attnStability;
     m_context->UpdateSubresource(m_refineConstants.Get(), 0, nullptr, &rc, 0, 0);
 
     ID3D11ShaderResourceView* s[] = {
@@ -708,16 +777,22 @@ bool Interpolator::ComputeMotion(
         m_motionTinySrv.Get(), m_confidenceTinySrv.Get(),
         m_motionTinyBackwardSrv.Get(), m_confidenceTinyBackwardSrv.Get()
     };
-    ID3D11UnorderedAccessView* u[] = {m_motionCoarseUav.Get(), m_confidenceCoarseUav.Get()};
+    ID3D11UnorderedAccessView* u[] = {
+        m_motionCoarseUav.Get(),
+        m_confidenceCoarseUav.Get(),
+        m_attnSmall1Uav.Get(),
+        m_attnSmall2Uav.Get(),
+        m_attnSmall3Uav.Get()
+    };
     ID3D11Buffer* cbs[] = {m_refineConstants.Get()};
 
     m_context->CSSetShader(m_motionRefineCs.Get(), nullptr, 0);
     m_context->CSSetShaderResources(0, 10, s);
-    m_context->CSSetUnorderedAccessViews(0, 2, u, nullptr);
+    m_context->CSSetUnorderedAccessViews(0, 5, u, nullptr);
     m_context->CSSetConstantBuffers(0, 1, cbs);
     m_context->CSSetSamplers(0, 1, samplers);
     Dispatch(m_smallWidth, m_smallHeight);
-    ClearCS(10, 2);
+    ClearCS(10, 5);
   }
 
   // =======================================================================
@@ -729,6 +804,9 @@ bool Interpolator::ComputeMotion(
     rc.motionScale = static_cast<float>(m_lumaWidth) / static_cast<float>(m_smallWidth);
     rc.useBackward = 0;
     rc.backwardScale = 1.0f;
+    rc.attnLearnRate = attnLearnRate;
+    rc.attnPriorMix = attnPriorMix;
+    rc.attnStability = attnStability;
     m_context->UpdateSubresource(m_refineConstants.Get(), 0, nullptr, &rc, 0, 0);
 
     ID3D11ShaderResourceView* s[] = {
@@ -738,16 +816,22 @@ bool Interpolator::ComputeMotion(
         m_motionCoarseSrv.Get(), m_confidenceCoarseSrv.Get(),
         m_motionTinyBackwardSrv.Get(), m_confidenceTinyBackwardSrv.Get()
     };
-    ID3D11UnorderedAccessView* u[] = {m_motionUav.Get(), m_confidenceUav.Get()};
+    ID3D11UnorderedAccessView* u[] = {
+        m_motionUav.Get(),
+        m_confidenceUav.Get(),
+        m_attnFull1Uav.Get(),
+        m_attnFull2Uav.Get(),
+        m_attnFull3Uav.Get()
+    };
     ID3D11Buffer* cbs[] = {m_refineConstants.Get()};
 
     m_context->CSSetShader(m_motionRefineCs.Get(), nullptr, 0);
     m_context->CSSetShaderResources(0, 10, s);
-    m_context->CSSetUnorderedAccessViews(0, 2, u, nullptr);
+    m_context->CSSetUnorderedAccessViews(0, 5, u, nullptr);
     m_context->CSSetConstantBuffers(0, 1, cbs);
     m_context->CSSetSamplers(0, 1, samplers);
     Dispatch(m_lumaWidth, m_lumaHeight);
-    ClearCS(10, 2);
+    ClearCS(10, 5);
   }
 
   // =======================================================================

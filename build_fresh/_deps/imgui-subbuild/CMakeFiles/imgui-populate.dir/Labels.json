@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/build_fresh/_deps/imgui-subbuild/CMakeFiles/imgui-populate"
+		},
+		{
+			"file" : "C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/build_fresh/_deps/imgui-subbuild/CMakeFiles/80677d324795966fa1a49934db848f41/imgui-populate.rule"
+		},
+		{
+			"file" : "C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/build_fresh/_deps/imgui-subbuild/CMakeFiles/31ff56f29a72fd7fa77464fca3b4dbad/imgui-populate-complete.rule"
+		},
+		{
+			"file" : "C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/build_fresh/_deps/imgui-subbuild/CMakeFiles/07312ead5216e881e73ca4ca7149a2bb/imgui-populate-build.rule"
+		},
+		{
+			"file" : "C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/build_fresh/_deps/imgui-subbuild/CMakeFiles/07312ead5216e881e73ca4ca7149a2bb/imgui-populate-configure.rule"
+		},
+		{
+			"file" : "C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/build_fresh/_deps/imgui-subbuild/CMakeFiles/07312ead5216e881e73ca4ca7149a2bb/imgui-populate-download.rule"
+		},
+		{
+			"file" : "C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/build_fresh/_deps/imgui-subbuild/CMakeFiles/07312ead5216e881e73ca4ca7149a2bb/imgui-populate-install.rule"
+		},
+		{
+			"file" : "C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/build_fresh/_deps/imgui-subbuild/CMakeFiles/07312ead5216e881e73ca4ca7149a2bb/imgui-populate-mkdir.rule"
+		},
+		{
+			"file" : "C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/build_fresh/_deps/imgui-subbuild/CMakeFiles/07312ead5216e881e73ca4ca7149a2bb/imgui-populate-patch.rule"
+		},
+		{
+			"file" : "C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/build_fresh/_deps/imgui-subbuild/CMakeFiles/07312ead5216e881e73ca4ca7149a2bb/imgui-populate-test.rule"
+		},
+		{
+			"file" : "C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/build_fresh/_deps/imgui-subbuild/CMakeFiles/07312ead5216e881e73ca4ca7149a2bb/imgui-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"imgui-populate"
+		],
+		"name" : "imgui-populate"
+	}
+}

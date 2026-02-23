@@ -3,11 +3,103 @@
 #include <windows.h>
 #include <dxgi1_6.h>
 
+#include <algorithm>
 #include <cstdint>
+#include <fstream>
+#include <sstream>
 #include <vector>
 #include <iostream>
 
 #pragma comment(lib, "dxgi.lib")
+
+namespace {
+
+std::string HrToHex(HRESULT hr) {
+  std::ostringstream ss;
+  ss << "0x" << std::hex << std::uppercase << static_cast<unsigned long>(hr);
+  return ss.str();
+}
+
+void AppendInitLog(std::ofstream& log, const std::string& line) {
+  if (log.is_open()) {
+    log << line << "\n";
+  }
+}
+
+bool LuidEquals(const LUID& a, const LUID& b) {
+  return a.HighPart == b.HighPart && a.LowPart == b.LowPart;
+}
+
+bool AdapterHasOutputs(IDXGIAdapter1* adapter) {
+  if (!adapter) {
+    return false;
+  }
+
+  Microsoft::WRL::ComPtr<IDXGIOutput> output;
+  return SUCCEEDED(adapter->EnumOutputs(0, &output));
+}
+
+std::string AdapterName(IDXGIAdapter1* adapter) {
+  if (!adapter) {
+    return "default";
+  }
+
+  DXGI_ADAPTER_DESC1 desc = {};
+  if (FAILED(adapter->GetDesc1(&desc))) {
+    return "unknown-adapter";
+  }
+
+  char utf8[512] = {};
+  int written = WideCharToMultiByte(
+      CP_UTF8,
+      0,
+      desc.Description,
+      -1,
+      utf8,
+      static_cast<int>(sizeof(utf8)),
+      nullptr,
+      nullptr);
+
+  if (written <= 1) {
+    return "unnamed-adapter";
+  }
+  return utf8;
+}
+
+std::string DeviceAdapterName(ID3D11Device* device) {
+  if (!device) {
+    return {};
+  }
+
+  Microsoft::WRL::ComPtr<IDXGIDevice> dxgiDevice;
+  if (FAILED(device->QueryInterface(IID_PPV_ARGS(&dxgiDevice)))) {
+    return {};
+  }
+
+  Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
+  if (FAILED(dxgiDevice->GetAdapter(&adapter))) {
+    return {};
+  }
+
+  Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter1;
+  if (FAILED(adapter.As(&adapter1))) {
+    return {};
+  }
+
+  return AdapterName(adapter1.Get());
+}
+
+std::wstring ToLowerAscii(std::wstring value) {
+  std::transform(value.begin(), value.end(), value.begin(), [](wchar_t c) {
+    if (c >= L'A' && c <= L'Z') {
+      return static_cast<wchar_t>(c - L'A' + L'a');
+    }
+    return c;
+  });
+  return value;
+}
+
+} // namespace
 
 bool D3D11Device::Initialize(HWND hwnd) {
   UINT flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
@@ -15,67 +107,236 @@ bool D3D11Device::Initialize(HWND hwnd) {
   flags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
-  // Full DXGI Support Upgrade: 
-  // 1. Create Factory first
-  // 2. Enumerate Adapters to find High Performance GPU
-  // 3. Create Device on that Adapter
-  
+  std::ofstream initLog("init_log.txt", std::ios::app);
+  AppendInitLog(initLog, "\n[D3D11Device::Initialize] begin");
+  m_hasDxgiOutputs = false;
+  m_usingSystemMonitorFallback = false;
+  m_activeAdapterName.clear();
+
+  wchar_t prefBuf[64] = {};
+  DWORD prefLen = GetEnvironmentVariableW(
+      L"TMFE_GPU_PREFERENCE",
+      prefBuf,
+      static_cast<DWORD>(ARRAYSIZE(prefBuf)));
+  std::wstring gpuPref;
+  if (prefLen > 0 && prefLen < ARRAYSIZE(prefBuf)) {
+    gpuPref = ToLowerAscii(std::wstring(prefBuf));
+  }
+  const bool preferHighPerformance =
+      (gpuPref == L"high_performance" || gpuPref == L"high-performance" ||
+       gpuPref == L"high" || gpuPref == L"dgpu");
+  const bool requireOutputAdapters = !preferHighPerformance;
+  if (preferHighPerformance) {
+    AppendInitLog(initLog, "GPU preference: high_performance (TMFE_GPU_PREFERENCE)");
+  } else {
+    AppendInitLog(initLog, "GPU preference: display_attached (default)");
+  }
+
   HRESULT hr = CreateDXGIFactory1(IID_PPV_ARGS(&m_factory));
   if (FAILED(hr)) {
-      return false;
+    AppendInitLog(initLog, "CreateDXGIFactory1 failed: " + HrToHex(hr));
+    return false;
   }
+  AppendInitLog(initLog, "CreateDXGIFactory1 succeeded");
 
-  Microsoft::WRL::ComPtr<IDXGIAdapter> targetAdapter;
-  Microsoft::WRL::ComPtr<IDXGIFactory6> factory6;
-  if (SUCCEEDED(m_factory.As(&factory6))) {
-      // DXGI 1.6: Ask for High Performance GPU specifically
-      Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter1;
-      if (SUCCEEDED(factory6->EnumAdapterByGpuPreference(
-              0, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter1)))) {
-          targetAdapter = adapter1;
-      }
-  }
-
-  // Fallback if DXGI 1.6 fails or returns null
-  if (!targetAdapter) {
-     m_factory->EnumAdapters(0, &targetAdapter);
-  }
-
+  Microsoft::WRL::ComPtr<IDXGIFactory2> adapterEnumFactory = m_factory;
   D3D_FEATURE_LEVEL featureLevels[] = {
       D3D_FEATURE_LEVEL_11_1,
       D3D_FEATURE_LEVEL_11_0,
   };
+  D3D_FEATURE_LEVEL selectedFeatureLevel = D3D_FEATURE_LEVEL_11_0;
 
-  D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_0;
-  
-  // Create device with the specific high-perf adapter
-  hr = D3D11CreateDevice(
-      targetAdapter.Get(), 
-      targetAdapter ? D3D_DRIVER_TYPE_UNKNOWN : D3D_DRIVER_TYPE_HARDWARE, // UNKNOWN needed when providing adapter
-      nullptr,
-      flags,
-      featureLevels,
-      ARRAYSIZE(featureLevels),
-      D3D11_SDK_VERSION,
-      &m_device,
-      &featureLevel,
-      &m_context);
+  auto tryCreateDevice = [&](IDXGIAdapter1* adapter1, D3D_DRIVER_TYPE driverType, const std::string& label) -> bool {
+    m_device.Reset();
+    m_context.Reset();
 
-  if (FAILED(hr)) {
-    // Last ditch fallback: Try default adapter if specific choice failed
-    hr = D3D11CreateDevice(
-        nullptr,
-        D3D_DRIVER_TYPE_HARDWARE,
+    IDXGIAdapter* baseAdapter = adapter1;
+    HRESULT createHr = D3D11CreateDevice(
+        baseAdapter,
+        driverType,
         nullptr,
         flags,
         featureLevels,
         ARRAYSIZE(featureLevels),
         D3D11_SDK_VERSION,
         &m_device,
-        &featureLevel,
+        &selectedFeatureLevel,
         &m_context);
-        
-    if (FAILED(hr)) return false;
+    AppendInitLog(initLog, label + " D3D11CreateDevice: " + HrToHex(createHr));
+
+#if defined(_DEBUG)
+    if (createHr == DXGI_ERROR_SDK_COMPONENT_MISSING &&
+        (flags & D3D11_CREATE_DEVICE_DEBUG) != 0) {
+      UINT noDebugFlags = flags & ~D3D11_CREATE_DEVICE_DEBUG;
+      createHr = D3D11CreateDevice(
+          baseAdapter,
+          driverType,
+          nullptr,
+          noDebugFlags,
+          featureLevels,
+          ARRAYSIZE(featureLevels),
+          D3D11_SDK_VERSION,
+          &m_device,
+          &selectedFeatureLevel,
+          &m_context);
+      AppendInitLog(initLog, label + " retry without debug layer: " + HrToHex(createHr));
+    }
+#endif
+
+    if (FAILED(createHr)) {
+      return false;
+    }
+
+    AppendInitLog(initLog, label + " feature level: " + std::to_string(static_cast<int>(selectedFeatureLevel)));
+    return true;
+  };
+
+  auto syncFactoryAndMonitors = [&]() -> bool {
+    Microsoft::WRL::ComPtr<IDXGIDevice> dxgiDevice;
+    HRESULT localHr = m_device.As(&dxgiDevice);
+    if (FAILED(localHr)) {
+      AppendInitLog(initLog, "Query IDXGIDevice failed: " + HrToHex(localHr));
+      return false;
+    }
+
+    Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
+    localHr = dxgiDevice->GetAdapter(&adapter);
+    if (FAILED(localHr)) {
+      AppendInitLog(initLog, "GetAdapter failed: " + HrToHex(localHr));
+      return false;
+    }
+
+    localHr = adapter->GetParent(IID_PPV_ARGS(&m_factory));
+    if (FAILED(localHr)) {
+      AppendInitLog(initLog, "GetParent(IDXGIFactory2) failed: " + HrToHex(localHr));
+      return false;
+    }
+
+    Microsoft::WRL::ComPtr<IDXGIFactory5> factory5;
+    if (SUCCEEDED(m_factory.As(&factory5))) {
+      BOOL allowTearing = FALSE;
+      if (SUCCEEDED(factory5->CheckFeatureSupport(
+              DXGI_FEATURE_PRESENT_ALLOW_TEARING,
+              &allowTearing,
+              sizeof(allowTearing)))) {
+        m_allowTearing = (allowTearing == TRUE);
+      }
+    }
+
+    EnumerateMonitors();
+    m_hasDxgiOutputs = !m_monitors.empty();
+    if (!m_hasDxgiOutputs) {
+      AppendInitLog(initLog, "No DXGI outputs on selected adapter, using system monitor fallback");
+      EnumerateSystemMonitors();
+      m_usingSystemMonitorFallback = !m_monitors.empty();
+    } else {
+      m_usingSystemMonitorFallback = false;
+    }
+
+    const std::string deviceAdapterName = DeviceAdapterName(m_device.Get());
+    if (!deviceAdapterName.empty()) {
+      m_activeAdapterName = deviceAdapterName;
+    }
+
+    AppendInitLog(initLog, "EnumerateMonitors count: " + std::to_string(m_monitors.size()));
+    AppendInitLog(initLog, "DXGI outputs available: " + std::string(m_hasDxgiOutputs ? "true" : "false"));
+    if (!m_activeAdapterName.empty()) {
+      AppendInitLog(initLog, "Active adapter: " + m_activeAdapterName);
+    }
+    return !m_monitors.empty();
+  };
+
+  std::vector<Microsoft::WRL::ComPtr<IDXGIAdapter1>> adapterCandidates;
+
+  Microsoft::WRL::ComPtr<IDXGIFactory6> factory6;
+  if (SUCCEEDED(adapterEnumFactory.As(&factory6))) {
+    for (UINT i = 0;; ++i) {
+      Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter1;
+      HRESULT enumHr = factory6->EnumAdapterByGpuPreference(
+          i,
+          DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
+          IID_PPV_ARGS(&adapter1));
+      if (enumHr == DXGI_ERROR_NOT_FOUND) {
+        break;
+      }
+      if (SUCCEEDED(enumHr)) {
+        adapterCandidates.push_back(adapter1);
+      }
+    }
+  }
+
+  for (UINT i = 0;; ++i) {
+    Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter1;
+    HRESULT enumHr = adapterEnumFactory->EnumAdapters1(i, &adapter1);
+    if (enumHr == DXGI_ERROR_NOT_FOUND) {
+      break;
+    }
+    if (SUCCEEDED(enumHr)) {
+      adapterCandidates.push_back(adapter1);
+    }
+  }
+
+  bool created = false;
+  std::vector<LUID> seenLuids;
+  for (const auto& adapter1 : adapterCandidates) {
+    if (!adapter1) {
+      continue;
+    }
+
+    DXGI_ADAPTER_DESC1 desc = {};
+    if (FAILED(adapter1->GetDesc1(&desc))) {
+      continue;
+    }
+    if ((desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) != 0) {
+      continue;
+    }
+
+    bool alreadySeen = false;
+    for (const auto& luid : seenLuids) {
+      if (LuidEquals(desc.AdapterLuid, luid)) {
+        alreadySeen = true;
+        break;
+      }
+    }
+    if (alreadySeen) {
+      continue;
+    }
+    seenLuids.push_back(desc.AdapterLuid);
+
+    const bool hasOutputs = AdapterHasOutputs(adapter1.Get());
+    const std::string adapterName = AdapterName(adapter1.Get());
+    AppendInitLog(initLog,
+                  "Trying adapter [" + adapterName + "] hasOutputs=" + (hasOutputs ? "true" : "false"));
+    if (requireOutputAdapters && !hasOutputs) {
+      continue;
+    }
+
+    if (tryCreateDevice(adapter1.Get(), D3D_DRIVER_TYPE_UNKNOWN, "Adapter " + adapterName) &&
+        syncFactoryAndMonitors()) {
+      created = true;
+      break;
+    }
+  }
+
+  if (!created) {
+    AppendInitLog(initLog, "Trying default hardware device");
+    if (tryCreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, "Default hardware") &&
+        syncFactoryAndMonitors()) {
+      created = true;
+    }
+  }
+
+  if (!created) {
+    AppendInitLog(initLog, "Trying WARP fallback device");
+    if (tryCreateDevice(nullptr, D3D_DRIVER_TYPE_WARP, "WARP fallback") &&
+        syncFactoryAndMonitors()) {
+      created = true;
+    }
+  }
+
+  if (!created) {
+    AppendInitLog(initLog, "All D3D11 device initialization paths failed");
+    return false;
   }
 
   Microsoft::WRL::ComPtr<IDXGIDevice1> dxgiDevice1;
@@ -84,38 +345,15 @@ bool D3D11Device::Initialize(HWND hwnd) {
     dxgiDevice1->SetGPUThreadPriority(7);
   }
 
-  // Reload factory from device just to ensure sync (though we created it above)
-  Microsoft::WRL::ComPtr<IDXGIDevice> dxgiDevice;
-  if (FAILED(m_device.As(&dxgiDevice))) return false;
-
-  Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
-  if (FAILED(dxgiDevice->GetAdapter(&adapter))) return false;
-  
-  // Update m_factory cleanly from the used adapter
-  if (FAILED(adapter->GetParent(IID_PPV_ARGS(&m_factory)))) return false;
-
-  Microsoft::WRL::ComPtr<IDXGIFactory5> factory5;
-  if (SUCCEEDED(m_factory.As(&factory5))) {
-    BOOL allowTearing = FALSE;
-    if (SUCCEEDED(factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING,
-                                                &allowTearing,
-                                                sizeof(allowTearing)))) {
-      m_allowTearing = (allowTearing == TRUE);
-    }
-  }
-
-  EnumerateMonitors();
-  if (m_monitors.empty()) {
-    return false;
-  }
-
   RECT rect = m_monitors[0].rect;
   UINT width = static_cast<UINT>(rect.right - rect.left);
   UINT height = static_cast<UINT>(rect.bottom - rect.top);
   if (!CreateSwapChain(hwnd, width, height)) {
+    AppendInitLog(initLog, "CreateSwapChain failed");
     return false;
   }
 
+  AppendInitLog(initLog, "D3D11Device::Initialize succeeded");
   return true;
 }
 
@@ -126,6 +364,9 @@ void D3D11Device::Shutdown() {
   m_context.Reset();
   m_device.Reset();
   m_monitors.clear();
+  m_hasDxgiOutputs = false;
+  m_usingSystemMonitorFallback = false;
+  m_activeAdapterName.clear();
 }
 
 bool D3D11Device::ResizeSwapChain(UINT width, UINT height) {
@@ -306,20 +547,43 @@ bool D3D11Device::CreateSwapChain(HWND hwnd, UINT width, UINT height) {
   desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
   desc.BufferCount = 2; // Double Buffering
   desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-  desc.Scaling = DXGI_SCALING_NONE; // change it to fullscreen scale 
   desc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
-  desc.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+
+  UINT baseFlags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
   if (m_allowTearing) {
-    desc.Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+    baseFlags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
   }
 
-  HRESULT hr = m_factory->CreateSwapChainForHwnd(
-      m_device.Get(),
-      hwnd,
-      &desc,
-      nullptr,
-      nullptr,
-      &m_swapChain);
+  auto tryCreateSwapChain = [&](DXGI_SCALING scaling, UINT flags, const char* tag) -> HRESULT {
+    desc.Scaling = scaling;
+    desc.Flags = flags;
+    m_swapChain.Reset();
+
+    HRESULT localHr = m_factory->CreateSwapChainForHwnd(
+        m_device.Get(),
+        hwnd,
+        &desc,
+        nullptr,
+        nullptr,
+        &m_swapChain);
+
+    if (FAILED(localHr)) {
+      std::ofstream log("init_log.txt", std::ios::app);
+      if (log.is_open()) {
+        log << "CreateSwapChainForHwnd(" << tag << ") failed: " << HrToHex(localHr) << "\n";
+      }
+    }
+    return localHr;
+  };
+
+  HRESULT hr = tryCreateSwapChain(DXGI_SCALING_NONE, baseFlags, "SCALING_NONE");
+  if (FAILED(hr)) {
+    hr = tryCreateSwapChain(DXGI_SCALING_STRETCH, baseFlags, "SCALING_STRETCH");
+  }
+  if (FAILED(hr)) {
+    UINT noLatencyFlags = baseFlags & ~DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+    hr = tryCreateSwapChain(DXGI_SCALING_STRETCH, noLatencyFlags, "SCALING_STRETCH_NO_WAITABLE");
+  }
   if (FAILED(hr)) {
     return false;
   }
@@ -418,4 +682,47 @@ void D3D11Device::EnumerateMonitors() {
 
     m_monitors.push_back(info);
   }
+}
+
+void D3D11Device::EnumerateSystemMonitors() {
+  m_monitors.clear();
+
+  struct EnumState {
+    std::vector<MonitorInfo>* monitors = nullptr;
+  } state;
+  state.monitors = &m_monitors;
+
+  EnumDisplayMonitors(
+      nullptr,
+      nullptr,
+      [](HMONITOR monitor, HDC, LPRECT, LPARAM lParam) -> BOOL {
+        auto* enumState = reinterpret_cast<EnumState*>(lParam);
+        if (!enumState || !enumState->monitors) {
+          return FALSE;
+        }
+
+        MONITORINFOEXW infoEx = {};
+        infoEx.cbSize = sizeof(infoEx);
+        if (!GetMonitorInfoW(monitor, &infoEx)) {
+          return TRUE;
+        }
+
+        MonitorInfo info;
+        info.name = infoEx.szDevice;
+        info.rect = infoEx.rcMonitor;
+        info.monitor = monitor;
+
+        DEVMODEW devMode = {};
+        devMode.dmSize = sizeof(devMode);
+        if (EnumDisplaySettingsW(infoEx.szDevice, ENUM_CURRENT_SETTINGS, &devMode) &&
+            devMode.dmDisplayFrequency > 1) {
+          info.refreshRate.Numerator = devMode.dmDisplayFrequency;
+          info.refreshRate.Denominator = 1;
+          info.maxRefreshRate = info.refreshRate;
+        }
+
+        enumState->monitors->push_back(info);
+        return TRUE;
+      },
+      reinterpret_cast<LPARAM>(&state));
 }

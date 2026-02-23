@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\vfxno\Documents\GitHub\TrueMotionFidelityEngine\build_fresh\_deps\imgui-subbuild\CMakeFiles\07312ead5216e881e73ca4ca7149a2bb\imgui-populate-mkdir.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\vfxno\Documents\GitHub\TrueMotionFidelityEngine\build_fresh\_deps\imgui-subbuild\CMakeFiles\07312ead5216e881e73ca4ca7149a2bb\imgui-populate-download.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\vfxno\Documents\GitHub\TrueMotionFidelityEngine\build_fresh\_deps\imgui-subbuild\CMakeFiles\07312ead5216e881e73ca4ca7149a2bb\imgui-populate-update.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\vfxno\Documents\GitHub\TrueMotionFidelityEngine\build_fresh\_deps\imgui-subbuild\CMakeFiles\07312ead5216e881e73ca4ca7149a2bb\imgui-populate-patch.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\vfxno\Documents\GitHub\TrueMotionFidelityEngine\build_fresh\_deps\imgui-subbuild\CMakeFiles\07312ead5216e881e73ca4ca7149a2bb\imgui-populate-configure.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\vfxno\Documents\GitHub\TrueMotionFidelityEngine\build_fresh\_deps\imgui-subbuild\CMakeFiles\07312ead5216e881e73ca4ca7149a2bb\imgui-populate-build.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\vfxno\Documents\GitHub\TrueMotionFidelityEngine\build_fresh\_deps\imgui-subbuild\CMakeFiles\07312ead5216e881e73ca4ca7149a2bb\imgui-populate-install.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\vfxno\Documents\GitHub\TrueMotionFidelityEngine\build_fresh\_deps\imgui-subbuild\CMakeFiles\07312ead5216e881e73ca4ca7149a2bb\imgui-populate-test.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\vfxno\Documents\GitHub\TrueMotionFidelityEngine\build_fresh\_deps\imgui-subbuild\CMakeFiles\31ff56f29a72fd7fa77464fca3b4dbad\imgui-populate-complete.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\vfxno\Documents\GitHub\TrueMotionFidelityEngine\build_fresh\_deps\imgui-subbuild\CMakeFiles\80677d324795966fa1a49934db848f41\imgui-populate.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\vfxno\Documents\GitHub\TrueMotionFidelityEngine\build_fresh\_deps\imgui-subbuild\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\vfxno\Documents\GitHub\TrueMotionFidelityEngine\build_fresh\_deps\imgui-subbuild\CMakeFiles\imgui-populate" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{00D2EBF5-DC0E-3E26-8447-DE96FE8C1F0B}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

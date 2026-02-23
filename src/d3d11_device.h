@@ -37,6 +37,9 @@ public:
   ID3D11RenderTargetView* RenderTargetView() const { return m_rtv.Get(); }
   bool AllowTearing() const { return m_allowTearing; }
   HANDLE GetSwapChainWaitHandle() const { return m_swapChainWaitHandle; }
+  const std::string& ActiveAdapterName() const { return m_activeAdapterName; }
+  bool HasDxgiOutputs() const { return m_hasDxgiOutputs; }
+  bool UsingSystemMonitorFallback() const { return m_usingSystemMonitorFallback; }
 
   const std::vector<MonitorInfo>& Monitors() const { return m_monitors; }
   int MonitorCount() const { return static_cast<int>(m_monitors.size()); }
@@ -52,6 +55,7 @@ private:
   bool CreateSwapChain(HWND hwnd, UINT width, UINT height);
   void UpdateRenderTarget();
   void EnumerateMonitors();
+  void EnumerateSystemMonitors();
 
   Microsoft::WRL::ComPtr<ID3D11Device> m_device;
   Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_context;
@@ -62,4 +66,7 @@ private:
 
   std::vector<MonitorInfo> m_monitors;
   bool m_allowTearing = false;
+  bool m_hasDxgiOutputs = false;
+  bool m_usingSystemMonitorFallback = false;
+  std::string m_activeAdapterName;
 };
