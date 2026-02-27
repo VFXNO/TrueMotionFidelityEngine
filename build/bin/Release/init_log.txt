@@ -1149,3 +1149,33 @@ D3D11Device::Initialize succeeded
 Interpolator::Initialize started
 LoadShaders succeeded
 Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [NVIDIA GeForce RTX 3050 Ti Laptop GPU] hasOutputs=false
+Trying adapter [AMD Radeon(TM) Graphics] hasOutputs=true
+Adapter AMD Radeon(TM) Graphics D3D11CreateDevice: 0x0
+Adapter AMD Radeon(TM) Graphics feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon(TM) Graphics
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded
+
+[D3D11Device::Initialize] begin
+GPU preference: display_attached (default)
+CreateDXGIFactory1 succeeded
+Trying adapter [NVIDIA GeForce RTX 3050 Ti Laptop GPU] hasOutputs=false
+Trying adapter [AMD Radeon(TM) Graphics] hasOutputs=true
+Adapter AMD Radeon(TM) Graphics D3D11CreateDevice: 0x0
+Adapter AMD Radeon(TM) Graphics feature level: 45312
+EnumerateMonitors count: 1
+DXGI outputs available: true
+Active adapter: AMD Radeon(TM) Graphics
+D3D11Device::Initialize succeeded
+Interpolator::Initialize started
+LoadShaders succeeded
+Interpolator::Initialize succeeded

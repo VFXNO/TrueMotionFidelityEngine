@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <fstream>
+#include <sstream>
 
 namespace {
 
@@ -68,6 +69,32 @@ struct DebugConstants {
   float motionScale = 0.03f;
   float diffScale   = 2.0f;
   float pad         = 0.0f;
+};
+
+// IFNet-Lite + FusionNet-Lite weights - matches HLSL cbuffer AttentionWeightsCB
+// Total: 128 trainable parameters + 1 flag + 3 padding = 132 floats = 528 bytes
+struct AttentionWeights {
+  // === IFNet-Lite: 12->8->16 MLP ===
+  // Hidden weights: 8 units x 4 floats (weight-shared)
+  float mlpW_h0[4], mlpW_h1[4], mlpW_h2[4], mlpW_h3[4];
+  float mlpW_h4[4], mlpW_h5[4], mlpW_h6[4], mlpW_h7[4];
+  // Output weights: 4 shared vectors
+  float mlpW_out0[4], mlpW_out1[4], mlpW_out2[4], mlpW_out3[4];
+  // Hidden biases (8 values in 2 float4)
+  float mlpBias_h0[4], mlpBias_h1[4];
+  // Output biases (16 values in 4 float4)
+  float mlpBias_out0[4], mlpBias_out1[4], mlpBias_out2[4], mlpBias_out3[4];
+  // Base weights
+  float baseW1[4], baseW2[4], baseW3[4];
+  // === FusionNet-Lite: 12->6->4 Synthesis MLP ===
+  float synthW_h0[4], synthW_h1[4], synthW_h2[4];
+  float synthW_h3[4], synthW_h4[4], synthW_h5[4];
+  float synthW_out0[4], synthW_out1[4];
+  float synthBias_h0[4], synthBias_h1[4];
+  float synthBias_out[4];
+  // Control flag + padding
+  float useCustomWeights;
+  float pad[3];
 };
 
 UINT DivUp(int size) {
@@ -132,6 +159,7 @@ bool Interpolator::Initialize(ID3D11Device* device, ID3D11DeviceContext* context
   if (!makeCB(sizeof(SmoothConstants),   m_smoothConstants,   "SmoothConstants"))   return false;
   if (!makeCB(sizeof(InterpConstants),   m_interpConstants,   "InterpConstants"))   return false;
   if (!makeCB(sizeof(DebugConstants),    m_debugConstants,    "DebugConstants"))    return false;
+  if (!makeCB(sizeof(AttentionWeights),   m_attentionWeights,  "AttentionWeights"))  return false;
 
   D3D11_SAMPLER_DESC samplerDesc = {};
   samplerDesc.Filter   = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -249,13 +277,14 @@ void Interpolator::Execute(
       m_prevFeature3Srv.Get(), m_currFeature3Srv.Get()
   };
   ID3D11UnorderedAccessView* uavs[] = {m_outputUav.Get()};
-  ID3D11Buffer* cbs[] = {m_interpConstants.Get()};
+  // Bind InterpCB (b0) + AttentionWeightsCB (b1) for FusionNet-Lite synthesis
+  ID3D11Buffer* cbs[] = {m_interpConstants.Get(), m_attentionWeights.Get()};
   ID3D11SamplerState* samplers[] = {m_linearSampler.Get()};
 
   m_context->CSSetShader(m_interpolateCs.Get(), nullptr, 0);
   m_context->CSSetShaderResources(0, 12, srvs);
   m_context->CSSetUnorderedAccessViews(0, 1, uavs, nullptr);
-  m_context->CSSetConstantBuffers(0, 1, cbs);
+  m_context->CSSetConstantBuffers(0, 2, cbs);
   m_context->CSSetSamplers(0, 1, samplers);
   Dispatch(m_outputWidth, m_outputHeight);
   ClearCS(12, 1);
@@ -319,13 +348,14 @@ void Interpolator::InterpolateOnly(
       m_prevFeature3Srv.Get(), m_currFeature3Srv.Get()
   };
   ID3D11UnorderedAccessView* uavs[] = {m_outputUav.Get()};
-  ID3D11Buffer* cbs[] = {m_interpConstants.Get()};
+  // Bind InterpCB (b0) + AttentionWeightsCB (b1) for FusionNet-Lite synthesis
+  ID3D11Buffer* cbs[] = {m_interpConstants.Get(), m_attentionWeights.Get()};
   ID3D11SamplerState* samplers[] = {m_linearSampler.Get()};
 
   m_context->CSSetShader(m_interpolateCs.Get(), nullptr, 0);
   m_context->CSSetShaderResources(0, 12, srvs);
   m_context->CSSetUnorderedAccessViews(0, 1, uavs, nullptr);
-  m_context->CSSetConstantBuffers(0, 1, cbs);
+  m_context->CSSetConstantBuffers(0, 2, cbs);
   m_context->CSSetSamplers(0, 1, samplers);
   Dispatch(m_outputWidth, m_outputHeight);
   ClearCS(12, 1);
@@ -823,12 +853,12 @@ bool Interpolator::ComputeMotion(
         m_attnFull2Uav.Get(),
         m_attnFull3Uav.Get()
     };
-    ID3D11Buffer* cbs[] = {m_refineConstants.Get()};
+    ID3D11Buffer* cbs[] = {m_refineConstants.Get(), m_attentionWeights.Get()};
 
     m_context->CSSetShader(m_motionRefineCs.Get(), nullptr, 0);
     m_context->CSSetShaderResources(0, 10, s);
     m_context->CSSetUnorderedAccessViews(0, 5, u, nullptr);
-    m_context->CSSetConstantBuffers(0, 1, cbs);
+    m_context->CSSetConstantBuffers(0, 2, cbs);
     m_context->CSSetSamplers(0, 1, samplers);
     Dispatch(m_lumaWidth, m_lumaHeight);
     ClearCS(10, 5);
@@ -868,4 +898,410 @@ std::wstring Interpolator::ShaderPath(const wchar_t* filename) const {
   size_t pos = exePath.find_last_of(L"\\/");
   if (pos == std::wstring::npos) return filename;
   return exePath.substr(0, pos) + L"\\shaders\\" + filename;
+}
+
+// -----------------------------------------------------------------------
+// LoadAttentionWeights - Load MLP weights from JSON file
+// -----------------------------------------------------------------------
+bool Interpolator::LoadAttentionWeights(const wchar_t* path) {
+  std::ifstream file(path);
+  if (!file.is_open()) {
+    return false;
+  }
+
+  // Initialize with default weights so missing keys don't result in zeros
+  AttentionWeights weights = {};
+  
+  // === IFNet-Lite defaults (12->8->16 MLP) ===
+  // Hidden layer weights: 8 units
+  float mlpH0[] = { 1.12f, -0.31f, 0.48f, 0.86f };
+  float mlpH1[] = { -0.49f, 0.84f, 0.24f, -0.29f };
+  float mlpH2[] = { 0.34f, 0.27f, -0.44f, 0.75f };
+  float mlpH3[] = { 0.58f, -0.72f, 0.18f, 0.31f };
+  float mlpH4[] = { -0.27f, 0.41f, 0.95f, -0.33f };
+  float mlpH5[] = { 0.73f, 0.11f, -0.29f, 0.63f };
+  float mlpH6[] = { 0.43f, -0.55f, 0.71f, -0.21f };
+  float mlpH7[] = { -0.62f, 0.38f, 0.15f, 0.47f };
+  memcpy(weights.mlpW_h0, mlpH0, 16); memcpy(weights.mlpW_h1, mlpH1, 16);
+  memcpy(weights.mlpW_h2, mlpH2, 16); memcpy(weights.mlpW_h3, mlpH3, 16);
+  memcpy(weights.mlpW_h4, mlpH4, 16); memcpy(weights.mlpW_h5, mlpH5, 16);
+  memcpy(weights.mlpW_h6, mlpH6, 16); memcpy(weights.mlpW_h7, mlpH7, 16);
+  
+  // Output layer weights: 4 shared vectors
+  float mlpO0[] = { 0.10f, -0.05f, 0.02f, 0.07f };
+  float mlpO1[] = { -0.03f, 0.01f, 0.05f, -0.04f };
+  float mlpO2[] = { 0.00f, 0.03f, -0.02f, 0.06f };
+  float mlpO3[] = { 0.05f, -0.02f, 0.04f, -0.01f };
+  memcpy(weights.mlpW_out0, mlpO0, 16); memcpy(weights.mlpW_out1, mlpO1, 16);
+  memcpy(weights.mlpW_out2, mlpO2, 16); memcpy(weights.mlpW_out3, mlpO3, 16);
+  
+  // Hidden biases (8 values in 2 float4)
+  float biasH0[] = { 0.03f, -0.01f, 0.02f, 0.04f };
+  float biasH1[] = { -0.02f, 0.01f, 0.02f, -0.01f };
+  memcpy(weights.mlpBias_h0, biasH0, 16);
+  memcpy(weights.mlpBias_h1, biasH1, 16);
+  
+  // Output biases (16 values in 4 float4)
+  float biasO0[] = { -0.02f, 0.01f, 0.0f, 0.0f };
+  float biasO1[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+  float biasO2[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+  float biasO3[] = { 0.0f, 0.0f, -2.0f, 0.0f };  // residual=0, occlusion~0.12, quality=0.5
+  memcpy(weights.mlpBias_out0, biasO0, 16); memcpy(weights.mlpBias_out1, biasO1, 16);
+  memcpy(weights.mlpBias_out2, biasO2, 16); memcpy(weights.mlpBias_out3, biasO3, 16);
+  
+  // Base weights
+  float bW1[] = { 0.15f, 0.1f, 0.1f, 0.2f };
+  float bW2[] = { 0.1f, 0.1f, 0.15f, 0.1f };
+  float bW3[] = { 0.1f, 0.1f, 0.1f, 0.1f };
+  memcpy(weights.baseW1, bW1, 16); memcpy(weights.baseW2, bW2, 16);
+  memcpy(weights.baseW3, bW3, 16);
+  
+  // === FusionNet-Lite defaults (12->6->4 Synthesis MLP) ===
+  float sH0[] = { 0.5f, -0.3f, 0.2f, 0.4f };
+  float sH1[] = { -0.2f, 0.6f, 0.1f, -0.3f };
+  float sH2[] = { 0.3f, 0.1f, -0.4f, 0.5f };
+  float sH3[] = { 0.4f, -0.5f, 0.3f, 0.2f };
+  float sH4[] = { -0.1f, 0.4f, 0.6f, -0.2f };
+  float sH5[] = { 0.5f, 0.2f, -0.3f, 0.4f };
+  memcpy(weights.synthW_h0, sH0, 16); memcpy(weights.synthW_h1, sH1, 16);
+  memcpy(weights.synthW_h2, sH2, 16); memcpy(weights.synthW_h3, sH3, 16);
+  memcpy(weights.synthW_h4, sH4, 16); memcpy(weights.synthW_h5, sH5, 16);
+  float sO0[] = { 0.3f, 0.2f, 0.4f, 0.1f };
+  float sO1[] = { 0.2f, 0.3f, 0.3f, 0.2f };
+  memcpy(weights.synthW_out0, sO0, 16); memcpy(weights.synthW_out1, sO1, 16);
+  float sBH0[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+  float sBH1[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+  float sBO[] = { 0.0f, 0.0f, 1.4f, -0.85f };  // blend=0.5, detail=0.5, conf=0.8, sharp=0.3
+  memcpy(weights.synthBias_h0, sBH0, 16); memcpy(weights.synthBias_h1, sBH1, 16);
+  memcpy(weights.synthBias_out, sBO, 16);
+  
+  // Simple JSON parsing
+  std::string content((std::istreambuf_iterator<char>(file)),
+                       std::istreambuf_iterator<char>());
+  
+  // Helper to parse a 4-element float array
+  auto parseArray = [&](const char* name, float* out) {
+    std::string searchStr = std::string("\"") + name + "\"";
+    size_t pos = content.find(searchStr);
+    if (pos == std::string::npos) {
+      searchStr = name;
+      pos = content.find(searchStr);
+    }
+    if (pos != std::string::npos) {
+      size_t arrStart = content.find('[', pos);
+      size_t arrEnd = content.find(']', arrStart);
+      if (arrStart != std::string::npos && arrEnd != std::string::npos) {
+        std::string arr = content.substr(arrStart + 1, arrEnd - arrStart - 1);
+        for (char& c : arr) { if (c == ',') c = ' '; }
+        std::istringstream iss(arr);
+        float val;
+        int i = 0;
+        while (iss >> val && i < 4) { out[i++] = val; }
+      }
+    }
+  };
+  
+  // Parse IFNet-Lite hidden weights (8 units)
+  parseArray("mlpW_h0", weights.mlpW_h0);
+  parseArray("mlpW_h1", weights.mlpW_h1);
+  parseArray("mlpW_h2", weights.mlpW_h2);
+  parseArray("mlpW_h3", weights.mlpW_h3);
+  parseArray("mlpW_h4", weights.mlpW_h4);
+  parseArray("mlpW_h5", weights.mlpW_h5);
+  parseArray("mlpW_h6", weights.mlpW_h6);
+  parseArray("mlpW_h7", weights.mlpW_h7);
+  
+  // Parse output weights (4 vectors)
+  parseArray("mlpW_out0", weights.mlpW_out0);
+  parseArray("mlpW_out1", weights.mlpW_out1);
+  parseArray("mlpW_out2", weights.mlpW_out2);
+  parseArray("mlpW_out3", weights.mlpW_out3);
+  
+  // Parse biases (backward-compatible: try new names first, fall back to old)
+  parseArray("mlpBias_h0", weights.mlpBias_h0);
+  parseArray("mlpBias_h1", weights.mlpBias_h1);
+  // Backward compat: old "mlpBias_hidden" maps to mlpBias_h0
+  if (content.find("\"mlpBias_hidden\"") != std::string::npos) {
+    parseArray("mlpBias_hidden", weights.mlpBias_h0);
+  }
+  parseArray("mlpBias_out0", weights.mlpBias_out0);
+  parseArray("mlpBias_out1", weights.mlpBias_out1);
+  parseArray("mlpBias_out2", weights.mlpBias_out2);
+  parseArray("mlpBias_out3", weights.mlpBias_out3);
+  
+  // Parse base weights
+  parseArray("baseW1", weights.baseW1);
+  parseArray("baseW2", weights.baseW2);
+  parseArray("baseW3", weights.baseW3);
+  
+  // Parse FusionNet-Lite synthesis weights (optional, defaults are fine)
+  parseArray("synthW_h0", weights.synthW_h0);
+  parseArray("synthW_h1", weights.synthW_h1);
+  parseArray("synthW_h2", weights.synthW_h2);
+  parseArray("synthW_h3", weights.synthW_h3);
+  parseArray("synthW_h4", weights.synthW_h4);
+  parseArray("synthW_h5", weights.synthW_h5);
+  parseArray("synthW_out0", weights.synthW_out0);
+  parseArray("synthW_out1", weights.synthW_out1);
+  parseArray("synthBias_h0", weights.synthBias_h0);
+  parseArray("synthBias_h1", weights.synthBias_h1);
+  parseArray("synthBias_out", weights.synthBias_out);
+  
+  // Set custom weights flag
+  weights.useCustomWeights = 1.0f;
+
+  if (!m_attentionWeights) {
+    return false;
+  }
+
+  // Update the constant buffer
+  m_context->UpdateSubresource(m_attentionWeights.Get(), 0, nullptr, &weights, 0, 0);
+  m_useCustomWeights = true;
+  
+  return true;
+}
+
+// -----------------------------------------------------------------------
+// SaveAttentionWeights - Save MLP weights to JSON file
+// -----------------------------------------------------------------------
+bool Interpolator::SaveAttentionWeights(const wchar_t* path) const {
+  // Default weights (matching IFNet-Lite + FusionNet-Lite HLSL defaults)
+  AttentionWeights weights = {};
+  
+  // IFNet-Lite hidden weights (8 units)
+  float mlpH0[] = { 1.12f, -0.31f, 0.48f, 0.86f };
+  float mlpH1[] = { -0.49f, 0.84f, 0.24f, -0.29f };
+  float mlpH2[] = { 0.34f, 0.27f, -0.44f, 0.75f };
+  float mlpH3[] = { 0.58f, -0.72f, 0.18f, 0.31f };
+  float mlpH4[] = { -0.27f, 0.41f, 0.95f, -0.33f };
+  float mlpH5[] = { 0.73f, 0.11f, -0.29f, 0.63f };
+  float mlpH6[] = { 0.43f, -0.55f, 0.71f, -0.21f };
+  float mlpH7[] = { -0.62f, 0.38f, 0.15f, 0.47f };
+  memcpy(weights.mlpW_h0, mlpH0, 16); memcpy(weights.mlpW_h1, mlpH1, 16);
+  memcpy(weights.mlpW_h2, mlpH2, 16); memcpy(weights.mlpW_h3, mlpH3, 16);
+  memcpy(weights.mlpW_h4, mlpH4, 16); memcpy(weights.mlpW_h5, mlpH5, 16);
+  memcpy(weights.mlpW_h6, mlpH6, 16); memcpy(weights.mlpW_h7, mlpH7, 16);
+  
+  float mlpO0[] = { 0.10f, -0.05f, 0.02f, 0.07f };
+  float mlpO1[] = { -0.03f, 0.01f, 0.05f, -0.04f };
+  float mlpO2[] = { 0.00f, 0.03f, -0.02f, 0.06f };
+  float mlpO3[] = { 0.05f, -0.02f, 0.04f, -0.01f };
+  memcpy(weights.mlpW_out0, mlpO0, 16); memcpy(weights.mlpW_out1, mlpO1, 16);
+  memcpy(weights.mlpW_out2, mlpO2, 16); memcpy(weights.mlpW_out3, mlpO3, 16);
+  
+  float biasH0[] = { 0.03f, -0.01f, 0.02f, 0.04f };
+  float biasH1[] = { -0.02f, 0.01f, 0.02f, -0.01f };
+  memcpy(weights.mlpBias_h0, biasH0, 16); memcpy(weights.mlpBias_h1, biasH1, 16);
+  
+  float biasO0[] = { -0.02f, 0.01f, 0.0f, 0.0f };
+  float biasO1[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+  float biasO2[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+  float biasO3[] = { 0.0f, 0.0f, -2.0f, 0.0f };
+  memcpy(weights.mlpBias_out0, biasO0, 16); memcpy(weights.mlpBias_out1, biasO1, 16);
+  memcpy(weights.mlpBias_out2, biasO2, 16); memcpy(weights.mlpBias_out3, biasO3, 16);
+  
+  float bW1[] = { 0.15f, 0.1f, 0.1f, 0.2f };
+  float bW2[] = { 0.1f, 0.1f, 0.15f, 0.1f };
+  float bW3[] = { 0.1f, 0.1f, 0.1f, 0.1f };
+  memcpy(weights.baseW1, bW1, 16); memcpy(weights.baseW2, bW2, 16);
+  memcpy(weights.baseW3, bW3, 16);
+  
+  // FusionNet-Lite synthesis defaults (zeroed out, will use defaults in shader)
+  
+  weights.useCustomWeights = 0.0f;
+  
+  std::ofstream file(path);
+  if (!file.is_open()) return false;
+  
+  auto writeArray = [&](const char* name, float* w) {
+    file << "  \"" << name << "\": [" << w[0] << ", " << w[1] << ", " << w[2] << ", " << w[3] << "]";
+  };
+  
+  file << "{\n";
+  
+  // Save IFNet-Lite hidden weights (8 units)
+  float* hiddenWeights[] = { weights.mlpW_h0, weights.mlpW_h1, weights.mlpW_h2,
+                              weights.mlpW_h3, weights.mlpW_h4, weights.mlpW_h5,
+                              weights.mlpW_h6, weights.mlpW_h7 };
+  for (int i = 0; i < 8; i++) {
+    char name[16];
+    sprintf_s(name, "mlpW_h%d", i);
+    writeArray(name, hiddenWeights[i]);
+    file << ",\n";
+  }
+  
+  // Save output weights (4 vectors)
+  float* outputWeights[] = { weights.mlpW_out0, weights.mlpW_out1, weights.mlpW_out2, weights.mlpW_out3 };
+  for (int i = 0; i < 4; i++) {
+    char name[16];
+    sprintf_s(name, "mlpW_out%d", i);
+    writeArray(name, outputWeights[i]);
+    file << ",\n";
+  }
+  
+  // Save biases
+  writeArray("mlpBias_h0", weights.mlpBias_h0); file << ",\n";
+  writeArray("mlpBias_h1", weights.mlpBias_h1); file << ",\n";
+  writeArray("mlpBias_out0", weights.mlpBias_out0); file << ",\n";
+  writeArray("mlpBias_out1", weights.mlpBias_out1); file << ",\n";
+  writeArray("mlpBias_out2", weights.mlpBias_out2); file << ",\n";
+  writeArray("mlpBias_out3", weights.mlpBias_out3); file << ",\n";
+  
+  // Save base weights
+  writeArray("baseW1", weights.baseW1); file << ",\n";
+  writeArray("baseW2", weights.baseW2); file << ",\n";
+  writeArray("baseW3", weights.baseW3); file << "\n";
+  
+  file << "}\n";
+  
+  return true;
+}
+
+// -----------------------------------------------------------------------
+// ExportTrainedWeights - Export EMA-trained weights from GPU textures
+// -----------------------------------------------------------------------
+bool Interpolator::ExportTrainedWeights(const wchar_t* path) {
+  // Use small resolution textures (used in both minimal and full pipeline)
+  Microsoft::WRL::ComPtr<ID3D11Texture2D> tex1 = m_attnSmall1;
+  Microsoft::WRL::ComPtr<ID3D11Texture2D> tex2 = m_attnSmall2;
+  Microsoft::WRL::ComPtr<ID3D11Texture2D> tex3 = m_attnSmall3;
+  
+  if (!tex1 || !tex2 || !tex3) {
+    // Try full resolution
+    tex1 = m_attnFull1.Get();
+    tex2 = m_attnFull2.Get();
+    tex3 = m_attnFull3.Get();
+  }
+  
+  if (!tex1 || !tex2 || !tex3) {
+    return false;
+  }
+  
+  // Flush GPU to ensure data is written
+  m_context->Flush();
+  
+  // Get texture dimensions
+  D3D11_TEXTURE2D_DESC desc = {};
+  tex1->GetDesc(&desc);
+  
+  if (desc.Width == 0 || desc.Height == 0) {
+    return false;
+  }
+  
+  // Create staging textures for reading
+  D3D11_TEXTURE2D_DESC stagingDesc = {};
+  stagingDesc.Width = desc.Width;
+  stagingDesc.Height = desc.Height;
+  stagingDesc.MipLevels = 1;
+  stagingDesc.ArraySize = 1;
+  stagingDesc.Format = desc.Format;
+  stagingDesc.SampleDesc.Count = 1;
+  stagingDesc.SampleDesc.Quality = 0;
+  stagingDesc.Usage = D3D11_USAGE_STAGING;
+  stagingDesc.BindFlags = 0;
+  stagingDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+  stagingDesc.MiscFlags = 0;
+  stagingDesc.BindFlags = 0;
+  stagingDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+  stagingDesc.MiscFlags = 0;
+  
+  Microsoft::WRL::ComPtr<ID3D11Texture2D> staging1, staging2, staging3;
+  HRESULT hr;
+  hr = m_device->CreateTexture2D(&stagingDesc, nullptr, &staging1);
+  if (FAILED(hr)) return false;
+  hr = m_device->CreateTexture2D(&stagingDesc, nullptr, &staging2);
+  if (FAILED(hr)) return false;
+  hr = m_device->CreateTexture2D(&stagingDesc, nullptr, &staging3);
+  if (FAILED(hr)) return false;
+  
+  // Copy to staging
+  m_context->CopyResource(staging1.Get(), tex1.Get());
+  m_context->CopyResource(staging2.Get(), tex2.Get());
+  m_context->CopyResource(staging3.Get(), tex3.Get());
+  
+  // Map and read
+  D3D11_MAPPED_SUBRESOURCE mapped1 = {};
+  D3D11_MAPPED_SUBRESOURCE mapped2 = {};
+  D3D11_MAPPED_SUBRESOURCE mapped3 = {};
+  
+  hr = m_context->Map(staging1.Get(), 0, D3D11_MAP_READ, 0, &mapped1);
+  if (FAILED(hr)) return false;
+  
+  hr = m_context->Map(staging2.Get(), 0, D3D11_MAP_READ, 0, &mapped2);
+  if (FAILED(hr)) { m_context->Unmap(staging1.Get(), 0); return false; }
+  
+  hr = m_context->Map(staging3.Get(), 0, D3D11_MAP_READ, 0, &mapped3);
+  if (FAILED(hr)) { m_context->Unmap(staging1.Get(), 0); m_context->Unmap(staging2.Get(), 0); return false; }
+  
+  // Average all pixels
+  float sumW1[4] = {0,0,0,0};
+  float sumW2[4] = {0,0,0,0};
+  float sumW3[4] = {0,0,0,0};
+  float* data1 = (float*)mapped1.pData;
+  float* data2 = (float*)mapped2.pData;
+  float* data3 = (float*)mapped3.pData;
+  
+  int pixelCount = desc.Width * desc.Height;
+  int rowPitch1 = mapped1.RowPitch / sizeof(float);
+  int rowPitch2 = mapped2.RowPitch / sizeof(float);
+  int rowPitch3 = mapped3.RowPitch / sizeof(float);
+  
+  for (int y = 0; y < (int)desc.Height; y++) {
+    for (int x = 0; x < (int)desc.Width; x++) {
+      int idx1 = y * rowPitch1 + x * 4;
+      int idx2 = y * rowPitch2 + x * 4;
+      int idx3 = y * rowPitch3 + x * 4;
+      
+      sumW1[0] += data1[idx1 + 0];
+      sumW1[1] += data1[idx1 + 1];
+      sumW1[2] += data1[idx1 + 2];
+      sumW1[3] += data1[idx1 + 3];
+      
+      sumW2[0] += data2[idx2 + 0];
+      sumW2[1] += data2[idx2 + 1];
+      sumW2[2] += data2[idx2 + 2];
+      sumW2[3] += data2[idx2 + 3];
+      
+      sumW3[0] += data3[idx3 + 0];
+      sumW3[1] += data3[idx3 + 1];
+      sumW3[2] += data3[idx3 + 2];
+      sumW3[3] += data3[idx3 + 3];
+    }
+  }
+  
+  m_context->Unmap(staging1.Get(), 0);
+  m_context->Unmap(staging2.Get(), 0);
+  m_context->Unmap(staging3.Get(), 0);
+  
+  // Normalize by pixel count
+  for (int i = 0; i < 4; i++) {
+    sumW1[i] /= pixelCount;
+    sumW2[i] /= pixelCount;
+    sumW3[i] /= pixelCount;
+  }
+  
+  // Normalize each weight vector to sum to 1
+  auto normalize = [](float* w) {
+    float sum = w[0] + w[1] + w[2] + w[3];
+    if (sum > 0.0001f) {
+      w[0] /= sum; w[1] /= sum; w[2] /= sum; w[3] /= sum;
+    }
+  };
+  normalize(sumW1);
+  normalize(sumW2);
+  normalize(sumW3);
+  
+  // Write to JSON
+  std::ofstream file(path);
+  if (!file.is_open()) {
+    return false;
+  }
+  
+  file << "{\n";
+  file << "  \"baseW1\": [" << sumW1[0] << ", " << sumW1[1] << ", " << sumW1[2] << ", " << sumW1[3] << "],\n";
+  file << "  \"baseW2\": [" << sumW2[0] << ", " << sumW2[1] << ", " << sumW2[2] << ", " << sumW2[3] << "],\n";
+  file << "  \"baseW3\": [" << sumW3[0] << ", " << sumW3[1] << ", " << sumW3[2] << ", " << sumW3[3] << "]\n";
+  file << "}\n";
+  
+  return true;
 }

@@ -11,6 +11,9 @@ RWTexture2D<float4> Feature3Out : register(u2);
 
 static const float3 kLumaWeights = float3(0.2126, 0.7152, 0.0722);
 
+// saturate for older shader models
+float saturate(float x) { return clamp(x, 0.0, 1.0); }
+
 float GetLuma(int2 pos, int2 maxPos) {
     pos = clamp(pos, int2(0, 0), maxPos);
     return dot(Src.Load(int3(pos, 0)).rgb, kLumaWeights);
@@ -22,6 +25,86 @@ float GetAvgLuma(int2 base, int2 maxPos) {
     float l01 = GetLuma(base + int2(0, 1), maxPos);
     float l11 = GetLuma(base + int2(1, 1), maxPos);
     return (l00 + l10 + l01 + l11) * 0.25;
+}
+
+// ============================================================================
+// Walsh-Hadamard Transform (WHT) for Periodicity Detection
+// Detects repetitive/periodic texture patterns that confuse optical flow
+// ============================================================================
+
+float ComputePeriodicityWHT(int2 base, int2 maxPos) {
+    // Sample 4x4 neighborhood for WHT
+    float s[4][4];
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            s[y][x] = GetAvgLuma(base + int2(x * 2 - 3, y * 2 - 3), maxPos);
+        }
+    }
+    
+    // 4x4 WHT - no multiplications, only +1/-1
+    // H4 = H2 ⊗ H2 where H2 = [[1,1],[1,-1]]
+    float wht[4][4];
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            float sum = 0;
+            for (int ky = 0; ky < 4; ky++) {
+                for (int kx = 0; kx < 4; kx++) {
+                    int sign = ((ky & 1) ? -1 : 1) * ((kx & 1) ? -1 : 1);
+                    sum += s[ky][kx] * sign;
+                }
+            }
+            wht[y][x] = sum * 0.25;
+        }
+    }
+    
+    // Compute DC (mean) and AC energy
+    float dc = wht[0][0];
+    float acEnergy = 0;
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            if (y != 0 || x != 0) {
+                acEnergy += wht[y][x] * wht[y][x];
+            }
+        }
+    }
+    acEnergy = sqrt(acEnergy / 15.0);
+    
+    // Periodicity metric: high AC energy concentrated in few bins = periodic
+    // If AC is spread uniformly = random texture (not periodic)
+    // We check if there are strong peaks
+    
+    // Find max AC coefficient
+    float maxAC = 0;
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            if (y != 0 || x != 0) {
+                maxAC = max(maxAC, abs(wht[y][x]));
+            }
+        }
+    }
+    
+    // If max AC is much larger than RMS AC → periodic pattern
+    float rmsAC = sqrt(acEnergy * acEnergy + 1e-10);
+    float peakRatio = maxAC / (rmsAC + 1e-10);
+    
+    // Combined periodicity score (0 = no periodicity, 1 = highly periodic)
+    // Peak ratio > 2.0 suggests strong periodicity
+    float periodicity = saturate(peakRatio - 1.5) * 0.5;
+    
+    // Also check for checkerboard-like patterns (alternating)
+    float checker = abs(s[0][0] - s[1][1]) + abs(s[1][0] - s[0][1]);
+    float variance = 0;
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            variance += abs(s[y][x] - dc);
+        }
+    }
+    variance /= 16.0;
+    
+    // If checkerboard energy is high relative to variance → periodic
+    float checkerboardness = saturate(checker / (variance + 0.01) - 0.5) * 0.3;
+    
+    return min(periodicity + checkerboardness, 1.0);
 }
 
 [numthreads(16, 16, 1)]
@@ -48,6 +131,9 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     float p02 = GetAvgLuma(base + int2(-2,  2), maxPos);
     float p12 = GetAvgLuma(base + int2( 0,  2), maxPos);
     float p22 = GetAvgLuma(base + int2( 2,  2), maxPos);
+
+    // WHT-based Periodicity Detection (repetitive texture indicator)
+    float f_periodic = ComputePeriodicityWHT(base, maxPos);
 
     // Tiny CNN Layer 1: Feature Extraction (Hand-crafted weights)
     // Feature 1: Base Luma
@@ -108,7 +194,8 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     // f_tex, f_var, f_smooth, and f_mag are passed linearly to preserve the exact texture pattern for optical flow
 
     // Output the 12-channel feature map
+    // WHT periodicity: 0 = random/noise, 1 = highly repetitive texture
     LumaOut[id.xy] = float4(f_luma, f_edgeX, f_edgeY, f_tex);
     Feature2Out[id.xy] = float4(f_corner, f_var, f_diag1, f_diag2);
-    Feature3Out[id.xy] = float4(f_smooth, f_log, f_mag, f_cross);
+    Feature3Out[id.xy] = float4(f_smooth, f_log, f_mag, f_periodic);
 }

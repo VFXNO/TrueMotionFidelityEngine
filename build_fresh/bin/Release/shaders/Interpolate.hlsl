@@ -37,6 +37,75 @@ cbuffer InterpCB : register(b0) {
     float3 pad;
 };
 
+// ============================================================================
+// FusionNet-Lite: Shared weight buffer (same layout as MotionRefine.hlsl)
+// Only the synthesis MLP fields and useCustomWeights flag are used here.
+// ============================================================================
+cbuffer AttentionWeightsCB : register(b1) {
+    // === IFNet-Lite fields (unused here, must match layout) ===
+    float4 mlpW_h0, mlpW_h1, mlpW_h2, mlpW_h3;
+    float4 mlpW_h4, mlpW_h5, mlpW_h6, mlpW_h7;
+    float4 mlpW_out0, mlpW_out1, mlpW_out2, mlpW_out3;
+    float4 mlpBias_h0, mlpBias_h1;
+    float4 mlpBias_out0, mlpBias_out1, mlpBias_out2, mlpBias_out3;
+    float4 baseW1, baseW2, baseW3;
+    
+    // === FusionNet-Lite: 12->6->4 Synthesis MLP ===
+    float4 synthW_h0, synthW_h1, synthW_h2;
+    float4 synthW_h3, synthW_h4, synthW_h5;
+    float4 synthW_out0, synthW_out1;
+    float4 synthBias_h0, synthBias_h1;
+    float4 synthBias_out;
+    
+    float useCustomWeights;
+    float3 _attnPad;
+};
+
+float SigmoidFast(float x) {
+    return 1.0 / (1.0 + exp(-x));
+}
+
+// ============================================================================
+// FusionNet-Lite Synthesis MLP: Learned occlusion-aware frame synthesis
+//
+// Input:  12 warped feature differences (|prev_warped - curr_warped|)
+// Hidden: 6 units (ReLU)
+// Output: 4 synthesis controls (sigmoid)
+//   [0] blend_weight   - occlusion-aware blend (0=use prev, 1=use curr)
+//   [1] detail_factor  - high-frequency detail injection strength
+//   [2] confidence_gate - how much to trust the warped result
+//   [3] sharpness      - adaptive sharpening strength
+// ============================================================================
+float4 SynthesisNet(float4 diff1, float4 diff2, float4 diff3) {
+    if (useCustomWeights < 0.5) {
+        // Default: neutral synthesis (matches pre-enhancement behavior)
+        return float4(0.5, 0.5, 0.85, 0.3);
+    }
+    
+    float total = dot(abs(diff1), 1.0) + dot(abs(diff2), 1.0) + dot(abs(diff3), 1.0) + 1e-6;
+    float4 x1 = abs(diff1) / total;
+    float4 x2 = abs(diff2) / total;
+    float4 x3 = abs(diff3) / total;
+    
+    // 6 hidden units (ReLU) with same weight-sharing as IFNet
+    float h0 = max(0.0, dot(x1, synthW_h0.xyzw) + dot(x2, synthW_h0.zwxy * float4(-1,-1,1,1)) + dot(x3, float4(synthW_h0.w, synthW_h0.x, synthW_h0.y, synthW_h0.z)) + synthBias_h0.x);
+    float h1 = max(0.0, dot(x1, synthW_h1.xyzw) + dot(x2, synthW_h1.zwxy * float4(-1,-1,1,1)) + dot(x3, float4(synthW_h1.w, synthW_h1.x, synthW_h1.y, synthW_h1.z)) + synthBias_h0.y);
+    float h2 = max(0.0, dot(x1, synthW_h2.xyzw) + dot(x2, synthW_h2.zwxy * float4(-1,-1,1,1)) + dot(x3, float4(synthW_h2.w, synthW_h2.x, synthW_h2.y, synthW_h2.z)) + synthBias_h0.z);
+    float h3 = max(0.0, dot(x1, synthW_h3.xyzw) + dot(x2, synthW_h3.zwxy * float4(-1,-1,1,1)) + dot(x3, float4(synthW_h3.w, synthW_h3.x, synthW_h3.y, synthW_h3.z)) + synthBias_h0.w);
+    float h4 = max(0.0, dot(x1, synthW_h4.xyzw) + dot(x2, synthW_h4.zwxy * float4(-1,-1,1,1)) + dot(x3, float4(synthW_h4.w, synthW_h4.x, synthW_h4.y, synthW_h4.z)) + synthBias_h1.x);
+    float h5 = max(0.0, dot(x1, synthW_h5.xyzw) + dot(x2, synthW_h5.zwxy * float4(-1,-1,1,1)) + dot(x3, float4(synthW_h5.w, synthW_h5.x, synthW_h5.y, synthW_h5.z)) + synthBias_h1.y);
+    
+    // 4 outputs (sigmoid) with weight sharing
+    float4 raw = synthW_out0 * (h0 + h2 + h4) + synthW_out1 * (h1 + h3 + h5) + synthBias_out;
+    
+    return float4(
+        SigmoidFast(raw.x),   // blend_weight
+        SigmoidFast(raw.y),   // detail_factor
+        SigmoidFast(raw.z),   // confidence_gate
+        SigmoidFast(raw.w)    // sharpness
+    );
+}
+
 static const float3 kLumaWeights = float3(0.2126, 0.7152, 0.0722);
 
 float Luma(float3 c) { return dot(c, kLumaWeights); }
@@ -225,9 +294,32 @@ void CSMain(uint3 id : SV_DispatchThreadID)
         // Base error metric: 12-channel CNN feature difference
         float error = dot(diff, w1) + dot(diff2, w2) + dot(diff3, w3);
         
-        // Tie-breaker: prefer smaller motion vectors (background) to avoid 
-        // jumping to a foreground vector on repeating texture patterns.
-        error += length(testMV) * 0.002;
+        // Periodicity-aware tie-breaker:
+        // Periodic textures have multiple valid matches - use spatial consistency
+        float periodicity = CurrFeature3.SampleLevel(LinearClamp, inputUv, 0).w;
+        
+        if (periodicity > 0.3) {
+            // For periodic textures, prefer motion consistent with neighbors
+            // This helps disambiguate between multiple valid motion candidates
+            float2 neighborMV1 = Motion.SampleLevel(LinearClamp, clamp(inputUv + float2(0.01, 0), 0.0, 0.999), 0).xy;
+            float2 neighborMV2 = Motion.SampleLevel(LinearClamp, clamp(inputUv - float2(0.01, 0), 0.0, 0.999), 0).xy;
+            float2 neighborMV3 = Motion.SampleLevel(LinearClamp, clamp(inputUv + float2(0, 0.01), 0.0, 0.999), 0).xy;
+            float2 neighborMV4 = Motion.SampleLevel(LinearClamp, clamp(inputUv - float2(0, 0.01), 0.0, 0.999), 0).xy;
+            
+            float consistency1 = 1.0 - length(testMV - neighborMV1) * 0.5;
+            float consistency2 = 1.0 - length(testMV - neighborMV2) * 0.5;
+            float consistency3 = 1.0 - length(testMV - neighborMV3) * 0.5;
+            float consistency4 = 1.0 - length(testMV - neighborMV4) * 0.5;
+            float spatialConsistency = max(max(consistency1, consistency2), max(consistency3, consistency4));
+            spatialConsistency = saturate(spatialConsistency);
+            
+            // Reduce error for spatially consistent motion on periodic textures
+            error -= spatialConsistency * 0.02 * periodicity;
+        } else {
+            // Tie-breaker: prefer smaller motion vectors (background) to avoid 
+            // jumping to a foreground vector on repeating texture patterns.
+            error += length(testMV) * 0.002;
+        }
         
         if (error < minError) {
             minError = error;
@@ -260,7 +352,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     float3 warpedCurr = SampleColor(CurrColor, warpCurrUv, inSize);
 
     // =====================================================================
-    // 3. CNN FEATURE-AWARE BLENDING & DETAIL INJECTION
+    // 3. FUSIONNET-LITE: LEARNED OCCLUSION-AWARE SYNTHESIS
     // =====================================================================
     // Sample the 12-channel CNN features at the final warped locations
     float4 fP1 = PrevFeature.SampleLevel(LinearClamp, warpPrevUv, 0);
@@ -270,36 +362,52 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     float4 fP3 = PrevFeature3.SampleLevel(LinearClamp, warpPrevUv, 0);
     float4 fC3 = CurrFeature3.SampleLevel(LinearClamp, warpCurrUv, 0);
 
-    // Calculate the "structural energy" of the warped patches
-    // Feature 11 is Edge Magnitude (fP3.z and fC3.z)
-    // Feature 5 is Corner Response (fP2.x and fC2.x)
-    // Feature 6 is Local Variance (fP2.y and fC2.y)
+    // Compute feature differences for the synthesis MLP (like RIFE's FusionNet)
+    float4 featureDiff1 = fP1 - fC1;
+    float4 featureDiff2 = fP2 - fC2;
+    float4 featureDiff3 = fP3 - fC3;
+    
+    // Run the synthesis MLP to predict per-pixel occlusion-aware synthesis controls
+    float4 synthOut = SynthesisNet(featureDiff1, featureDiff2, featureDiff3);
+    float blendBase     = synthOut.x;  // Learned occlusion blend (0=prev, 1=curr)
+    float detailFactor  = synthOut.y;  // Detail injection strength
+    float confGate      = synthOut.z;  // How much to trust warped result vs direct
+    float sharpness     = synthOut.w;  // Adaptive sharpening
+    
+    // Structural energy fallback (used when no custom weights loaded)
     float energyPrev = fP3.z + abs(fP2.x) + fP2.y;
     float energyCurr = fC3.z + abs(fC2.x) + fC2.y;
-
-    // If one frame has significantly more structural energy (e.g. it's not occluded/blurry),
-    // we shift the blend weight slightly towards it to preserve details.
     float energyDiff = energyPrev - energyCurr;
-    float energyWeight = saturate(0.5 + energyDiff * 0.5); // 0.5 is neutral
+    float energyWeight = saturate(0.5 + energyDiff * 0.5);
     
-    // Combine the temporal alpha with the structural energy weight
-    // We don't want to completely override alpha, just bias it by up to 30%
-    float blendWeight = lerp(alpha, energyWeight, 0.3);
+    // Combine learned blend with temporal alpha
+    // Fade out the learned bias near alpha=0 and alpha=1 to ensure pure real frames
+    float biasStrength = (1.0 - abs(alpha * 2.0 - 1.0)); // 0 at edges, 1 at mid
+    
+    // Merge the learned occlusion blend with the energy-based fallback
+    float adaptiveBlend = lerp(energyWeight, blendBase, saturate(useCustomWeights));
+    float blendWeight = lerp(alpha, adaptiveBlend, biasStrength * 0.4);
 
-    // We use the feature-aware blend to ensure we never "cancel" the warping,
-    // but intelligently preserve sharp edges and corners during the warp.
+    // Warp-blended result (occlusion-aware like RIFE)
     float3 result = lerp(warpedPrev, warpedCurr, blendWeight);
 
-    // Feature-Guided Detail Injection:
-    // Extract high-frequency details (Texture Pattern + LoG) from the CNN
+    // Feature-guided detail injection with learned strength
     float detailPrev = fP1.w + fP3.y;
     float detailCurr = fC1.w + fC3.y;
-    
-    // Blend the details using the same weight
     float blendedDetail = lerp(detailPrev, detailCurr, blendWeight);
+    result += blendedDetail * (0.02 + 0.06 * detailFactor) * biasStrength;
     
-    // Add the details back to the luma of the result to recover sharpness lost during bicubic warping
-    result += blendedDetail * 0.05; // Subtle sharpening
+    // Confidence gating: blend between warped result and direct current frame
+    // Low confidence gate = the MLP thinks this pixel can't be reliably warped
+    float directBlend = (1.0 - confGate) * 0.3 * biasStrength;
+    result = lerp(result, currDirect, directBlend);
+
+    // Fast path for pure real frames to avoid any floating point inaccuracies
+    if (alpha <= 0.001) {
+        result = SampleColor(PrevColor, inputUv, inSize);
+    } else if (alpha >= 0.999) {
+        result = SampleColor(CurrColor, inputUv, inSize);
+    }
 
     OutColor[id.xy] = float4(saturate(result), 1.0);
 }

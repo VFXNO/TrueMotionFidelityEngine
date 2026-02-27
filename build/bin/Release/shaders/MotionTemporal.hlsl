@@ -72,23 +72,31 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
     float2 clampedHist = clamp(histMV, minMV, maxMV);
     float spread = length(maxMV - minMV);
     
-    // RESTORED LOGIC AND INCREASED STRENGTH
-    float mvDist = length(currMV - histMV); // Use raw history for distance
+    // Adaptive blend: use clamped history to prevent drift accumulation
+    // Strong temporal smoothing when motion is consistent, weaker when changing
+    float mvDist = length(currMV - clampedHist);
     float blend = historyWeight;
     
-    if (mvDist < 4.0) {
-        // Super stable if motion is somewhat consistent
-        blend = lerp(blend, 0.99, 0.9);
-    } else if (mvDist > 50.0) {
-        blend *= 0.5;
+    if (mvDist < 2.0) {
+        // Very consistent motion — moderate temporal filtering
+        blend = lerp(blend, 0.88, 0.80);
+    } else if (mvDist < 8.0) {
+        // Moderately consistent — lighter smoothing
+        blend = lerp(blend, 0.80, 0.65);
+    } else if (mvDist > 40.0) {
+        // Large change — likely scene cut or fast camera move, drop history
+        blend *= 0.15;
     }
     
-    blend = clamp(blend, 0.90, 0.99); // MINIMUM 90% HISTORY - EXTREME STABILIZATION
+    // Luma change detection: reduce history when content changes significantly
+    float lumaBlendFactor = saturate(1.0 - lumaDiff * 10.0);
+    blend *= lerp(0.4, 1.0, lumaBlendFactor);
+    
+    blend = clamp(blend, 0.40, 0.88); // Faster adaptation, cap at 88%
 
-    // Use raw history instead of clamped to avoid re-introducing current frame jitter
-    // float2 resultMV = lerp(currMV, clampedHist, blend);
-    float2 resultMV = lerp(currMV, histMV, blend); 
-    float resultConf = lerp(currConf, histConf, blend * 0.8);
+    // Use CLAMPED history to prevent drift while maintaining smoothness
+    float2 resultMV = lerp(currMV, clampedHist, blend);
+    float resultConf = lerp(currConf, histConf, blend * 0.7);
     
     MotionOut[id.xy] = resultMV;
     ConfOut[id.xy] = resultConf;

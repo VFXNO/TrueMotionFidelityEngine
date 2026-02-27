@@ -127,6 +127,7 @@ private:
   float m_confidencePower = 1.5f;
   float m_motionEdgeScale = 6.0f;
   int m_interpolationQuality = 1; // 0=Standard, 1=High
+  bool m_useCustomWeights = false; // Use custom ML weights
   
   HANDLE m_waitTimer = nullptr;
   float m_outputDelayMs = 0.0f;

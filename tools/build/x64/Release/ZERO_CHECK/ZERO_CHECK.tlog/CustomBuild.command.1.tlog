@@ -1,0 +1,10 @@
+^C:\USERS\VFXNO\DOCUMENTS\GITHUB\TRUEMOTIONFIDELITYENGINE\TOOLS\BUILD\CMAKEFILES\9842333A9E3287A35EDB9F1CDF3EA667\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/tools -BC:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/tools/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/tools/build/training_suite.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

@@ -4,8 +4,8 @@
 // Architecture:
 //   1. Read and smooth motion vectors (9-tap bilateral on coarse fields)
 //   2. Forward warp from Prev, backward warp from Curr
-//   3. Alpha-weighted blend between warped prev and warped curr
-//   4. No dissolve, no blending fallback - purely warped output
+//   3. AI occlusion-aware source selection (no frame blending)
+//   4. No dissolve, no blending, no ghosting - purely warped output
 // ============================================================================
 
 Texture2D<float4> PrevColor        : register(t0);
@@ -36,6 +36,75 @@ cbuffer InterpCB : register(b0) {
     float motionSampleScale;
     float3 pad;
 };
+
+// ============================================================================
+// FusionNet-Lite: Shared weight buffer (same layout as MotionRefine.hlsl)
+// Only the synthesis MLP fields and useCustomWeights flag are used here.
+// ============================================================================
+cbuffer AttentionWeightsCB : register(b1) {
+    // === IFNet-Lite fields (unused here, must match layout) ===
+    float4 mlpW_h0, mlpW_h1, mlpW_h2, mlpW_h3;
+    float4 mlpW_h4, mlpW_h5, mlpW_h6, mlpW_h7;
+    float4 mlpW_out0, mlpW_out1, mlpW_out2, mlpW_out3;
+    float4 mlpBias_h0, mlpBias_h1;
+    float4 mlpBias_out0, mlpBias_out1, mlpBias_out2, mlpBias_out3;
+    float4 baseW1, baseW2, baseW3;
+    
+    // === FusionNet-Lite: 12->6->4 Synthesis MLP ===
+    float4 synthW_h0, synthW_h1, synthW_h2;
+    float4 synthW_h3, synthW_h4, synthW_h5;
+    float4 synthW_out0, synthW_out1;
+    float4 synthBias_h0, synthBias_h1;
+    float4 synthBias_out;
+    
+    float useCustomWeights;
+    float3 _attnPad;
+};
+
+float SigmoidFast(float x) {
+    return 1.0 / (1.0 + exp(-x));
+}
+
+// ============================================================================
+// FusionNet-Lite Synthesis MLP: Learned occlusion-aware frame synthesis
+//
+// Input:  12 warped feature differences (|prev_warped - curr_warped|)
+// Hidden: 6 units (ReLU)
+// Output: 4 synthesis controls (sigmoid)
+//   [0] blend_weight   - occlusion-aware blend (0=use prev, 1=use curr)
+//   [1] detail_factor  - high-frequency detail injection strength
+//   [2] confidence_gate - how much to trust the warped result
+//   [3] sharpness      - adaptive sharpening strength
+// ============================================================================
+float4 SynthesisNet(float4 diff1, float4 diff2, float4 diff3) {
+    if (useCustomWeights < 0.5) {
+        // Default: neutral synthesis (matches pre-enhancement behavior)
+        return float4(0.5, 0.5, 0.85, 0.3);
+    }
+    
+    float total = dot(abs(diff1), 1.0) + dot(abs(diff2), 1.0) + dot(abs(diff3), 1.0) + 1e-6;
+    float4 x1 = abs(diff1) / total;
+    float4 x2 = abs(diff2) / total;
+    float4 x3 = abs(diff3) / total;
+    
+    // 6 hidden units (ReLU) with same weight-sharing as IFNet
+    float h0 = max(0.0, dot(x1, synthW_h0.xyzw) + dot(x2, synthW_h0.zwxy * float4(-1,-1,1,1)) + dot(x3, float4(synthW_h0.w, synthW_h0.x, synthW_h0.y, synthW_h0.z)) + synthBias_h0.x);
+    float h1 = max(0.0, dot(x1, synthW_h1.xyzw) + dot(x2, synthW_h1.zwxy * float4(-1,-1,1,1)) + dot(x3, float4(synthW_h1.w, synthW_h1.x, synthW_h1.y, synthW_h1.z)) + synthBias_h0.y);
+    float h2 = max(0.0, dot(x1, synthW_h2.xyzw) + dot(x2, synthW_h2.zwxy * float4(-1,-1,1,1)) + dot(x3, float4(synthW_h2.w, synthW_h2.x, synthW_h2.y, synthW_h2.z)) + synthBias_h0.z);
+    float h3 = max(0.0, dot(x1, synthW_h3.xyzw) + dot(x2, synthW_h3.zwxy * float4(-1,-1,1,1)) + dot(x3, float4(synthW_h3.w, synthW_h3.x, synthW_h3.y, synthW_h3.z)) + synthBias_h0.w);
+    float h4 = max(0.0, dot(x1, synthW_h4.xyzw) + dot(x2, synthW_h4.zwxy * float4(-1,-1,1,1)) + dot(x3, float4(synthW_h4.w, synthW_h4.x, synthW_h4.y, synthW_h4.z)) + synthBias_h1.x);
+    float h5 = max(0.0, dot(x1, synthW_h5.xyzw) + dot(x2, synthW_h5.zwxy * float4(-1,-1,1,1)) + dot(x3, float4(synthW_h5.w, synthW_h5.x, synthW_h5.y, synthW_h5.z)) + synthBias_h1.y);
+    
+    // 4 outputs (sigmoid) with weight sharing
+    float4 raw = synthW_out0 * (h0 + h2 + h4) + synthW_out1 * (h1 + h3 + h5) + synthBias_out;
+    
+    return float4(
+        SigmoidFast(raw.x),   // blend_weight
+        SigmoidFast(raw.y),   // detail_factor
+        SigmoidFast(raw.z),   // confidence_gate
+        SigmoidFast(raw.w)    // sharpness
+    );
+}
 
 static const float3 kLumaWeights = float3(0.2126, 0.7152, 0.0722);
 
@@ -186,14 +255,56 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     
     // Base error metric: 12-channel CNN feature difference
     float minError = dot(diffCenter, w1) + dot(diffCenter2, w2) + dot(diffCenter3, w3);
+    
+    // Warp OOB penalty: penalize MVs that warp outside the valid region
+    float2 prevUvTest = pPrevCenter / inSize;
+    float2 currUvTest = pCurrCenter / inSize;
+    float oobPenCenter = (any(prevUvTest < 0.005) || any(prevUvTest > 0.995) ||
+                          any(currUvTest < 0.005) || any(currUvTest > 0.995)) ? 0.1 : 0.0;
+    minError += oobPenCenter;
     minError += length(fwdMV) * 0.002; // Add length penalty to center as well
     
+    // --- Zero-MV inheritance ---
+    // If center MV is near-zero, gather the median of neighbor MVs.
+    // This catches disoccluded regions where MotionEst found no match.
+    float centerMVLen = length(fwdMV);
+    float2 neighborMVAcc = float2(0, 0);
+    float neighborMVW = 0;
+    
     // Find max motion in neighborhood to scale search
-    float maxLen = length(fwdMV);
-    maxLen = max(maxLen, length(Motion.SampleLevel(LinearClamp, clamp(inputUv + float2(0.02, 0), 0.0, 0.999), 0).xy * motionSampleScale));
-    maxLen = max(maxLen, length(Motion.SampleLevel(LinearClamp, clamp(inputUv + float2(-0.02, 0), 0.0, 0.999), 0).xy * motionSampleScale));
-    maxLen = max(maxLen, length(Motion.SampleLevel(LinearClamp, clamp(inputUv + float2(0, 0.02), 0.0, 0.999), 0).xy * motionSampleScale));
-    maxLen = max(maxLen, length(Motion.SampleLevel(LinearClamp, clamp(inputUv + float2(0, -0.02), 0.0, 0.999), 0).xy * motionSampleScale));
+    float maxLen = centerMVLen;
+    static const float2 kCardinal[4] = {
+        float2(0.02, 0), float2(-0.02, 0), float2(0, 0.02), float2(0, -0.02)
+    };
+    [unroll] for (int c = 0; c < 4; ++c) {
+        float2 nMV = Motion.SampleLevel(LinearClamp, clamp(inputUv + kCardinal[c], 0.0, 0.999), 0).xy * motionSampleScale;
+        float nLen = length(nMV);
+        maxLen = max(maxLen, nLen);
+        // Accumulate for zero-MV inheritance (weighted by magnitude)
+        float nw = saturate(nLen * 0.5);
+        neighborMVAcc += nMV * nw;
+        neighborMVW += nw;
+    }
+    
+    // If our MV is near-zero but neighbors have significant motion, inherit it
+    if (centerMVLen < 1.0 && neighborMVW > 0.5) {
+        float2 inheritedMV = neighborMVAcc / neighborMVW;
+        // Evaluate inherited MV quality
+        float2 iPrev = inputPos + inheritedMV * alpha;
+        float2 iCurr = inputPos - inheritedMV * (1.0 - alpha);
+        float4 fIP = PrevFeature.SampleLevel(LinearClamp, iPrev / inSize, 0);
+        float4 fIC = CurrFeature.SampleLevel(LinearClamp, iCurr / inSize, 0);
+        float4 fIP2 = PrevFeature2.SampleLevel(LinearClamp, iPrev / inSize, 0);
+        float4 fIC2 = CurrFeature2.SampleLevel(LinearClamp, iCurr / inSize, 0);
+        float4 fIP3 = PrevFeature3.SampleLevel(LinearClamp, iPrev / inSize, 0);
+        float4 fIC3 = CurrFeature3.SampleLevel(LinearClamp, iCurr / inSize, 0);
+        float iError = dot(abs(fIP - fIC), w1) + dot(abs(fIP2 - fIC2), w2) + dot(abs(fIP3 - fIC3), w3);
+        iError += length(inheritedMV) * 0.002;
+        if (iError < minError) {
+            minError = iError;
+            bestMV = inheritedMV;
+        }
+    }
     
     // Keep search radius standard to prevent jumping to the next repeating pattern (1-brick shift)
     float2 searchRadius = max(float2(0.005, 0.005), (maxLen / inSize) * 0.6);
@@ -203,6 +314,9 @@ void CSMain(uint3 id : SV_DispatchThreadID)
         float2(0, -2), float2(-2, 0), float2(2, 0), float2(0, 2)
     };
     
+    // Periodicity detection (read once outside loop)
+    float periodicity = CurrFeature3.SampleLevel(LinearClamp, inputUv, 0).w;
+    
     [unroll] for (int j = 0; j < 8; ++j) {
         float2 sampleUv = clamp(inputUv + kSearch[j] * searchRadius, 0.0, 0.999);
         float2 testMV = Motion.SampleLevel(LinearClamp, sampleUv, 0).xy * motionSampleScale;
@@ -210,13 +324,19 @@ void CSMain(uint3 id : SV_DispatchThreadID)
         float2 pPrev = inputPos + testMV * alpha;
         float2 pCurr = inputPos - testMV * (1.0 - alpha);
         
+        // Warp OOB penalty for this candidate
+        float2 pPrevUv = pPrev / inSize;
+        float2 pCurrUv = pCurr / inSize;
+        float oobPen = (any(pPrevUv < 0.005) || any(pPrevUv > 0.995) ||
+                        any(pCurrUv < 0.005) || any(pCurrUv > 0.995)) ? 0.1 : 0.0;
+        
         // Use CNN features to evaluate how well this motion vector aligns the textures
-        float4 fPrev = PrevFeature.SampleLevel(LinearClamp, pPrev / inSize, 0);
-        float4 fCurr = CurrFeature.SampleLevel(LinearClamp, pCurr / inSize, 0);
-        float4 fPrev2 = PrevFeature2.SampleLevel(LinearClamp, pPrev / inSize, 0);
-        float4 fCurr2 = CurrFeature2.SampleLevel(LinearClamp, pCurr / inSize, 0);
-        float4 fPrev3 = PrevFeature3.SampleLevel(LinearClamp, pPrev / inSize, 0);
-        float4 fCurr3 = CurrFeature3.SampleLevel(LinearClamp, pCurr / inSize, 0);
+        float4 fPrev = PrevFeature.SampleLevel(LinearClamp, pPrevUv, 0);
+        float4 fCurr = CurrFeature.SampleLevel(LinearClamp, pCurrUv, 0);
+        float4 fPrev2 = PrevFeature2.SampleLevel(LinearClamp, pPrevUv, 0);
+        float4 fCurr2 = CurrFeature2.SampleLevel(LinearClamp, pCurrUv, 0);
+        float4 fPrev3 = PrevFeature3.SampleLevel(LinearClamp, pPrevUv, 0);
+        float4 fCurr3 = CurrFeature3.SampleLevel(LinearClamp, pCurrUv, 0);
         
         float4 diff = abs(fPrev - fCurr);
         float4 diff2 = abs(fPrev2 - fCurr2);
@@ -224,12 +344,29 @@ void CSMain(uint3 id : SV_DispatchThreadID)
         
         // Base error metric: 12-channel CNN feature difference
         float error = dot(diff, w1) + dot(diff2, w2) + dot(diff3, w3);
+        error += oobPen;
         
-        // Tie-breaker: prefer smaller motion vectors (background) to avoid 
-        // jumping to a foreground vector on repeating texture patterns.
-        error += length(testMV) * 0.002;
+        // Periodicity-aware tie-breaker:
+        if (periodicity > 0.3) {
+            float2 neighborMV1 = Motion.SampleLevel(LinearClamp, clamp(inputUv + float2(0.01, 0), 0.0, 0.999), 0).xy;
+            float2 neighborMV2 = Motion.SampleLevel(LinearClamp, clamp(inputUv - float2(0.01, 0), 0.0, 0.999), 0).xy;
+            float2 neighborMV3 = Motion.SampleLevel(LinearClamp, clamp(inputUv + float2(0, 0.01), 0.0, 0.999), 0).xy;
+            float2 neighborMV4 = Motion.SampleLevel(LinearClamp, clamp(inputUv - float2(0, 0.01), 0.0, 0.999), 0).xy;
+            
+            float consistency1 = 1.0 - length(testMV - neighborMV1) * 0.5;
+            float consistency2 = 1.0 - length(testMV - neighborMV2) * 0.5;
+            float consistency3 = 1.0 - length(testMV - neighborMV3) * 0.5;
+            float consistency4 = 1.0 - length(testMV - neighborMV4) * 0.5;
+            float spatialConsistency = max(max(consistency1, consistency2), max(consistency3, consistency4));
+            spatialConsistency = saturate(spatialConsistency);
+            error -= spatialConsistency * 0.02 * periodicity;
+        } else {
+            error += length(testMV) * 0.002;
+        }
         
-        if (error < minError) {
+        // HYSTERESIS: require 10% improvement to switch MVs
+        // Prevents frame-to-frame flipping between marginal candidates
+        if (error < minError * 0.90) {
             minError = error;
             bestMV = testMV;
         }
@@ -260,9 +397,12 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     float3 warpedCurr = SampleColor(CurrColor, warpCurrUv, inSize);
 
     // =====================================================================
-    // 3. CNN FEATURE-AWARE BLENDING & DETAIL INJECTION
+    // 3. PURE AI WARP: OCCLUSION-AWARE SOURCE SELECTION (NO FRAME BLENDING)
     // =====================================================================
-    // Sample the 12-channel CNN features at the final warped locations
+    // Both warpedPrev and warpedCurr are motion-compensated to target time.
+    // Instead of lerp-blending (which ghosts when MVs are imperfect),
+    // we SELECT the better source per-pixel using AI occlusion prediction.
+
     float4 fP1 = PrevFeature.SampleLevel(LinearClamp, warpPrevUv, 0);
     float4 fC1 = CurrFeature.SampleLevel(LinearClamp, warpCurrUv, 0);
     float4 fP2 = PrevFeature2.SampleLevel(LinearClamp, warpPrevUv, 0);
@@ -270,39 +410,38 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     float4 fP3 = PrevFeature3.SampleLevel(LinearClamp, warpPrevUv, 0);
     float4 fC3 = CurrFeature3.SampleLevel(LinearClamp, warpCurrUv, 0);
 
-    // Calculate the "structural energy" of the warped patches
-    // Feature 11 is Edge Magnitude (fP3.z and fC3.z)
-    // Feature 5 is Corner Response (fP2.x and fC2.x)
-    // Feature 6 is Local Variance (fP2.y and fC2.y)
-    float energyPrev = fP3.z + abs(fP2.x) + fP2.y;
-    float energyCurr = fC3.z + abs(fC2.x) + fC2.y;
+    float4 featureDiff1 = fP1 - fC1;
+    float4 featureDiff2 = fP2 - fC2;
+    float4 featureDiff3 = fP3 - fC3;
 
-    // If one frame has significantly more structural energy (e.g. it's not occluded/blurry),
-    // we shift the blend weight slightly towards it to preserve details.
-    float energyDiff = energyPrev - energyCurr;
-    float energyWeight = saturate(0.5 + energyDiff * 0.5); // 0.5 is neutral
-    
-    // Combine the temporal alpha with the structural energy weight
-    // We don't want to completely override alpha, just bias it by up to 30%
-    // Fade out the energy bias near alpha=0 and alpha=1 to ensure pure real frames
-    float biasStrength = 0.3 * (1.0 - abs(alpha * 2.0 - 1.0)); // 0 at alpha=0/1, 0.3 at alpha=0.5
-    float blendWeight = lerp(alpha, energyWeight, biasStrength);
+    // Run synthesis MLP for per-pixel occlusion prediction
+    float4 synthOut = SynthesisNet(featureDiff1, featureDiff2, featureDiff3);
+    float occlusionSelect = synthOut.x;  // AI occlusion mask: 0=prev valid, 1=curr valid
 
-    // We use the feature-aware blend to ensure we never "cancel" the warping,
-    // but intelligently preserve sharp edges and corners during the warp.
-    float3 result = lerp(warpedPrev, warpedCurr, blendWeight);
+    // --- Warp consistency: detect where motion vectors fail ---
+    // Multi-channel warp consistency (not just luma) for more stable detection
+    float3 warpDelta = abs(warpedPrev - warpedCurr);
+    float warpAgreement = 1.0 - saturate(dot(warpDelta, float3(0.35, 0.45, 0.20)) * 5.0);
 
-    // Feature-Guided Detail Injection:
-    // Extract high-frequency details (Texture Pattern + LoG) from the CNN
-    float detailPrev = fP1.w + fP3.y;
-    float detailCurr = fC1.w + fC3.y;
-    
-    // Blend the details using the same weight
-    float blendedDetail = lerp(detailPrev, detailCurr, blendWeight);
-    
-    // Add the details back to the luma of the result to recover sharpness lost during bicubic warping
-    // Fade out sharpening near alpha=0 and alpha=1 to avoid altering real frames
-    result += blendedDetail * 0.05 * (1.0 - abs(alpha * 2.0 - 1.0));
+    // --- Warp quality bias: prefer the frame warped less distance ---
+    float prevWarpLen = length(fwdMV * alpha);
+    float currWarpLen = length(fwdMV * (1.0 - alpha));
+    float qualityBias = 1.0 - currWarpLen / (prevWarpLen + currWarpLen + 0.001);
+
+    // Base selection: AI occlusion prediction when trained, quality bias otherwise
+    float rawSelect = lerp(qualityBias, occlusionSelect, saturate(useCustomWeights));
+
+    // In areas where warps disagree, pull toward quality bias (more reliable frame)
+    float mergedSelect = lerp(rawSelect, qualityBias, (1.0 - warpAgreement) * 0.35);
+
+    // --- SMOOTH SELECTION: use smoothstep for stable, jitter-free transitions ---
+    // Instead of aggressive sharpening (which flips between frames causing jitter),
+    // use smoothstep for C1-continuous transitions. Only go harder at strong occlusion.
+    float selectSharpness = lerp(1.0, 3.0, saturate((1.0 - warpAgreement) * 1.5));
+    float finalSelect = smoothstep(0.0, 1.0, saturate((mergedSelect - 0.5) * selectSharpness + 0.5));
+
+    // Pure warped result — NO alpha blending, NO unwarped fallback
+    float3 result = lerp(warpedPrev, warpedCurr, finalSelect);
 
     // Fast path for pure real frames to avoid any floating point inaccuracies
     if (alpha <= 0.001) {

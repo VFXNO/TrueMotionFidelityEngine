@@ -1327,7 +1327,14 @@ void App::UpdateCapture() {
 
             if (baseInterval > 0.0) {
               if (m_avgFrameInterval <= 0.0) m_avgFrameInterval = baseInterval;
-              else m_avgFrameInterval = m_avgFrameInterval * 0.95 + baseInterval * 0.05;
+              else {
+                // Faster adaptation (10%) when interval changes significantly,
+                // steady tracking (3%) when stable — avoids oscillation while
+                // responding quickly to framerate changes
+                double diff = std::abs(baseInterval - m_avgFrameInterval) / m_avgFrameInterval;
+                double adaptRate = (diff > 0.10) ? 0.10 : 0.03;
+                m_avgFrameInterval = m_avgFrameInterval * (1.0 - adaptRate) + baseInterval * adaptRate;
+              }
             }
           }
       } else {
@@ -1366,7 +1373,7 @@ void App::UpdateCapture() {
     
     // PERFECT PACING: Virtualize timestamps to eliminate capture jitter.
     // We count exact frame intervals to handle game stutters perfectly,
-    // and apply a tiny 2% drift correction to stay synced with real time.
+    // and apply a 5% drift correction to stay synced with real time.
     int64_t rawTime = frame.systemTime100ns;
     int64_t smoothedTime = rawTime;
     
@@ -1381,10 +1388,13 @@ void App::UpdateCapture() {
         int64_t expectedTime = m_lastSmoothedTime + numIntervals * interval100ns;
         int64_t drift = rawTime - expectedTime;
         
-        if (std::abs(drift) > interval100ns * 5) {
+        if (std::abs(drift) > interval100ns * 3) {
+            // Large phase slip — hard reset to avoid prolonged desync
             smoothedTime = rawTime;
         } else {
-            smoothedTime = expectedTime + (drift / 50);
+            // 5% drift correction per frame — fast enough to track cadence changes
+            // but slow enough to filter capture jitter
+            smoothedTime = expectedTime + (drift / 20);
         }
     }
     
@@ -1507,10 +1517,13 @@ void App::Render() {
     if (m_nextOutputQpc == 0) {
       m_nextOutputQpc = now.QuadPart;
     } else {
-        // If we fall behind by more than 1 frame, just reset to now to avoid rapid-fire catchup
-        // Rapid-fire catchup causes severe stutter when VSync is also active
-        if (now.QuadPart > m_nextOutputQpc + intervalQpc) {
-             m_nextOutputQpc = now.QuadPart;
+        // If we fall behind by more than 1.5 frames, re-anchor phase from 'now'
+        // instead of hard-resetting. This maintains smooth cadence.
+        int64_t behind = now.QuadPart - m_nextOutputQpc;
+        if (behind > intervalQpc + intervalQpc / 2) {
+             // Skip missed frames but keep phase-aligned
+             int64_t skipped = behind / intervalQpc;
+             m_nextOutputQpc += skipped * intervalQpc;
         }
     }
     
@@ -1549,8 +1562,9 @@ void App::Render() {
     m_nextOutputQpc = 0;
   }
 
-  // Keep a deeper pacing buffer to avoid end-of-pair stalls under capture jitter.
-  constexpr size_t kPacingQueueSize = 4;
+  // Keep a small pacing buffer: 3 frames gives 1 pair + 1 lookahead.
+  // Deeper queues add latency which hurts perceived smoothness.
+  constexpr size_t kPacingQueueSize = 3;
   while (m_frameQueue.size() > kPacingQueueSize) {
     m_frameQueue.pop_front();
     m_pairMotionComputed = false;
@@ -2450,6 +2464,122 @@ void App::RenderUi() {
   const char* qualityLabels[] = {"Standard (Fast)", "High (Sharp)"};
   ImGui::Combo("Quality Mode", &m_interpolationQuality, qualityLabels, IM_ARRAYSIZE(qualityLabels));
   if (ImGui::IsItemHovered()) ImGui::SetTooltip("Standard: Bilinear sampling (Blurrier, less GPU usage)\nHigh: Bicubic + Linear Light (Sharper, brightness correct, more GPU usage)");
+
+  // ML Weight Import/Export
+  ImGui::Separator();
+  ImGui::Text("ML Weights");
+  
+  static char statusMsg[128] = "";
+  
+  if (ImGui::Button("Export Weights")) {
+    wchar_t path[MAX_PATH] = {};
+    GetModuleFileNameW(nullptr, path, MAX_PATH);
+    std::wstring exePath(path);
+    size_t pos = exePath.find_last_of(L"\\/");
+    std::wstring weightsPath = exePath.substr(0, pos) + L"\\weights.json";
+    if (m_interpolator.SaveAttentionWeights(weightsPath.c_str())) {
+      sprintf_s(statusMsg, "Exported to weights.json");
+    } else {
+      sprintf_s(statusMsg, "Export failed!");
+    }
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Import Weights")) {
+    wchar_t path[MAX_PATH] = {};
+    GetModuleFileNameW(nullptr, path, MAX_PATH);
+    std::wstring exePath(path);
+    size_t pos = exePath.find_last_of(L"\\/");
+    std::wstring exeDir = exePath.substr(0, pos);
+    
+    bool loaded = false;
+    
+    // Try weights_trained.json in exe directory first (from training suite)
+    if (!loaded) {
+      std::wstring p = exeDir + L"\\weights_trained.json";
+      if (m_interpolator.LoadAttentionWeights(p.c_str())) {
+        sprintf_s(statusMsg, "Loaded weights_trained.json");
+        loaded = true;
+      }
+    }
+    
+    // Try output/weights_trained.json relative to exe
+    if (!loaded) {
+      std::wstring p = exeDir + L"\\output\\weights_trained.json";
+      if (m_interpolator.LoadAttentionWeights(p.c_str())) {
+        sprintf_s(statusMsg, "Loaded output/weights_trained.json");
+        loaded = true;
+      }
+    }
+    
+    // Try output/weights_trained.json relative to CWD
+    if (!loaded) {
+      if (m_interpolator.LoadAttentionWeights(L"output\\weights_trained.json")) {
+        sprintf_s(statusMsg, "Loaded output/weights_trained.json (cwd)");
+        loaded = true;
+      }
+    }
+    
+    // Try absolute path via project root for build_fresh
+    if (!loaded) {
+      size_t buildPos = exePath.find(L"\\build");
+      if (buildPos != std::wstring::npos) {
+        std::wstring p = exePath.substr(0, buildPos) + L"\\output\\weights_trained.json";
+        if (m_interpolator.LoadAttentionWeights(p.c_str())) {
+          sprintf_s(statusMsg, "Loaded project output/weights_trained.json");
+          loaded = true;
+        }
+      }
+    }
+    
+    // Try training suite output directly
+    if (!loaded) {
+      size_t buildPos = exePath.find(L"\\build");
+      if (buildPos != std::wstring::npos) {
+        std::wstring p = exePath.substr(0, buildPos) + L"\\tools\\build\\Release\\output\\weights_trained.json";
+        if (m_interpolator.LoadAttentionWeights(p.c_str())) {
+          sprintf_s(statusMsg, "Loaded training suite weights");
+          loaded = true;
+        }
+      }
+    }
+    
+    // Fallback to weights.json (may contain previously exported or default weights)
+    if (!loaded) {
+      std::wstring p = exeDir + L"\\weights.json";
+      if (m_interpolator.LoadAttentionWeights(p.c_str())) {
+        sprintf_s(statusMsg, "Loaded weights.json (defaults)");
+        loaded = true;
+      }
+    }
+    
+    if (loaded) {
+      m_interpolator.SetUseCustomWeights(true);
+      m_useCustomWeights = true;
+    } else {
+      sprintf_s(statusMsg, "Import failed - no weights file found!");
+    }
+  }
+  ImGui::SameLine();
+  if (ImGui::Checkbox("Custom", &m_useCustomWeights)) {
+    m_interpolator.SetUseCustomWeights(m_useCustomWeights);
+  }
+  if (strlen(statusMsg) > 0) {
+    ImGui::TextColored(ImVec4(1, 1, 0, 1), "%s", statusMsg);
+  }
+  
+  if (ImGui::Button("Export Trained")) {
+    wchar_t path[MAX_PATH] = {};
+    GetModuleFileNameW(nullptr, path, MAX_PATH);
+    std::wstring exePath(path);
+    size_t pos = exePath.find_last_of(L"\\/");
+    std::wstring weightsPath = exePath.substr(0, pos) + L"\\weights_trained.json";
+    if (m_interpolator.ExportTrainedWeights(weightsPath.c_str())) {
+      sprintf_s(statusMsg, "Exported trained weights!");
+    } else {
+      sprintf_s(statusMsg, "Export trained failed!");
+    }
+  }
+  if (ImGui::IsItemHovered()) ImGui::SetTooltip("Export: Save current ML weights to weights.json\nImport: Load weights from weights.json\nCustom: Use custom weights (off) = default + EMA");
 
   ImGui::Text("Delay: %.2f ms", m_outputDelayMs);
   const char* debugLabels[] = {"None", "Motion Flow", "Confidence Heatmap", "Motion Needles", "Residual Error", "Split Screen", "Occlusion", "AI Ghost Mask", "Structure Gradient"};

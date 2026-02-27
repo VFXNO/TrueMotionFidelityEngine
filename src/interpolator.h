@@ -69,6 +69,13 @@ public:
   ID3D11Texture2D* OutputTexture() const { return m_outputTexture.Get(); }
   ID3D11ShaderResourceView* OutputSrv() const { return m_outputSrv.Get(); }
 
+  // --- Weight export/import ---
+  bool LoadAttentionWeights(const wchar_t* path);
+  bool SaveAttentionWeights(const wchar_t* path) const;
+  bool ExportTrainedWeights(const wchar_t* path);  // Export EMA-trained weights from GPU
+  void SetUseCustomWeights(bool use) { m_useCustomWeights = use; }
+  bool GetUseCustomWeights() const { return m_useCustomWeights; }
+
 private:
   bool LoadShaders();
   void CreateResources();
@@ -222,9 +229,11 @@ private:
   Microsoft::WRL::ComPtr<ID3D11Buffer> m_smoothConstants;
   Microsoft::WRL::ComPtr<ID3D11Buffer> m_interpConstants;
   Microsoft::WRL::ComPtr<ID3D11Buffer> m_debugConstants;
+  Microsoft::WRL::ComPtr<ID3D11Buffer> m_attentionWeights;
   Microsoft::WRL::ComPtr<ID3D11SamplerState> m_linearSampler;
 
   // Configuration state
+  bool m_useCustomWeights = false;
   int m_inputWidth = 0;
   int m_inputHeight = 0;
   int m_outputWidth = 0;

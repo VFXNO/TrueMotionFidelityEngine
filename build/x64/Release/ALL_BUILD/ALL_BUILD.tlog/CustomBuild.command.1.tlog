@@ -1,6 +1,6 @@
 ^C:\USERS\VFXNO\DOCUMENTS\GITHUB\TRUEMOTIONFIDELITYENGINE\CMAKELISTS.TXT
 setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/vfxno/Documents/GITHUB/TrueMotionFidelityEngine -BC:/Users/vfxno/Documents/GITHUB/TrueMotionFidelityEngine/build --check-stamp-file C:/Users/vfxno/Documents/GITHUB/TrueMotionFidelityEngine/build/CMakeFiles/generate.stamp
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine -BC:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/build --check-stamp-file C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/build/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone

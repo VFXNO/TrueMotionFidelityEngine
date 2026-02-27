@@ -1,0 +1,18 @@
+Trying to load: C:\Users\vfxno\Documents\GitHub\TrueMotionFidelityEngine\build\bin\Release\weights.json
+File opened successfully
+Parsed JSON, updating buffer...
+Failed to map buffer! HR: 0x80070057
+Trying to load: C:\Users\vfxno\Documents\GitHub\TrueMotionFidelityEngine\build\bin\Release\weights_trained.json
+Failed to open file
+Trying to load: output\weights_trained.json
+File opened successfully
+Parsed JSON, updating buffer...
+Failed to map buffer! HR: 0x80070057
+Trying to load: C:\Users\vfxno\Documents\GitHub\TrueMotionFidelityEngine\output\weights_trained.json
+File opened successfully
+Parsed JSON, updating buffer...
+Failed to map buffer! HR: 0x80070057
+Trying to load: C:\Users\vfxno\Documents\GitHub\TrueMotionFidelityEngine\build\bin\Release\weights.json
+File opened successfully
+Parsed JSON, updating buffer...
+Successfully updated buffer using UpdateSubresource.

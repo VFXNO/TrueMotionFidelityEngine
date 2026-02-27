@@ -1,0 +1,4 @@
+C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/tools/build/CMakeFiles/training_suite.dir
+C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/tools/build/CMakeFiles/training_suite_gui.dir
+C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/tools/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/vfxno/Documents/GitHub/TrueMotionFidelityEngine/tools/build/CMakeFiles/ZERO_CHECK.dir

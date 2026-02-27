@@ -1,0 +1,33 @@
+1 DIALOGEX 0, 0, 500, 400
+CAPTION "True Motion Fidelity - Training Suite"
+{
+    LTEXT "Input Folder:", -1, 10, 15, 80, 12
+    EDITTEXT 100, 90, 12, 280, 14
+    PUSHBUTTON "Browse", 300, 380, 12, 50, 14
+
+    LTEXT "Output Folder:", -1, 10, 40, 80, 12
+    EDITTEXT 101, 90, 37, 280, 14
+    PUSHBUTTON "Browse", 301, 380, 37, 50, 14
+
+    LTEXT "RIFE Path (optional):", -1, 10, 65, 100, 12
+    EDITTEXT 102, 110, 62, 260, 14
+    PUSHBUTTON "Browse", 302, 380, 62, 50, 14
+
+    CHECKBOX "Use RIFE for Ground Truth", 400, 10, 85, 180, 12
+    CHECKBOX "Clean Static Images", 401, 200, 85, 120, 12
+
+    LTEXT "Epochs:", -1, 10, 110, 50, 12
+    EDITTEXT 103, 60, 107, 60, 14
+    LTEXT "Learning Rate:", -1, 130, 110, 70, 12
+    EDITTEXT 104, 200, 107, 60, 14
+
+    DEFPUSHBUTTON "Start Training", 200, 270, 105, 80, 20
+    PUSHBUTTON "Stop", 201, 360, 105, 50, 20
+
+    LTEXT "Progress:", -1, 10, 140, 40, 12
+    EDITTEXT 105, 60, 137, 40, 14
+    LTEXT "%", -1, 105, 140, 10, 12
+
+    LTEXT "Log:", -1, 10, 165, 30, 12
+    EDITTEXT 500, 10, 180, 480, 180
+}
