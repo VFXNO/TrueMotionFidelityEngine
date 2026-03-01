@@ -1,0 +1,257 @@
+#version 450
+// ============================================================================
+// PWC-Net Inspired Motion Estimation — Cost Volume + Search
+// Adapted from: Sun et al., "PWC-Net: CNNs for Optical Flow Using Pyramid,
+//                Warping, and Cost Volume" (CVPR 2018)
+//
+// Computes normalized cross-correlation over a [-d,d]² displacement window
+// between feature maps of the two input frames. Finds the best integer
+// displacement, then refines to sub-pixel via parabolic fitting.
+//
+// Output (RGBA16F per pixel):
+//   R = best motion X  (half-res pixels)
+//   G = best motion Y  (half-res pixels)
+//   B = best correlation score  [-1, 1]
+//   A = uniqueness (best − 2nd best correlation)
+// ============================================================================
+
+precision highp float;
+
+// ============================================================================
+// Tuning Constants
+// ============================================================================
+
+#define MAX_SEARCH_RANGE  4         // ±4 pixels → 9×9 = 81 displacements
+#define PATCH_R           1         // 3×3 patch for robust ZNCC
+#define TILE_SIZE         16
+#define APRON             MAX_SEARCH_RANGE
+#define TILE_FULL         (TILE_SIZE + 2 * APRON) // 24
+
+// ============================================================================
+// Descriptor Bindings  (must match pipeline layout)
+// ============================================================================
+
+layout(binding = 0)  uniform sampler2D feat0_level0;   // prev features
+layout(binding = 1)  uniform sampler2D feat1_level0;   // curr features
+layout(binding = 2)  uniform sampler2D feat0_level1;
+layout(binding = 3)  uniform sampler2D feat1_level1;
+layout(binding = 4)  uniform sampler2D feat0_level2;
+layout(binding = 5)  uniform sampler2D feat1_level2;
+layout(binding = 6)  uniform sampler2D feat0_level3;
+layout(binding = 7)  uniform sampler2D feat1_level3;
+layout(binding = 8)  uniform sampler2D feat0_level4;
+layout(binding = 9)  uniform sampler2D feat1_level4;
+layout(binding = 10) uniform sampler2D feat0_level5;
+layout(binding = 11) uniform sampler2D feat1_level5;
+
+layout(binding = 12) uniform sampler2D flowPrev;       // temporal prediction
+
+layout(binding = 13, rgba16f) uniform writeonly image2D costVolume; // output
+
+// ============================================================================
+// Push Constants  (56 bytes — matches C++ struct)
+// ============================================================================
+
+layout(push_constant) uniform PushConstants {
+    vec4  srcSize;          // full-res (w, h, 1/w, 1/h)
+    vec4  costVolumeSize;   // half-res (w, h, 1/w, 1/h)
+    int   level;
+    int   searchRange;      // actual search radius (capped at MAX_SEARCH_RANGE)
+    int   isBackward;
+    int   usePrevFlow;
+    float flowScale;
+    float padding;
+} pc;
+
+// ============================================================================
+// Shared memory tile for reference (frame 0) features – avoids redundant
+// texture fetches when neighbouring threads overlap in their patch windows.
+// ============================================================================
+
+shared vec4 sTile[TILE_FULL][TILE_FULL];   // 24×24 × vec4 = 9 216 bytes
+
+// ============================================================================
+// Channel weighting for ZNCC — give luma 40 %, gradient 20 %, laplacian 15 %,
+// variance 25 %.  Same prior philosophy as the D3D11 pipeline.
+// ============================================================================
+
+const vec4 kChannelW = vec4(0.40, 0.20, 0.15, 0.25);
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+// Normalised UV for a pixel position in the half-res feature map.
+vec2 halfUV(vec2 px) {
+    return (px + 0.5) * pc.costVolumeSize.zw;
+}
+
+// Feature-weighted ZNCC between a reference patch (in shared mem) and a
+// search-position patch (sampled from texture).  Patch radius = PATCH_R (1→3×3).
+float computeZNCC(ivec2 tileBase, ivec2 localPos, vec2 searchUV) {
+    // Accumulate means + cross terms across the patch
+    vec4 sumA  = vec4(0.0);
+    vec4 sumB  = vec4(0.0);
+    vec4 sumAA = vec4(0.0);
+    vec4 sumBB = vec4(0.0);
+    vec4 sumAB = vec4(0.0);
+    float cnt  = 0.0;
+
+    for (int py = -PATCH_R; py <= PATCH_R; py++) {
+        for (int px = -PATCH_R; px <= PATCH_R; px++) {
+            // Reference from shared memory
+            ivec2 tp = localPos + APRON + ivec2(px, py);
+            vec4 a = sTile[tp.y][tp.x];
+
+            // Search from texture (bilinear)
+            vec2 suv = searchUV + vec2(float(px), float(py)) * pc.costVolumeSize.zw;
+            suv = clamp(suv, vec2(0.001), vec2(0.999));
+            vec4 b = texture(feat1_level0, suv);
+
+            sumA  += a;
+            sumB  += b;
+            sumAA += a * a;
+            sumBB += b * b;
+            sumAB += a * b;
+            cnt   += 1.0;
+        }
+    }
+
+    // Per-channel ZNCC
+    vec4 meanA = sumA / cnt;
+    vec4 meanB = sumB / cnt;
+    vec4 varA  = sumAA / cnt - meanA * meanA;
+    vec4 varB  = sumBB / cnt - meanB * meanB;
+    vec4 cov   = sumAB / cnt - meanA * meanB;
+
+    vec4 denom = sqrt(max(varA, vec4(1e-8)) * max(varB, vec4(1e-8)));
+    vec4 ncc   = cov / denom;
+
+    // Weighted combination across channels
+    return dot(ncc, kChannelW);
+}
+
+// 1-D parabolic sub-pixel offset: given three equally-spaced correlation
+// values (left, center, right), return sub-pixel offset from center.
+float parabolicOffset(float left, float center, float right) {
+    float denom = 2.0 * (left + right - 2.0 * center);
+    if (abs(denom) < 1e-6) return 0.0;
+    return clamp((left - right) / denom, -0.5, 0.5);
+}
+
+// ============================================================================
+layout(local_size_x = TILE_SIZE, local_size_y = TILE_SIZE) in;
+
+void main() {
+    ivec2 pixelPos = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 cvSize   = ivec2(pc.costVolumeSize.xy);
+
+    // --- Load shared-memory tile (reference features) ----------------------
+    ivec2 groupOrigin = ivec2(gl_WorkGroupID.xy) * TILE_SIZE;
+    int  lid  = int(gl_LocalInvocationIndex);
+    int  tileTotal = TILE_FULL * TILE_FULL;  // 576
+
+    for (int t = lid; t < tileTotal; t += TILE_SIZE * TILE_SIZE) {
+        int ty = t / TILE_FULL;
+        int tx = t - ty * TILE_FULL;
+        ivec2 gp = groupOrigin - APRON + ivec2(tx, ty);
+        vec2  uv = halfUV(vec2(gp));
+        uv = clamp(uv, vec2(0.001), vec2(0.999));
+        sTile[ty][tx] = texture(feat0_level0, uv);
+    }
+    barrier();
+
+    if (pixelPos.x >= cvSize.x || pixelPos.y >= cvSize.y) return;
+
+    ivec2 localPos = ivec2(gl_LocalInvocationID.xy);
+
+    // --- Base flow from temporal prediction ---------------------------------
+    vec2 baseFlow = vec2(0.0);
+    if (pc.usePrevFlow != 0) {
+        vec2 fuv = halfUV(vec2(pixelPos));
+        fuv = clamp(fuv, vec2(0.001), vec2(0.999));
+        baseFlow = texture(flowPrev, fuv).xy * pc.flowScale;
+    }
+
+    // --- Static-pixel fast path --------------------------------------------
+    // Features channel 0 = luma, channel 3 = variance (texture strength).
+    vec4 refFeat = sTile[localPos.y + APRON][localPos.x + APRON];
+    vec2 currUV  = halfUV(vec2(pixelPos) + baseFlow);
+    currUV = clamp(currUV, vec2(0.001), vec2(0.999));
+    vec4 currFeat = texture(feat1_level0, currUV);
+
+    float frameDiff = length(refFeat - currFeat);
+    float texStr    = refFeat.w;                 // variance
+
+    if (frameDiff < 0.008 && texStr < 0.04) {
+        // Near-static — zero motion, high confidence surrogate
+        imageStore(costVolume, pixelPos, vec4(0.0, 0.0, 0.97, 0.80));
+        return;
+    }
+
+    // --- Adaptive search radius --------------------------------------------
+    int sr = min(pc.searchRange, MAX_SEARCH_RANGE);
+    // Shrink radius for low-motion content
+    float motionHint = clamp(frameDiff * 4.0 + texStr * 2.0, 0.0, 1.0);
+    int actualR = max(1, int(mix(float(sr) * 0.5, float(sr), motionHint)));
+
+    // --- Phase 1: Full grid search at integer displacements -----------------
+    float bestCorr  = -2.0;
+    float secCorr   = -2.0;
+    ivec2 bestDisp  = ivec2(0);
+
+    for (int dy = -actualR; dy <= actualR; dy++) {
+        for (int dx = -actualR; dx <= actualR; dx++) {
+            vec2 disp = baseFlow + vec2(float(dx), float(dy));
+            vec2 suv  = halfUV(vec2(pixelPos) + disp);
+
+            float c = computeZNCC(groupOrigin, localPos, suv);
+
+            // Motion regularisation: small penalty for large displacement
+            float penalty = length(vec2(float(dx), float(dy))) * 0.003;
+            c -= penalty;
+
+            if (c > bestCorr) {
+                secCorr  = bestCorr;
+                bestCorr = c;
+                bestDisp = ivec2(dx, dy);
+            } else if (c > secCorr) {
+                secCorr = c;
+            }
+        }
+    }
+
+    // --- Phase 2: Sub-pixel refinement (parabolic fitting) ------------------
+    // Evaluate ZNCC at ±1 around best integer in X and Y for the parabola.
+    float cx = bestCorr;
+    float cy = bestCorr;
+
+    // X neighbours
+    {
+        vec2 dispL = baseFlow + vec2(float(bestDisp.x - 1), float(bestDisp.y));
+        vec2 dispR = baseFlow + vec2(float(bestDisp.x + 1), float(bestDisp.y));
+        float cL = computeZNCC(groupOrigin, localPos, halfUV(vec2(pixelPos) + dispL));
+        float cR = computeZNCC(groupOrigin, localPos, halfUV(vec2(pixelPos) + dispR));
+        cx = parabolicOffset(cL, bestCorr, cR);
+    }
+    // Y neighbours
+    {
+        vec2 dispU = baseFlow + vec2(float(bestDisp.x), float(bestDisp.y - 1));
+        vec2 dispD = baseFlow + vec2(float(bestDisp.x), float(bestDisp.y + 1));
+        float cU = computeZNCC(groupOrigin, localPos, halfUV(vec2(pixelPos) + dispU));
+        float cD = computeZNCC(groupOrigin, localPos, halfUV(vec2(pixelPos) + dispD));
+        cy = parabolicOffset(cU, bestCorr, cD);
+    }
+
+    vec2 finalDispPx = baseFlow + vec2(float(bestDisp.x) + cx,
+                                       float(bestDisp.y) + cy);
+
+    // Direction handling
+    if (pc.isBackward != 0) finalDispPx = -finalDispPx;
+
+    // Uniqueness = gap between best and 2nd-best
+    float uniqueness = clamp(bestCorr - secCorr, 0.0, 1.0);
+
+    imageStore(costVolume, pixelPos,
+               vec4(finalDispPx.x, finalDispPx.y, bestCorr, uniqueness));
+}

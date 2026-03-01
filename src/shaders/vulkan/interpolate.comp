@@ -1,0 +1,302 @@
+#version 450
+// ============================================================================
+// Frame Interpolation Shader - Motion Compensated Warping
+// Uses PWC-Net motion vectors to interpolate between frames
+// ============================================================================
+
+precision highp float;
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+#define PI 3.14159265359
+
+// ============================================================================
+// Descriptor Bindings
+// ============================================================================
+
+// Input frames as samplers
+layout(binding = 0) uniform sampler2D framePrev;
+layout(binding = 1) uniform sampler2D frameCurr;
+
+// Motion field and confidence (from PWC-Net)
+layout(binding = 2) uniform sampler2D motionFwd;
+layout(binding = 3) uniform sampler2D motionBwd;
+layout(binding = 4) uniform sampler2D confidenceFwd;
+layout(binding = 5) uniform sampler2D confidenceBwd;
+
+// Feature pyramids for occlusion detection
+layout(binding = 6) uniform sampler2D featPrev;
+layout(binding = 7) uniform sampler2D featCurr;
+
+// Samplers for different filtering modes
+layout(binding = 8) uniform sampler2D linearSampler;
+layout(binding = 9) uniform sampler2D pointSampler;
+
+// Output
+layout(binding = 10, rgba8) uniform writeonly image2D outputFrame;
+
+// ============================================================================
+// Push Constants
+// ============================================================================
+
+layout(push_constant) uniform PushConstants {
+    vec4 frameSize;       // width, height, 1/width, 1/height
+    vec4 motionSize;      // motion field dimensions
+    float alpha;          // interpolation factor (0.0-1.0)
+    float confPower;      // confidence weighting power
+    float diffScale;      // difference scaling for occlusion
+    int  useBidirectional; // use backward flow
+    int  useOcclusion;    // enable occlusion detection
+    int  qualityMode;     // 0=fast, 1=balanced, 2=quality
+    int  padding;
+} pc;
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+// Soft clipping for smooth blending
+float softClamp(float x, float lower, float upper) {
+    return lower + (upper - lower) * smoothstep(lower, upper, x);
+}
+
+// Compute occlusion score from forward/backward flow consistency
+float computeOcclusion(vec2 flowFwd, vec2 flowBwd, float confFwd, float confBwd) {
+    // Forward-backward consistency check
+    vec2 reprojectFwd = flowBwd + flowFwd; // Should be ~0 if consistent
+    vec2 reprojectBwd = flowFwd + flowBwd;
+    
+    float consistency = length(reprojectFwd);
+    
+    // Also check confidence difference
+    float confDiff = abs(confFwd - confBwd);
+    
+    // Combine into occlusion score
+    float occlusion = smoothstep(0.0, 4.0, consistency) + confDiff * 0.5;
+    occlusion = clamp(occlusion, 0.0, 1.0);
+    
+    return occlusion;
+}
+
+// Edge-aware weight for bilateral filtering
+float edgeAwareWeight(vec2 uv, vec2 flow, vec2 texelSize) {
+    vec2 warpedUV = uv + flow * texelSize;
+    
+    vec4 center = texture(linearSampler, uv);
+    vec4 warped = texture(linearSampler, warpedUV);
+    
+    // Color difference
+    float colorDiff = length(center.rgb - warped.rgb);
+    
+    // Spatial distance
+    float spatialDist = length(flow) * 0.1;
+    
+    // Combined weight
+    float weight = exp(-colorDiff * pc.diffScale - spatialDist);
+    
+    return weight;
+}
+
+// 9-tap Gaussian blur kernel for motion-compensated filtering
+const float gaussianWeights[5] = float[5](0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
+
+// ============================================================================
+// Main Interpolation Logic
+// ============================================================================
+
+vec4 interpolateWithMotion(vec2 uv, vec2 flow, float alpha, float confidence) {
+    // Warp coordinates
+    vec2 warpedUV = uv + flow * alpha;
+    
+    // Clamp to valid range
+    warpedUV = clamp(warpedUV, vec2(0.001), vec2(0.999));
+    
+    // Sample warped color
+    vec4 warpedColor = texture(linearSampler, warpedUV);
+    
+    // Apply confidence weighting
+    float weight = pow(confidence, pc.confPower);
+    
+    return warpedColor;
+}
+
+// Occlusion-aware blending between forward and backward warps
+vec4 blendBidirectional(vec2 uv, vec2 flowFwd, vec2 flowBwd, 
+                       float confFwd, float confBwd, float alpha) {
+    // Warp from previous frame (forward motion)
+    vec2 uvFwd = uv + flowFwd * alpha;
+    uvFwd = clamp(uvFwd, vec2(0.001), vec2(0.999));
+    vec4 colorFwd = texture(linearSampler, uvFwd);
+    
+    // Warp from current frame (backward motion)
+    vec2 uvBwd = uv - flowBwd * (1.0 - alpha);
+    uvBwd = clamp(uvBwd, vec2(0.001), vec2(0.999));
+    vec4 colorBwd = texture(linearSampler, uvBwd);
+    
+    // Compute occlusion scores
+    float occFwd = 0.0;
+    float occBwd = 0.0;
+    
+    if (pc.useOcclusion != 0) {
+        occFwd = computeOcclusion(flowFwd, flowBwd, confFwd, confBwd);
+        occBwd = 1.0 - occFwd; // Symmetric
+    }
+    
+    // Confidence-weighted blend with occlusion handling
+    float weightFwd = confFwd * (1.0 - occFwd);
+    float weightBwd = confBwd * (1.0 - occBwd);
+    float weightSum = weightFwd + weightBwd + 1e-6;
+    
+    vec4 blended = (colorFwd * weightFwd + colorBwd * weightBwd) / weightSum;
+    
+    // Add detail preservation from higher-confidence source
+    if (confFwd > confBwd) {
+        blended = mix(blended, colorFwd, confFwd * 0.3);
+    } else {
+        blended = mix(blended, colorBwd, confBwd * 0.3);
+    }
+    
+    return blended;
+}
+
+// Quality mode: motion-compensated filtering
+vec4 interpolateQuality(vec2 uv, vec2 flow, float alpha, float confidence) {
+    vec2 texelSize = pc.frameSize.zw;
+    vec4 result = vec4(0.0);
+    float weightSum = 0.0;
+    
+    // 9-tap motion-compensated filter
+    for (int dy = -2; dy <= 2; dy++) {
+        for (int dx = -2; dx <= 2; dx++) {
+            vec2 offset = vec2(float(dx), float(dy));
+            vec2 sampleUV = uv + offset * texelSize;
+            
+            // Offset motion for this sample
+            vec2 sampleFlow = flow; // Simplified - would offset by local flow gradient
+            
+            vec2 warpedUV = sampleUV + sampleFlow * alpha;
+            warpedUV = clamp(warpedUV, vec2(0.001), vec2(0.999));
+            
+            vec4 sampleColor = texture(linearSampler, warpedUV);
+            
+            // Gaussian weight
+            float dist = length(offset);
+            float weight = gaussianWeights[abs(dx)] * gaussianWeights[abs(dy)];
+            
+            // Edge-aware adjustment
+            weight *= edgeAwareWeight(uv, flow, texelSize);
+            
+            result += sampleColor * weight;
+            weightSum += weight;
+        }
+    }
+    
+    return result / weightSum;
+}
+
+// Fast mode: simple bilinear warp
+vec4 interpolateFast(vec2 uv, vec2 flow, float alpha, float confidence) {
+    return interpolateWithMotion(uv, flow, alpha, confidence);
+}
+
+// ============================================================================
+// Main Compute Shader
+// ============================================================================
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+void main() {
+    ivec2 pixelPos = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 outputSize = imageSize(outputFrame);
+    
+    if (pixelPos.x >= outputSize.x || pixelPos.y >= outputSize.y) return;
+    
+    // Calculate UV coordinates (pixelPos is in output space, frameSize = output dims)
+    vec2 uv = (vec2(pixelPos) + 0.5) * pc.frameSize.zw;
+    vec2 texelSize = pc.frameSize.zw;
+    
+    // Sample motion and confidence at same UV (sampler handles resolution mapping)
+    vec2 motionUV = clamp(uv, vec2(0.001), vec2(0.999));
+    
+    // Read motion (pixel displacement at motion-field resolution)
+    vec2 flow = texture(motionFwd, motionUV).xy;
+    // Read confidence from actual confidence texture (not motion!)
+    float conf = clamp(texture(confidenceFwd, motionUV).x, 0.0, 1.0);
+    
+    // Scale motion from motion-pixel displacement to UV displacement
+    // motionSize.zw = (1/motionW, 1/motionH)
+    flow *= pc.motionSize.zw;
+    
+    // Clamp motion to valid range (max 50% of frame in UV space)
+    float maxMotion = 0.5;
+    flow = clamp(flow, vec2(-maxMotion), vec2(maxMotion));
+    
+    // Sample backward flow if available
+    vec2 flowBwd = vec2(0.0);
+    float confBwd = 0.5;
+    
+    if (pc.useBidirectional != 0) {
+        flowBwd = texture(motionBwd, motionUV).xy * pc.motionSize.zw;
+        flowBwd = clamp(flowBwd, vec2(-maxMotion), vec2(maxMotion));
+        confBwd = clamp(texture(confidenceBwd, motionUV).x, 0.0, 1.0);
+    }
+    
+    // Compute final interpolated color based on quality mode
+    vec4 color;
+    
+    if (pc.useBidirectional != 0) {
+        // Bidirectional warping with occlusion handling
+        color = blendBidirectional(uv, flow, flowBwd, conf, confBwd, pc.alpha);
+    } else {
+        // Unidirectional warping
+        if (pc.qualityMode >= 2) {
+            color = interpolateQuality(uv, flow, pc.alpha, conf);
+        } else if (pc.qualityMode >= 1) {
+            // Balanced: add some filtering
+            vec4 fast = interpolateFast(uv, flow, pc.alpha, conf);
+            vec4 qual = interpolateQuality(uv, flow, pc.alpha, conf);
+            color = mix(fast, qual, 0.5);
+        } else {
+            color = interpolateFast(uv, flow, pc.alpha, conf);
+        }
+    }
+    
+    // Post-processing: subtle sharpening for game content
+    // Games often have sharp edges that get blurred by interpolation
+    if (pc.qualityMode >= 1) {
+        // Unsharp mask
+        vec4 center = color;
+        vec2 offsets[4] = vec2[4](
+            vec2(-texelSize.x, 0),
+            vec2(texelSize.x, 0),
+            vec2(0, -texelSize.y),
+            vec2(0, texelSize.y)
+        );
+        
+        vec4 neighbors = vec4(0.0);
+        for (int i = 0; i < 4; i++) {
+            neighbors += texture(linearSampler, clamp(uv + offsets[i], vec2(0.001), vec2(0.999)));
+        }
+        
+        // Edge enhancement
+        vec4 blur = neighbors * 0.25;
+        float edgeStrength = length(center.rgb - blur.rgb);
+        float sharpen = 1.0 + edgeStrength * 0.5;
+        
+        // Only sharpen if there's actual detail
+        if (edgeStrength > 0.01) {
+            color.rgb = mix(color.rgb, center.rgb * sharpen, min(edgeStrength * 2.0, 0.3));
+        }
+    }
+    
+    // Clamp and output (no gamma — input is already sRGB, matching D3D11 path)
+    color = clamp(color, vec4(0.0), vec4(1.0));
+    
+    // Alpha always 1.0 (opaque, matching D3D11 path)
+    color.a = 1.0;
+    
+    // Output is B8G8R8A8 shared texture — format handles R↔B mapping, no manual swizzle
+    imageStore(outputFrame, pixelPos, color);
+}

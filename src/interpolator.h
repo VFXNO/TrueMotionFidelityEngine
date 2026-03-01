@@ -5,19 +5,12 @@
 
 #include <string>
 
+#ifdef USE_VULKAN
+#include "render_device.h"
+#endif
+
 // ============================================================================
 // Interpolator v2 - Rewritten motion estimation & interpolation pipeline
-//
-// Pipeline overview:
-//   1. Downsample: Full-color -> half-res luma -> quarter-res luma -> eighth-res luma
-//   2. Motion estimation at tiny (1/8) resolution using hexagonal search + ZNCC
-//   3. Backward motion at tiny for consistency checking
-//   4. (Full pipeline only) Refine motion at quarter and half resolution via
-//      Lucas-Kanade gradient descent
-//   5. (Full pipeline only) Joint bilateral spatial smoothing
-//   6. (Full pipeline only) Motion-compensated temporal accumulation with
-//      AABB neighborhood clamping
-//   7. Bidirectional pure motion-compensated warp interpolation
 // ============================================================================
 class Interpolator {
 public:
@@ -35,6 +28,11 @@ public:
 
   bool Initialize(ID3D11Device* device, ID3D11DeviceContext* context);
   bool Resize(int inputWidth, int inputHeight, int outputWidth, int outputHeight);
+
+#ifdef USE_VULKAN
+  // Set the Vulkan render device for compute pipeline (call before Initialize)
+  void SetRenderDevice(tfe::RenderDevice* rd) { m_renderDevice = rd; }
+#endif
 
   // --- Configuration ---
   void SetMotionModel(int model) { m_motionModel = model; }
@@ -69,6 +67,10 @@ public:
   ID3D11Texture2D* OutputTexture() const { return m_outputTexture.Get(); }
   ID3D11ShaderResourceView* OutputSrv() const { return m_outputSrv.Get(); }
 
+  // --- Backend info ---
+  bool IsVulkan() const { return m_useVulkan; }
+  const char* GetBackendName() const { return m_useVulkan ? "Vulkan" : "D3D11"; }
+
   // --- Weight export/import ---
   bool LoadAttentionWeights(const wchar_t* path);
   bool SaveAttentionWeights(const wchar_t* path) const;
@@ -87,6 +89,111 @@ private:
   // Helpers to dispatch and clear CS state
   void Dispatch(int w, int h);
   void ClearCS(int srvCount, int uavCount);
+
+#ifdef USE_VULKAN
+  bool LoadVulkanShaders();
+#endif
+
+  // Backend state
+  bool m_useVulkan = false;
+
+#ifdef USE_VULKAN
+  // Vulkan resources (if available)
+  tfe::RenderDevice* m_renderDevice = nullptr;
+  
+  // Vulkan pipelines
+  VkPipeline m_vkFeaturePyramidPipeline = VK_NULL_HANDLE;
+  VkPipeline m_vkCostVolumePipeline = VK_NULL_HANDLE;
+  VkPipeline m_vkFlowDecoderPipeline = VK_NULL_HANDLE;
+  VkPipeline m_vkInterpolatePipeline = VK_NULL_HANDLE;
+  VkPipeline m_vkDownsamplePipeline = VK_NULL_HANDLE;
+  
+  VkPipelineLayout m_vkFeaturePyramidLayout = VK_NULL_HANDLE;
+  VkPipelineLayout m_vkCostVolumeLayout = VK_NULL_HANDLE;
+  VkPipelineLayout m_vkFlowDecoderLayout = VK_NULL_HANDLE;
+  VkPipelineLayout m_vkInterpolateLayout = VK_NULL_HANDLE;
+  VkPipelineLayout m_vkDownsampleLayout = VK_NULL_HANDLE;
+  
+  VkDescriptorSet m_vkFeaturePyramidSet = VK_NULL_HANDLE;
+  VkDescriptorSet m_vkCostVolumeSet = VK_NULL_HANDLE;
+  VkDescriptorSet m_vkFlowDecoderSet = VK_NULL_HANDLE;
+  VkDescriptorSet m_vkInterpolateSet = VK_NULL_HANDLE;
+  VkDescriptorSet m_vkDownsampleSet = VK_NULL_HANDLE;
+
+  // Descriptor set layouts (needed for descriptor set allocation)
+  VkDescriptorSetLayout m_vkFeaturePyramidSetLayout = VK_NULL_HANDLE;
+  VkDescriptorSetLayout m_vkCostVolumeSetLayout = VK_NULL_HANDLE;
+  VkDescriptorSetLayout m_vkFlowDecoderSetLayout = VK_NULL_HANDLE;
+  VkDescriptorSetLayout m_vkInterpolateSetLayout = VK_NULL_HANDLE;
+  VkDescriptorSetLayout m_vkDownsampleSetLayout = VK_NULL_HANDLE;
+
+  // Vulkan image wrapper for compute dispatch
+  struct VkImg {
+    VkImage image = VK_NULL_HANDLE;
+    VkDeviceMemory memory = VK_NULL_HANDLE;
+    VkImageView view = VK_NULL_HANDLE;
+    VkImageLayout currentLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  };
+
+  // D3D11<->Vulkan zero-copy shared texture (same GPU memory)
+  struct SharedImg {
+    // D3D11 side
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> d3dTex;
+    HANDLE ntHandle = nullptr;
+    // Vulkan side (imported from D3D11 shared handle)
+    VkImage vkImage = VK_NULL_HANDLE;
+    VkDeviceMemory vkMemory = VK_NULL_HANDLE;
+    VkImageView vkView = VK_NULL_HANDLE;
+    uint32_t w = 0, h = 0;
+  };
+
+  // Shared textures for zero-copy D3D11<->Vulkan
+  SharedImg m_sharedPrev, m_sharedCurr;         // Input frame copies (BGRA8)
+  SharedImg m_sharedMotion;                      // Motion field (RG16F)
+  SharedImg m_sharedConf;                        // Confidence (R16F)
+  SharedImg m_sharedFeatPrev, m_sharedFeatCurr;  // Features (RGBA16F)
+  SharedImg m_sharedOutput;                      // Output (B8G8R8A8)
+
+  // Non-shared output VkImage (GENERAL layout for storage writes) — not needed in zero-copy
+  VkImg m_vkImgOutput;                     // Output (RGBA8, write-only)
+
+  // Vulkan-only intermediate images for full Vulkan pipeline
+  VkImg m_vkFeatPrev;    // Half-res features for prev frame (RGBA16F, hW×hH)
+  VkImg m_vkFeatCurr;    // Half-res features for curr frame (RGBA16F, hW×hH)
+  VkImg m_vkCostVol;     // Cost volume output (RGBA16F, hW×hH)
+  VkImg m_vkFlowOut;     // Motion vectors output (RG16F, hW×hH)
+  VkImg m_vkConfOut;     // Confidence output (R16F, hW×hH)
+  VkImg m_vkDummy;       // 1×1 dummy for unused descriptor bindings
+
+  // Descriptor sets for full Vulkan pipeline stages
+  VkDescriptorSet m_vkDownsamplePrevSet  = VK_NULL_HANDLE;
+  VkDescriptorSet m_vkDownsampleCurrSet  = VK_NULL_HANDLE;
+  VkDescriptorSet m_vkCostVolumeFullSet  = VK_NULL_HANDLE;
+  VkDescriptorSet m_vkFlowDecoderFullSet = VK_NULL_HANDLE;
+  VkDescriptorSet m_vkInterpolateFullSet = VK_NULL_HANDLE;
+
+  // Vulkan samplers and sync
+  VkSampler m_vkLinearSampler = VK_NULL_HANDLE;
+  VkSampler m_vkPointSampler = VK_NULL_HANDLE;
+  VkFence m_vkComputeFence = VK_NULL_HANDLE;
+  bool m_vkResCreated = false;
+  bool m_vkZeroCopy = false;  // True if external memory import succeeded
+  bool m_vkFullPipeline = false;  // True if full VK pipeline intermediates ready
+
+  // Vulkan compute dispatch helpers
+  bool CreateVkImg(VkImg& img, uint32_t w, uint32_t h, VkFormat fmt, VkImageUsageFlags usage);
+  void DestroyVkImg(VkImg& img);
+  bool CreateSharedImg(SharedImg& s, uint32_t w, uint32_t h, DXGI_FORMAT d3dFmt,
+                       VkFormat vkFmt, VkImageUsageFlags vkUsage);
+  void DestroySharedImg(SharedImg& s);
+  void CreateVulkanResources();
+  void DestroyVulkanResources();
+  bool VulkanDispatchInterpolate(ID3D11ShaderResourceView* prev,
+      ID3D11ShaderResourceView* curr, float alpha);
+  bool VulkanReWarp(float alpha);  // Fast re-warp: same data, new alpha only
+  bool VulkanFullDispatch(ID3D11ShaderResourceView* prev,
+      ID3D11ShaderResourceView* curr, float alpha);
+#endif
 
   Microsoft::WRL::ComPtr<ID3D11Device> m_device;
   Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_context;

@@ -1,0 +1,208 @@
+#version 450
+// ============================================================================
+// Downsample Shader - Creates luma/feature pyramid
+// Converts full-res images to half/quarter/eighth resolution
+// ============================================================================
+
+precision highp float;
+
+// ============================================================================
+// Descriptor Bindings
+// ============================================================================
+
+// Input: Full resolution image (sampler)
+layout(binding = 0) uniform sampler2D inputSampler;
+
+// Output: Feature pyramid levels (writeable images)
+layout(binding = 2, rgba16f) uniform writeonly image2D outputLevel0;
+layout(binding = 3, rgba16f) uniform writeonly image2D outputLevel1;
+layout(binding = 4, rgba16f) uniform writeonly image2D outputLevel2;
+layout(binding = 5, rgba16f) uniform writeonly image2D outputLevel3;
+
+// For reading previous level in pyramid (for quarter/eighth/etc)
+layout(binding = 6) uniform sampler2D level0Sampler;
+layout(binding = 7) uniform sampler2D level1Sampler;
+layout(binding = 8) uniform sampler2D level2Sampler;
+
+// ============================================================================
+// Push Constants  
+// ============================================================================
+
+layout(push_constant) uniform PushConstants {
+    vec4 inputSize;      // width, height, 1/width, 1/height
+    vec4 outputSize0;    // half resolution
+    vec4 outputSize1;    // quarter resolution
+    vec4 outputSize2;    // eighth resolution
+    vec4 outputSize3;    // sixteenth resolution
+    int  numLevels;      // number of output levels
+    int  padding;
+} pc;
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+// 5-tap Lanczos resampling kernel
+float lanczos(float x) {
+    if (x == 0.0) return 1.0;
+    if (abs(x) >= 3.0) return 0.0;
+    float pi_x = 3.14159265 * x;
+    return (sin(pi_x) / pi_x) * (sin(pi_x / 3.0) / (pi_x / 3.0));
+}
+
+// Sample with 5-tap Lanczos
+vec4 lanczosSample(sampler2D samp, vec2 uv, vec2 texelSize) {
+    vec2 coord = uv / texelSize - 0.5;
+    vec2 i_coord = floor(coord);
+    vec2 f_coord = fract(coord);
+    
+    vec4 result = vec4(0.0);
+    float weightSum = 0.0;
+    
+    for (int dy = -2; dy <= 2; dy++) {
+        for (int dx = -2; dx <= 2; dx++) {
+            vec2 offset = vec2(float(dx), float(dy));
+            float weight = lanczos(f_coord.x - float(dx)) * lanczos(f_coord.y - float(dy));
+            
+            vec2 samplePos = (i_coord + offset + 0.5) * texelSize;
+            samplePos = clamp(samplePos, texelSize * 0.5, 1.0 - texelSize * 0.5);
+            
+            result += texture(samp, samplePos) * weight;
+            weightSum += weight;
+        }
+    }
+    
+    return result / weightSum;
+}
+
+// Simple box blur for fast path
+vec4 boxBlur(sampler2D samp, vec2 uv, vec2 texelSize) {
+    vec4 sum = vec4(0.0);
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dx = -1; dx <= 1; dx++) {
+            vec2 offset = vec2(float(dx), float(dy)) * texelSize;
+            sum += texture(samp, uv + offset);
+        }
+    }
+    return sum / 9.0;
+}
+
+// ============================================================================
+// Main: Downsample to half resolution (Level 0)
+// ============================================================================
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+void mainHalf(ivec2 pixelPos, ivec2 outSize) {
+    if (pixelPos.x >= outSize.x || pixelPos.y >= outSize.y) return;
+    
+    vec2 uv = (vec2(pixelPos) + 0.5) * pc.outputSize0.zw;
+    vec2 texelSize = pc.inputSize.zw;
+    
+    // Use 5-tap Lanczos for high quality
+    vec4 color = lanczosSample(inputSampler, uv, texelSize);
+    
+    // Compute additional features for motion estimation
+    // Channel packing: R=luma, G=gradient mag, B=laplacian, A=texture variance
+    
+    // Luminance
+    float luma = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+    
+    // Gradient magnitude (using neighboring samples)
+    vec2 texelHalf = texelSize * 0.5;
+    vec4 n = texture(inputSampler, uv + vec2(0.0, -texelHalf.y));
+    vec4 s = texture(inputSampler, uv + vec2(0.0, texelHalf.y));
+    vec4 e = texture(inputSampler, uv + vec2(texelHalf.x, 0.0));
+    vec4 w = texture(inputSampler, uv + vec2(-texelHalf.x, 0.0));
+    
+    float gx = length((e.rgb - w.rgb) * vec3(0.299, 0.587, 0.114));
+    float gy = length((s.rgb - n.rgb) * vec3(0.299, 0.587, 0.114));
+    float gradMag = sqrt(gx * gx + gy * gy);
+    
+    // Laplacian (second derivative)
+    vec4 neighbors = n + s + e + w;
+    float laplacian = length(neighbors.rgb * 0.25 - color.rgb);
+    
+    // Variance (texture strength)
+    float variance = 0.0;
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dx = -1; dx <= 1; dx++) {
+            vec2 offset = vec2(float(dx), float(dy)) * texelHalf;
+            vec4 s = texture(inputSampler, uv + offset);
+            vec4 diff = s - color;
+            variance += dot(diff.rgb, diff.rgb);
+        }
+    }
+    variance = sqrt(variance / 9.0 + 1e-6);
+    
+    // Pack features
+    vec4 features;
+    features.x = luma;
+    features.y = gradMag;
+    features.z = laplacian;
+    features.w = variance;
+    
+    imageStore(outputLevel0, pixelPos, features);
+}
+
+// ============================================================================
+// Main: Downsample to quarter resolution (Level 1)
+// ============================================================================
+
+void mainQuarter(ivec2 pixelPos, ivec2 outSize) {
+    if (pixelPos.x >= outSize.x || pixelPos.y >= outSize.y) return;
+    
+    // Sample from level 0 using sampler
+    vec2 uv = (vec2(pixelPos) + 0.5) * pc.outputSize1.zw;
+    vec4 color = texture(level0Sampler, uv);
+    
+    imageStore(outputLevel1, pixelPos, color);
+}
+
+// ============================================================================
+// Main: Downsample to eighth resolution (Level 2) 
+// ============================================================================
+
+void mainEighth(ivec2 pixelPos, ivec2 outSize) {
+    if (pixelPos.x >= outSize.x || pixelPos.y >= outSize.y) return;
+    
+    // Sample from level 1 using sampler
+    vec2 uv = (vec2(pixelPos) + 0.5) * pc.outputSize2.zw;
+    vec4 color = texture(level1Sampler, uv);
+    
+    imageStore(outputLevel2, pixelPos, color);
+}
+
+// ============================================================================
+// Main: Downsample to sixteenth resolution (Level 3)
+// ============================================================================
+
+void mainSixteenth(ivec2 pixelPos, ivec2 outSize) {
+    if (pixelPos.x >= outSize.x || pixelPos.y >= outSize.y) return;
+    
+    // Sample from level 2 using sampler
+    vec2 uv = (vec2(pixelPos) + 0.5) * pc.outputSize3.zw;
+    vec4 color = texture(level2Sampler, uv);
+    
+    imageStore(outputLevel3, pixelPos, color);
+}
+
+// ============================================================================
+// Dispatch Handler
+// ============================================================================
+
+void main() {
+    // Determine which level we're computing based on workgroup z
+    int level = int(gl_WorkGroupID.z);
+    ivec2 pixelPos = ivec2(gl_GlobalInvocationID.xy);
+    
+    if (level == 0) {
+        mainHalf(pixelPos, ivec2(pc.outputSize0.xy));
+    } else if (level == 1) {
+        mainQuarter(pixelPos, ivec2(pc.outputSize1.xy));
+    } else if (level == 2) {
+        mainEighth(pixelPos, ivec2(pc.outputSize2.xy));
+    } else if (level == 3) {
+        mainSixteenth(pixelPos, ivec2(pc.outputSize3.xy));
+    }
+}

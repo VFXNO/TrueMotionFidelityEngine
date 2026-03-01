@@ -1,24 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\vfxno\Documents\GitHub\TrueMotionFidelityEngine\src\graphics_hook\graphics_hook.cpp">
+    <ClCompile Include="C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\src\graphics_hook\graphics_hook.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\vfxno\Documents\GitHub\TrueMotionFidelityEngine\src\graphics_hook_info.h">
+    <ClInclude Include="C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\src\graphics_hook_info.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\vfxno\Documents\GitHub\TrueMotionFidelityEngine\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{DA6DE4D8-607A-357C-9294-3AF4285937A6}</UniqueIdentifier>
+      <UniqueIdentifier>{0F4FFC8B-2C22-32F3-A974-CACE237670CB}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{F17B2915-0223-32A5-ACF4-55451D8C43B7}</UniqueIdentifier>
+      <UniqueIdentifier>{D1282A2D-8149-39F3-9DDA-426F5A50ADBA}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

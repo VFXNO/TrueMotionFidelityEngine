@@ -1,3 +1,0 @@
-Shader Interpolate.hlsl failed: C:\Users\vfxno\Downloads\TrueMotionFidelityEngine-main\build\bin\Release\shaders\Interpolate.hlsl(174,29-41): error X3004: undeclared identifier 'centerFeature'
-
-Path: C:\Users\vfxno\Downloads\TrueMotionFidelityEngine-main\build\bin\Release\shaders\Interpolate.hlsl

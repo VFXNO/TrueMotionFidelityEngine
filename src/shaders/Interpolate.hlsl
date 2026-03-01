@@ -172,8 +172,9 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     float2 rawMV   = Motion.SampleLevel(LinearClamp, inputUv, 0).xy * motionSampleScale;
     float  rawConf = saturate(pow(max(Confidence.SampleLevel(LinearClamp, inputUv, 0), 0.0), confPower));
 
-    // Detect coarse MV field (minimal pipeline uses tiny resolution)
-    float coarseFlag = saturate((motionSampleScale - 2.5) / 3.5);
+    // Detect coarse MV field - detect both tiny (8x) and small (4x) resolution
+    // For minimal pipeline: small (1/4) = scale 4, tiny (1/8) = scale 8
+    float coarseFlag = saturate((motionSampleScale - 2.0) / 4.0);
 
     // 9-tap bilateral smoothing for coarse MV fields
     // Prevents blocky warping from low-resolution motion

@@ -22,6 +22,12 @@
 #include <fstream>
 #include <sstream>
 
+#ifdef USE_VULKAN
+#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_win32.h>
+#include <dxgi.h>
+#endif
+
 namespace {
 
 // -----------------------------------------------------------------------
@@ -174,6 +180,27 @@ bool Interpolator::Initialize(ID3D11Device* device, ID3D11DeviceContext* context
   }
 
   log << "Interpolator::Initialize succeeded\n";
+
+#ifdef USE_VULKAN
+  // Try loading Vulkan compute shaders (non-fatal if fails)
+  {
+    std::ofstream vklog("vulkan_debug.txt", std::ios::app);
+    vklog << "LoadVulkanShaders ENTER\n";
+    vklog.flush();
+  }
+  if (LoadVulkanShaders()) {
+    m_useVulkan = true;
+    std::ofstream vklog("vulkan_debug.txt", std::ios::app);
+    vklog << "After Vulkan check, m_useVulkan=1\n";
+    vklog.flush();
+  } else {
+    m_useVulkan = false;
+    std::ofstream vklog("vulkan_debug.txt", std::ios::app);
+    vklog << "LoadVulkanShaders failed, falling back to D3D11 compute\n";
+    vklog.flush();
+  }
+#endif
+
   return true;
 }
 
@@ -215,14 +242,33 @@ void Interpolator::Execute(
     ID3D11ShaderResourceView* /*prevDepth*/,
     ID3D11ShaderResourceView* /*currDepth*/) {
   if (!prev || !curr || !m_outputUav) return;
-  if (!m_downsampleCs || !m_downsampleLumaCs || !m_motionCs ||
-      !m_motionRefineCs || !m_motionSmoothCs || !m_interpolateCs)
-    return;
   if (m_outputWidth <= 0 || m_outputHeight <= 0 || m_lumaWidth <= 0 || m_lumaHeight <= 0)
     return;
 
-  // --- Compute motion field ---
+  if (!m_downsampleCs || !m_downsampleLumaCs || !m_motionCs ||
+      !m_motionRefineCs || !m_motionSmoothCs || !m_interpolateCs)
+    return;
+
+#ifdef USE_VULKAN
+  // Full Vulkan PWC-Net pipeline: downsample → cost_volume → flow_decoder → interpolate
+  if (m_useVulkan && !m_useMinimalMotionPipeline && m_vkResCreated && m_vkFullPipeline) {
+    if (VulkanFullDispatch(prev, curr, std::clamp(alpha, 0.0f, 1.0f))) {
+      return;
+    }
+  }
+#endif
+
+  // --- Compute motion field (D3D11 — battle-tested pipeline) ---
   if (!ComputeMotion(prev, curr)) return;
+
+#ifdef USE_VULKAN
+  // Hybrid fallback: D3D11 motion + Vulkan interpolation
+  if (m_useVulkan && !m_useMinimalMotionPipeline && m_vkResCreated) {
+    if (VulkanDispatchInterpolate(prev, curr, std::clamp(alpha, 0.0f, 1.0f))) {
+      return;
+    }
+  }
+#endif
 
   // --- Build interpolation constants ---
   InterpConstants ic = {};
@@ -301,6 +347,16 @@ void Interpolator::InterpolateOnly(
     float alpha) {
   if (!prev || !curr || !m_outputUav || !m_interpolateCs) return;
   if (m_outputWidth <= 0 || m_outputHeight <= 0) return;
+
+#ifdef USE_VULKAN
+  // Fast Vulkan re-warp: shared textures already have correct data from
+  // the first Execute() call.  Only alpha changes — skip ALL D3D11 copies.
+  if (m_useVulkan && !m_useMinimalMotionPipeline && m_vkResCreated && m_vkZeroCopy) {
+    if (VulkanReWarp(std::clamp(alpha, 0.0f, 1.0f))) {
+      return;
+    }
+  }
+#endif
 
   // --- Build interpolation constants (same layout as Execute) ---
   InterpConstants ic = {};
@@ -465,6 +521,14 @@ bool Interpolator::LoadShaders() {
 // CreateResources
 // -----------------------------------------------------------------------
 void Interpolator::CreateResources() {
+  {
+    std::ofstream vklog("vulkan_debug.txt", std::ios::app);
+    vklog << "CreateResources: START, m_useVulkan=" << m_useVulkan
+          << " outputW=" << m_outputWidth << " outputH=" << m_outputHeight
+          << " lumaW=" << m_lumaWidth << " lumaH=" << m_lumaHeight << "\n";
+    vklog.flush();
+  }
+
   // Reset all textures
   m_prevLuma.Reset(); m_prevLumaSrv.Reset(); m_prevLumaUav.Reset();
   m_currLuma.Reset(); m_currLumaSrv.Reset(); m_currLumaUav.Reset();
@@ -612,8 +676,23 @@ void Interpolator::CreateResources() {
       !m_motionSmoothUav || !m_confidenceSmoothUav ||
       !m_attnSmall1Uav || !m_attnSmall2Uav || !m_attnSmall3Uav ||
       !m_attnFull1Uav || !m_attnFull2Uav || !m_attnFull3Uav) {
+    std::ofstream vklog("vulkan_debug.txt", std::ios::app);
+    vklog << "CreateResources: FAILED validation - one or more UAVs are null\n";
+    vklog.flush();
     return;
   }
+
+  {
+    std::ofstream vklog("vulkan_debug.txt", std::ios::app);
+    vklog << "CreateResources: SUCCESS\n";
+    vklog.flush();
+  }
+
+#ifdef USE_VULKAN
+  if (m_useVulkan) {
+    CreateVulkanResources();
+  }
+#endif
 }
 
 // -----------------------------------------------------------------------
@@ -1305,3 +1384,1494 @@ bool Interpolator::ExportTrainedWeights(const wchar_t* path) {
   
   return true;
 }
+
+// -----------------------------------------------------------------------
+// LoadVulkanShaders: Load SPIR-V compute shaders and create Vulkan pipelines
+// -----------------------------------------------------------------------
+#ifdef USE_VULKAN
+
+static std::vector<char> ReadSPIRVFile(const std::wstring& path) {
+  std::ifstream file(path, std::ios::binary | std::ios::ate);
+  if (!file.is_open()) return {};
+  size_t size = static_cast<size_t>(file.tellg());
+  file.seekg(0, std::ios::beg);
+  std::vector<char> data(size);
+  file.read(data.data(), size);
+  return data;
+}
+
+static bool CreateVulkanPipeline(
+    VkDevice device,
+    const std::vector<char>& spirv,
+    const std::vector<VkDescriptorSetLayoutBinding>& bindings,
+    uint32_t pushConstantSize,
+    VkPipeline& outPipeline,
+    VkPipelineLayout& outLayout,
+    VkDescriptorSetLayout& outSetLayout,
+    const char* name,
+    std::ofstream& log) {
+
+  if (spirv.empty() || spirv.size() % 4 != 0) {
+    log << "Invalid SPIR-V data for " << name << " size=" << spirv.size() << "\n";
+    log.flush();
+    return false;
+  }
+
+  // Create shader module
+  VkShaderModuleCreateInfo moduleInfo = {};
+  moduleInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+  moduleInfo.codeSize = spirv.size();
+  moduleInfo.pCode = reinterpret_cast<const uint32_t*>(spirv.data());
+
+  log << "Creating shader module, size=" << spirv.size() << "\n";
+  log.flush();
+
+  VkShaderModule shaderModule = VK_NULL_HANDLE;
+  if (vkCreateShaderModule(device, &moduleInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+    log << "vkCreateShaderModule failed for " << name << "\n";
+    log.flush();
+    return false;
+  }
+  log << "Shader module created successfully\n";
+  log.flush();
+
+  // Create descriptor set layout
+  VkDescriptorSetLayoutCreateInfo layoutInfo = {};
+  layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+  layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+  layoutInfo.pBindings = bindings.data();
+
+  if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &outSetLayout) != VK_SUCCESS) {
+    vkDestroyShaderModule(device, shaderModule, nullptr);
+    log << "Descriptor set layout creation failed for " << name << "\n";
+    log.flush();
+    return false;
+  }
+  log << "Descriptor set layout created\n";
+  log.flush();
+
+  // Create pipeline layout with push constants
+  VkPushConstantRange pushRange = {};
+  pushRange.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+  pushRange.offset = 0;
+  pushRange.size = pushConstantSize;
+
+  VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
+  pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+  pipelineLayoutInfo.setLayoutCount = 1;
+  pipelineLayoutInfo.pSetLayouts = &outSetLayout;
+  if (pushConstantSize > 0) {
+    pipelineLayoutInfo.pushConstantRangeCount = 1;
+    pipelineLayoutInfo.pPushConstantRanges = &pushRange;
+  }
+
+  if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &outLayout) != VK_SUCCESS) {
+    vkDestroyDescriptorSetLayout(device, outSetLayout, nullptr);
+    vkDestroyShaderModule(device, shaderModule, nullptr);
+    log << "Pipeline layout creation failed for " << name << "\n";
+    log.flush();
+    return false;
+  }
+  log << "Pipeline layout created\n";
+  log.flush();
+
+  // Create compute pipeline
+  VkComputePipelineCreateInfo pipelineInfo = {};
+  pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+  pipelineInfo.layout = outLayout;
+  pipelineInfo.stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+  pipelineInfo.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+  pipelineInfo.stage.module = shaderModule;
+  pipelineInfo.stage.pName = "main";
+
+  log << "About to create compute pipeline: " << name << "\n";
+  log.flush();
+
+  VkResult result = vkCreateComputePipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &outPipeline);
+  
+  // Shader module can be destroyed after pipeline creation
+  vkDestroyShaderModule(device, shaderModule, nullptr);
+
+  if (result != VK_SUCCESS) {
+    vkDestroyPipelineLayout(device, outLayout, nullptr);
+    vkDestroyDescriptorSetLayout(device, outSetLayout, nullptr);
+    outLayout = VK_NULL_HANDLE;
+    outSetLayout = VK_NULL_HANDLE;
+    log << "Compute pipeline creation failed for " << name << " result=" << result << "\n";
+    log.flush();
+    return false;
+  }
+
+  log << "Pipeline created: " << name << "\n";
+  log.flush();
+  return true;
+}
+
+bool Interpolator::LoadVulkanShaders() {
+  std::ofstream log("vulkan_debug.txt", std::ios::app);
+
+  if (!m_renderDevice) {
+    log << "LoadVulkanShaders: No render device\n";
+    log.flush();
+    return false;
+  }
+
+  VkDevice vkDevice = m_renderDevice->GetVkDevice();
+  if (vkDevice == VK_NULL_HANDLE) {
+    log << "LoadVulkanShaders: VkDevice is null\n";
+    log.flush();
+    return false;
+  }
+
+  log << "Passed Vulkan check\n";
+  log.flush();
+
+  // Build shader directory path
+  wchar_t exePath[MAX_PATH] = {};
+  GetModuleFileNameW(nullptr, exePath, MAX_PATH);
+  std::wstring exeDir(exePath);
+  auto pos = exeDir.find_last_of(L"\\/");
+  if (pos != std::wstring::npos) exeDir = exeDir.substr(0, pos);
+  std::wstring shaderDir = exeDir + L"\\shaders\\vulkan\\";
+
+  // Convert to narrow for logging
+  char narrowDir[512] = {};
+  WideCharToMultiByte(CP_UTF8, 0, shaderDir.c_str(), -1, narrowDir, sizeof(narrowDir), nullptr, nullptr);
+  log << "Shader dir: " << narrowDir << "\n";
+  log.flush();
+
+  // Helper to build descriptor bindings
+  auto makeSamplerBinding = [](uint32_t binding) -> VkDescriptorSetLayoutBinding {
+    VkDescriptorSetLayoutBinding b = {};
+    b.binding = binding;
+    b.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    b.descriptorCount = 1;
+    b.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+    return b;
+  };
+  auto makeStorageImageBinding = [](uint32_t binding) -> VkDescriptorSetLayoutBinding {
+    VkDescriptorSetLayoutBinding b = {};
+    b.binding = binding;
+    b.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+    b.descriptorCount = 1;
+    b.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+    return b;
+  };
+
+  // Set layouts are stored per-pipeline for descriptor set allocation
+
+  // --- Feature Pyramid: binding 0=sampler, 2-7=storage images ---
+  {
+    std::wstring path = shaderDir + L"feature_pyramid.spv";
+    auto spirv = ReadSPIRVFile(path);
+    char narrowPath[512] = {};
+    WideCharToMultiByte(CP_UTF8, 0, path.c_str(), -1, narrowPath, sizeof(narrowPath), nullptr, nullptr);
+    log << "Loading: " << narrowPath << "\n";
+    log.flush();
+
+    std::vector<VkDescriptorSetLayoutBinding> bindings = {
+      makeSamplerBinding(0),
+      makeStorageImageBinding(2), makeStorageImageBinding(3),
+      makeStorageImageBinding(4), makeStorageImageBinding(5),
+      makeStorageImageBinding(6), makeStorageImageBinding(7)
+    };
+
+    if (!CreateVulkanPipeline(vkDevice, spirv, bindings, 120,
+        m_vkFeaturePyramidPipeline, m_vkFeaturePyramidLayout, m_vkFeaturePyramidSetLayout,
+        "FeaturePyramid", log)) {
+      return false;
+    }
+  }
+
+  // --- Cost Volume: binding 0-12=samplers, 13=storage image ---
+  {
+    std::wstring path = shaderDir + L"cost_volume.spv";
+    auto spirv = ReadSPIRVFile(path);
+    char narrowPath[512] = {};
+    WideCharToMultiByte(CP_UTF8, 0, path.c_str(), -1, narrowPath, sizeof(narrowPath), nullptr, nullptr);
+    log << "Loading: " << narrowPath << "\n";
+    log.flush();
+
+    std::vector<VkDescriptorSetLayoutBinding> bindings = {
+      makeSamplerBinding(0), makeSamplerBinding(1),
+      makeSamplerBinding(2), makeSamplerBinding(3),
+      makeSamplerBinding(4), makeSamplerBinding(5),
+      makeSamplerBinding(6), makeSamplerBinding(7),
+      makeSamplerBinding(8), makeSamplerBinding(9),
+      makeSamplerBinding(10), makeSamplerBinding(11),
+      makeSamplerBinding(12),
+      makeStorageImageBinding(13)
+    };
+
+    if (!CreateVulkanPipeline(vkDevice, spirv, bindings, 56,
+        m_vkCostVolumePipeline, m_vkCostVolumeLayout, m_vkCostVolumeSetLayout,
+        "CostVolume", log)) {
+      return false;
+    }
+  }
+
+  // --- Flow Decoder: binding 0-3=samplers, 4-5=storage images ---
+  {
+    std::wstring path = shaderDir + L"flow_decoder.spv";
+    auto spirv = ReadSPIRVFile(path);
+    char narrowPath[512] = {};
+    WideCharToMultiByte(CP_UTF8, 0, path.c_str(), -1, narrowPath, sizeof(narrowPath), nullptr, nullptr);
+    log << "Loading: " << narrowPath << "\n";
+    log.flush();
+
+    std::vector<VkDescriptorSetLayoutBinding> bindings = {
+      makeSamplerBinding(0), makeSamplerBinding(1),
+      makeSamplerBinding(2), makeSamplerBinding(3),
+      makeStorageImageBinding(4), makeStorageImageBinding(5)
+    };
+
+    if (!CreateVulkanPipeline(vkDevice, spirv, bindings, 56,
+        m_vkFlowDecoderPipeline, m_vkFlowDecoderLayout, m_vkFlowDecoderSetLayout,
+        "FlowDecoder", log)) {
+      return false;
+    }
+  }
+
+  // --- Interpolate: binding 0-9=samplers, 10=storage image ---
+  {
+    std::wstring path = shaderDir + L"interpolate.spv";
+    auto spirv = ReadSPIRVFile(path);
+    char narrowPath[512] = {};
+    WideCharToMultiByte(CP_UTF8, 0, path.c_str(), -1, narrowPath, sizeof(narrowPath), nullptr, nullptr);
+    log << "Loading: " << narrowPath << "\n";
+    log.flush();
+
+    std::vector<VkDescriptorSetLayoutBinding> bindings = {
+      makeSamplerBinding(0), makeSamplerBinding(1),
+      makeSamplerBinding(2), makeSamplerBinding(3),
+      makeSamplerBinding(4), makeSamplerBinding(5),
+      makeSamplerBinding(6), makeSamplerBinding(7),
+      makeSamplerBinding(8), makeSamplerBinding(9),
+      makeStorageImageBinding(10)
+    };
+
+    if (!CreateVulkanPipeline(vkDevice, spirv, bindings, 60,
+        m_vkInterpolatePipeline, m_vkInterpolateLayout, m_vkInterpolateSetLayout,
+        "Interpolate", log)) {
+      return false;
+    }
+  }
+
+  // --- Downsample: binding 0=sampler, 2-5=storage images, 6-8=samplers ---
+  {
+    std::wstring path = shaderDir + L"downsample.spv";
+    auto spirv = ReadSPIRVFile(path);
+    char narrowPath[512] = {};
+    WideCharToMultiByte(CP_UTF8, 0, path.c_str(), -1, narrowPath, sizeof(narrowPath), nullptr, nullptr);
+    log << "Loading: " << narrowPath << "\n";
+    log.flush();
+
+    std::vector<VkDescriptorSetLayoutBinding> bindings = {
+      makeSamplerBinding(0),
+      makeStorageImageBinding(2), makeStorageImageBinding(3),
+      makeStorageImageBinding(4), makeStorageImageBinding(5),
+      makeSamplerBinding(6), makeSamplerBinding(7), makeSamplerBinding(8)
+    };
+
+    if (!CreateVulkanPipeline(vkDevice, spirv, bindings, 88,
+        m_vkDownsamplePipeline, m_vkDownsampleLayout, m_vkDownsampleSetLayout,
+        "Downsample", log)) {
+      return false;
+    }
+  }
+
+  log << "All Vulkan shaders loaded successfully\n";
+  log.flush();
+  return true;
+}
+
+// -----------------------------------------------------------------------
+// Vulkan Compute Dispatch Implementation
+// -----------------------------------------------------------------------
+
+static uint32_t FindVkMemoryType(VkPhysicalDevice phys, uint32_t filter, VkMemoryPropertyFlags props) {
+  VkPhysicalDeviceMemoryProperties mp;
+  vkGetPhysicalDeviceMemoryProperties(phys, &mp);
+  for (uint32_t i = 0; i < mp.memoryTypeCount; i++) {
+    if ((filter & (1 << i)) && (mp.memoryTypes[i].propertyFlags & props) == props)
+      return i;
+  }
+  return UINT32_MAX;
+}
+
+bool Interpolator::CreateVkImg(VkImg& img, uint32_t w, uint32_t h, VkFormat fmt, VkImageUsageFlags usage) {
+  VkDevice dev = m_renderDevice->GetVkDevice();
+  VkPhysicalDevice phys = m_renderDevice->GetVkPhysicalDevice();
+
+  VkImageCreateInfo ci = {};
+  ci.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+  ci.imageType = VK_IMAGE_TYPE_2D;
+  ci.format = fmt;
+  ci.extent = {w, h, 1};
+  ci.mipLevels = 1;
+  ci.arrayLayers = 1;
+  ci.samples = VK_SAMPLE_COUNT_1_BIT;
+  ci.tiling = VK_IMAGE_TILING_OPTIMAL;
+  ci.usage = usage;
+  ci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+  ci.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  if (vkCreateImage(dev, &ci, nullptr, &img.image) != VK_SUCCESS) return false;
+
+  VkMemoryRequirements req;
+  vkGetImageMemoryRequirements(dev, img.image, &req);
+  VkMemoryAllocateInfo ai = {};
+  ai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+  ai.allocationSize = req.size;
+  ai.memoryTypeIndex = FindVkMemoryType(phys, req.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+  if (ai.memoryTypeIndex == UINT32_MAX) {
+    vkDestroyImage(dev, img.image, nullptr); img.image = VK_NULL_HANDLE; return false;
+  }
+  if (vkAllocateMemory(dev, &ai, nullptr, &img.memory) != VK_SUCCESS) {
+    vkDestroyImage(dev, img.image, nullptr); img.image = VK_NULL_HANDLE; return false;
+  }
+  vkBindImageMemory(dev, img.image, img.memory, 0);
+
+  VkImageViewCreateInfo vi = {};
+  vi.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+  vi.image = img.image;
+  vi.viewType = VK_IMAGE_VIEW_TYPE_2D;
+  vi.format = fmt;
+  vi.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+  if (vkCreateImageView(dev, &vi, nullptr, &img.view) != VK_SUCCESS) {
+    vkFreeMemory(dev, img.memory, nullptr);
+    vkDestroyImage(dev, img.image, nullptr);
+    img = {}; return false;
+  }
+  img.currentLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  return true;
+}
+
+void Interpolator::DestroyVkImg(VkImg& img) {
+  if (!m_renderDevice) return;
+  VkDevice dev = m_renderDevice->GetVkDevice();
+  if (img.view) vkDestroyImageView(dev, img.view, nullptr);
+  if (img.image) vkDestroyImage(dev, img.image, nullptr);
+  if (img.memory) vkFreeMemory(dev, img.memory, nullptr);
+  img = {};
+}
+
+// -----------------------------------------------------------------------
+// CreateSharedImg: Creates a D3D11 texture with SHARED flag and
+// imports it into Vulkan via VK_KHR_external_memory_win32 (KMT handle).
+// The same GPU memory is visible to both APIs — zero CPU copies.
+// -----------------------------------------------------------------------
+bool Interpolator::CreateSharedImg(SharedImg& s, uint32_t w, uint32_t h,
+    DXGI_FORMAT d3dFmt, VkFormat vkFmt, VkImageUsageFlags vkUsage) {
+  VkDevice dev = m_renderDevice->GetVkDevice();
+  VkPhysicalDevice phys = m_renderDevice->GetVkPhysicalDevice();
+  s = {};
+  s.w = w; s.h = h;
+
+  // 1. Create D3D11 texture with legacy SHARED flag (KMT handle, universally supported)
+  D3D11_TEXTURE2D_DESC desc = {};
+  desc.Width = w; desc.Height = h;
+  desc.MipLevels = 1; desc.ArraySize = 1;
+  desc.Format = d3dFmt;
+  desc.SampleDesc.Count = 1;
+  desc.Usage = D3D11_USAGE_DEFAULT;
+  desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+  desc.MiscFlags = D3D11_RESOURCE_MISC_SHARED;
+  HRESULT hr = m_device->CreateTexture2D(&desc, nullptr, &s.d3dTex);
+  if (FAILED(hr)) {
+    std::ofstream log("vulkan_debug.txt", std::ios::app);
+    log << "CreateSharedImg: CreateTexture2D failed, hr=0x" << std::hex << hr
+        << " fmt=" << std::dec << d3dFmt << " " << w << "x" << h << "\n";
+    log.flush();
+    return false;
+  }
+
+  // 2. Get the KMT shared handle
+  Microsoft::WRL::ComPtr<IDXGIResource> dxgiRes;
+  if (FAILED(s.d3dTex.As(&dxgiRes))) { s.d3dTex.Reset(); return false; }
+  if (FAILED(dxgiRes->GetSharedHandle(&s.ntHandle))) {
+    s.d3dTex.Reset(); return false;
+  }
+
+  // 3. Create VkImage with external memory info (KMT handle type)
+  VkExternalMemoryImageCreateInfo extCI = {};
+  extCI.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO;
+  extCI.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D11_TEXTURE_KMT_BIT;
+
+  VkImageCreateInfo ci = {};
+  ci.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+  ci.pNext = &extCI;
+  ci.imageType = VK_IMAGE_TYPE_2D;
+  ci.format = vkFmt;
+  ci.extent = {w, h, 1};
+  ci.mipLevels = 1; ci.arrayLayers = 1;
+  ci.samples = VK_SAMPLE_COUNT_1_BIT;
+  ci.tiling = VK_IMAGE_TILING_OPTIMAL;
+  ci.usage = vkUsage;
+  ci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+  ci.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  if (vkCreateImage(dev, &ci, nullptr, &s.vkImage) != VK_SUCCESS) {
+    std::ofstream log("vulkan_debug.txt", std::ios::app);
+    log << "CreateSharedImg: vkCreateImage failed " << w << "x" << h << " fmt=" << vkFmt << "\n";
+    log.flush();
+    s.d3dTex.Reset(); return false;
+  }
+
+  // 4. Import D3D11 KMT shared handle as VkDeviceMemory
+  VkMemoryRequirements req;
+  vkGetImageMemoryRequirements(dev, s.vkImage, &req);
+
+  VkImportMemoryWin32HandleInfoKHR importInfo = {};
+  importInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR;
+  importInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D11_TEXTURE_KMT_BIT;
+  importInfo.handle = s.ntHandle;
+
+  VkMemoryDedicatedAllocateInfo dedicatedInfo = {};
+  dedicatedInfo.sType = VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO;
+  dedicatedInfo.image = s.vkImage;
+  importInfo.pNext = &dedicatedInfo;
+
+  VkMemoryAllocateInfo ai = {};
+  ai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+  ai.pNext = &importInfo;
+  ai.allocationSize = req.size;
+  ai.memoryTypeIndex = FindVkMemoryType(phys, req.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+  if (ai.memoryTypeIndex == UINT32_MAX) {
+    std::ofstream log("vulkan_debug.txt", std::ios::app);
+    log << "CreateSharedImg: no suitable memory type, bits=0x" << std::hex << req.memoryTypeBits << "\n";
+    log.flush();
+    vkDestroyImage(dev, s.vkImage, nullptr); s.vkImage = VK_NULL_HANDLE;
+    s.d3dTex.Reset(); return false;
+  }
+  VkResult vr = vkAllocateMemory(dev, &ai, nullptr, &s.vkMemory);
+  if (vr != VK_SUCCESS) {
+    std::ofstream log("vulkan_debug.txt", std::ios::app);
+    log << "CreateSharedImg: vkAllocateMemory failed, result=" << vr << "\n";
+    log.flush();
+    vkDestroyImage(dev, s.vkImage, nullptr); s.vkImage = VK_NULL_HANDLE;
+    s.d3dTex.Reset(); return false;
+  }
+  if (vkBindImageMemory(dev, s.vkImage, s.vkMemory, 0) != VK_SUCCESS) {
+    vkFreeMemory(dev, s.vkMemory, nullptr); s.vkMemory = VK_NULL_HANDLE;
+    vkDestroyImage(dev, s.vkImage, nullptr); s.vkImage = VK_NULL_HANDLE;
+    s.d3dTex.Reset(); return false;
+  }
+
+  // 5. Create VkImageView
+  VkImageViewCreateInfo vi = {};
+  vi.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+  vi.image = s.vkImage;
+  vi.viewType = VK_IMAGE_VIEW_TYPE_2D;
+  vi.format = vkFmt;
+  vi.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+  if (vkCreateImageView(dev, &vi, nullptr, &s.vkView) != VK_SUCCESS) {
+    vkFreeMemory(dev, s.vkMemory, nullptr);
+    vkDestroyImage(dev, s.vkImage, nullptr);
+    s = {}; return false;
+  }
+
+  return true;
+}
+
+void Interpolator::DestroySharedImg(SharedImg& s) {
+  if (!m_renderDevice) return;
+  VkDevice dev = m_renderDevice->GetVkDevice();
+  if (s.vkView) vkDestroyImageView(dev, s.vkView, nullptr);
+  if (s.vkImage) vkDestroyImage(dev, s.vkImage, nullptr);
+  if (s.vkMemory) vkFreeMemory(dev, s.vkMemory, nullptr);
+  // KMT handles are not closeable (not NT handles)
+  s = {};
+}
+
+void Interpolator::CreateVulkanResources() {
+  std::ofstream log("vulkan_debug.txt", std::ios::app);
+  log << "CreateVulkanResources: START\n"; log.flush();
+  if (!m_renderDevice || !m_renderDevice->IsVulkan()) return;
+
+  DestroyVulkanResources();
+
+  VkDevice dev = m_renderDevice->GetVkDevice();
+  uint32_t oW = (uint32_t)m_outputWidth, oH = (uint32_t)m_outputHeight;
+  uint32_t iW = (uint32_t)m_inputWidth, iH = (uint32_t)m_inputHeight;
+  uint32_t hW = (uint32_t)m_lumaWidth, hH = (uint32_t)m_lumaHeight;
+  if (!oW || !oH || !iW || !iH || !hW || !hH) return;
+
+  log << "  input=" << iW << "x" << iH << " output=" << oW << "x" << oH
+      << " luma=" << hW << "x" << hH << "\n";
+  log.flush();
+
+  // Try zero-copy shared textures (D3D11<->Vulkan, same GPU memory)
+  VkImageUsageFlags sampU = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+  VkImageUsageFlags storU = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT
+                          | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+  // Intermediate images need both sampled (for next stage) and storage (for writing)
+  VkImageUsageFlags intU = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+
+  bool zc = true;
+  zc &= CreateSharedImg(m_sharedPrev, iW, iH,
+      DXGI_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_B8G8R8A8_UNORM, sampU);
+  zc &= CreateSharedImg(m_sharedCurr, iW, iH,
+      DXGI_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_B8G8R8A8_UNORM, sampU);
+  zc &= CreateSharedImg(m_sharedMotion, hW, hH,
+      DXGI_FORMAT_R16G16_FLOAT, VK_FORMAT_R16G16_SFLOAT, sampU);
+  zc &= CreateSharedImg(m_sharedConf, hW, hH,
+      DXGI_FORMAT_R16_FLOAT, VK_FORMAT_R16_SFLOAT, sampU);
+  zc &= CreateSharedImg(m_sharedFeatPrev, hW, hH,
+      DXGI_FORMAT_R16G16B16A16_FLOAT, VK_FORMAT_R16G16B16A16_SFLOAT, sampU);
+  zc &= CreateSharedImg(m_sharedFeatCurr, hW, hH,
+      DXGI_FORMAT_R16G16B16A16_FLOAT, VK_FORMAT_R16G16B16A16_SFLOAT, sampU);
+  zc &= CreateSharedImg(m_sharedOutput, oW, oH,
+      DXGI_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_B8G8R8A8_UNORM, storU);
+
+  m_vkZeroCopy = zc;
+  if (zc) {
+    log << "CreateVulkanResources: ZERO-COPY shared textures OK\n"; log.flush();
+  } else {
+    log << "CreateVulkanResources: Shared texture creation FAILED, cannot proceed\n"; log.flush();
+    DestroyVulkanResources();
+    return;
+  }
+
+  // ---- Vulkan-only intermediate images for full pipeline ----
+  bool fullOk = true;
+  fullOk &= CreateVkImg(m_vkFeatPrev, hW, hH, VK_FORMAT_R16G16B16A16_SFLOAT, intU);
+  fullOk &= CreateVkImg(m_vkFeatCurr, hW, hH, VK_FORMAT_R16G16B16A16_SFLOAT, intU);
+  fullOk &= CreateVkImg(m_vkCostVol,  hW, hH, VK_FORMAT_R16G16B16A16_SFLOAT, intU);
+  fullOk &= CreateVkImg(m_vkFlowOut,  hW, hH, VK_FORMAT_R16G16_SFLOAT, intU);
+  fullOk &= CreateVkImg(m_vkConfOut,  hW, hH, VK_FORMAT_R16_SFLOAT, intU);
+  fullOk &= CreateVkImg(m_vkDummy, 1, 1, VK_FORMAT_R16G16B16A16_SFLOAT, intU);
+  if (fullOk) {
+    log << "CreateVulkanResources: Intermediate VkImages OK\n"; log.flush();
+  } else {
+    log << "CreateVulkanResources: Intermediate image creation failed (non-fatal)\n"; log.flush();
+  }
+
+  // Samplers
+  {
+    VkSamplerCreateInfo si = {};
+    si.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    si.magFilter = si.minFilter = VK_FILTER_LINEAR;
+    si.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    si.addressModeU = si.addressModeV = si.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    if (vkCreateSampler(dev, &si, nullptr, &m_vkLinearSampler) != VK_SUCCESS) {
+      DestroyVulkanResources(); return;
+    }
+  }
+  {
+    VkSamplerCreateInfo si = {};
+    si.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    si.magFilter = si.minFilter = VK_FILTER_NEAREST;
+    si.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+    si.addressModeU = si.addressModeV = si.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    if (vkCreateSampler(dev, &si, nullptr, &m_vkPointSampler) != VK_SUCCESS) {
+      DestroyVulkanResources(); return;
+    }
+  }
+
+  // Fence
+  {
+    VkFenceCreateInfo fi = {};
+    fi.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    if (vkCreateFence(dev, &fi, nullptr, &m_vkComputeFence) != VK_SUCCESS) {
+      DestroyVulkanResources(); return;
+    }
+  }
+
+  VkDescriptorPool pool = m_renderDevice->GetVkDescriptorPool();
+
+  // Allocate interpolation descriptor set (for D3D11 motion + VK interpolate path)
+  if (m_vkInterpolateSetLayout) {
+    VkDescriptorSetAllocateInfo da = {};
+    da.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    da.descriptorPool = pool;
+    da.descriptorSetCount = 1;
+    da.pSetLayouts = &m_vkInterpolateSetLayout;
+    if (vkAllocateDescriptorSets(dev, &da, &m_vkInterpolateSet) != VK_SUCCESS) {
+      log << "CreateVulkanResources: InterpolateSet alloc failed\n";
+      m_vkInterpolateSet = VK_NULL_HANDLE;
+    }
+  }
+
+  // ---- Allocate descriptor sets for full Vulkan pipeline ----
+  auto allocSet = [&](VkDescriptorSetLayout layout, VkDescriptorSet& outSet, const char* name) {
+    if (!layout) { log << "  " << name << ": no layout\n"; return; }
+    VkDescriptorSetAllocateInfo da = {};
+    da.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    da.descriptorPool = pool;
+    da.descriptorSetCount = 1;
+    da.pSetLayouts = &layout;
+    if (vkAllocateDescriptorSets(dev, &da, &outSet) != VK_SUCCESS) {
+      log << "  " << name << ": alloc FAILED\n"; outSet = VK_NULL_HANDLE;
+    }
+  };
+
+  allocSet(m_vkDownsampleSetLayout, m_vkDownsamplePrevSet, "DownsamplePrev");
+  allocSet(m_vkDownsampleSetLayout, m_vkDownsampleCurrSet, "DownsampleCurr");
+  allocSet(m_vkCostVolumeSetLayout, m_vkCostVolumeFullSet, "CostVolumeFull");
+  allocSet(m_vkFlowDecoderSetLayout, m_vkFlowDecoderFullSet, "FlowDecoderFull");
+  allocSet(m_vkInterpolateSetLayout, m_vkInterpolateFullSet, "InterpolateFull");
+
+  // ---- Pre-configure descriptor sets (all bindings set once, no per-frame updates) ----
+  if (fullOk && m_vkDownsamplePrevSet && m_vkDownsampleCurrSet &&
+      m_vkCostVolumeFullSet && m_vkFlowDecoderFullSet && m_vkInterpolateFullSet) {
+
+    VkDescriptorImageInfo dummySamp = {m_vkLinearSampler, m_vkDummy.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+    VkDescriptorImageInfo dummyStor = {VK_NULL_HANDLE, m_vkDummy.view, VK_IMAGE_LAYOUT_GENERAL};
+
+    // -- Downsample Prev: binding 0=sharedPrev, 2=featPrev(write), 3-5=dummy(write), 6-8=dummy(samp) --
+    {
+      VkDescriptorImageInfo si[8];
+      si[0] = {m_vkLinearSampler, m_sharedPrev.vkView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+      si[1] = {VK_NULL_HANDLE, m_vkFeatPrev.view, VK_IMAGE_LAYOUT_GENERAL}; // binding 2
+      si[2] = dummyStor; // binding 3
+      si[3] = dummyStor; // binding 4
+      si[4] = dummyStor; // binding 5
+      si[5] = dummySamp; // binding 6
+      si[6] = dummySamp; // binding 7
+      si[7] = dummySamp; // binding 8
+
+      VkWriteDescriptorSet ws[8] = {};
+      int bindings[] = {0, 2, 3, 4, 5, 6, 7, 8};
+      VkDescriptorType types[] = {
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+        VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+      };
+      for (int i = 0; i < 8; i++) {
+        ws[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        ws[i].dstSet = m_vkDownsamplePrevSet;
+        ws[i].dstBinding = bindings[i];
+        ws[i].descriptorCount = 1;
+        ws[i].descriptorType = types[i];
+        ws[i].pImageInfo = &si[i];
+      }
+      vkUpdateDescriptorSets(dev, 8, ws, 0, nullptr);
+    }
+
+    // -- Downsample Curr: binding 0=sharedCurr, 2=featCurr(write), 3-5=dummy, 6-8=dummy --
+    {
+      VkDescriptorImageInfo si[8];
+      si[0] = {m_vkLinearSampler, m_sharedCurr.vkView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+      si[1] = {VK_NULL_HANDLE, m_vkFeatCurr.view, VK_IMAGE_LAYOUT_GENERAL};
+      si[2] = dummyStor; si[3] = dummyStor; si[4] = dummyStor;
+      si[5] = dummySamp; si[6] = dummySamp; si[7] = dummySamp;
+
+      VkWriteDescriptorSet ws[8] = {};
+      int bindings[] = {0, 2, 3, 4, 5, 6, 7, 8};
+      VkDescriptorType types[] = {
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+        VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+      };
+      for (int i = 0; i < 8; i++) {
+        ws[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        ws[i].dstSet = m_vkDownsampleCurrSet;
+        ws[i].dstBinding = bindings[i];
+        ws[i].descriptorCount = 1;
+        ws[i].descriptorType = types[i];
+        ws[i].pImageInfo = &si[i];
+      }
+      vkUpdateDescriptorSets(dev, 8, ws, 0, nullptr);
+    }
+
+    // -- Cost Volume: bindings 0-11=samplers(features), 12=prev flow sampler, 13=costVol(write) --
+    {
+      VkDescriptorImageInfo featPrevSamp = {m_vkLinearSampler, m_vkFeatPrev.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+      VkDescriptorImageInfo featCurrSamp = {m_vkLinearSampler, m_vkFeatCurr.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+
+      VkDescriptorImageInfo si[14];
+      // binding 0=feat0_level0(prev), 1=feat1_level0(curr), 2-11=dummies
+      si[0] = featPrevSamp;
+      si[1] = featCurrSamp;
+      for (int i = 2; i < 12; i++) si[i] = dummySamp; // unused levels
+      si[12] = dummySamp; // flowPrev (no previous flow for first iteration)
+      si[13] = {VK_NULL_HANDLE, m_vkCostVol.view, VK_IMAGE_LAYOUT_GENERAL};
+
+      VkWriteDescriptorSet ws[14] = {};
+      for (int i = 0; i < 13; i++) {
+        ws[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        ws[i].dstSet = m_vkCostVolumeFullSet;
+        ws[i].dstBinding = i;
+        ws[i].descriptorCount = 1;
+        ws[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        ws[i].pImageInfo = &si[i];
+      }
+      ws[13].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+      ws[13].dstSet = m_vkCostVolumeFullSet;
+      ws[13].dstBinding = 13;
+      ws[13].descriptorCount = 1;
+      ws[13].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+      ws[13].pImageInfo = &si[13];
+      vkUpdateDescriptorSets(dev, 14, ws, 0, nullptr);
+    }
+
+    // -- Flow Decoder: 0=costVol, 1=featPrev, 2=featCurr, 3=prevFlow(dummy),
+    //                  4=flowOut(write), 5=confOut(write) --
+    {
+      VkDescriptorImageInfo si[6];
+      si[0] = {m_vkLinearSampler, m_vkCostVol.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+      si[1] = {m_vkLinearSampler, m_vkFeatPrev.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+      si[2] = {m_vkLinearSampler, m_vkFeatCurr.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+      si[3] = dummySamp; // no previous flow
+      si[4] = {VK_NULL_HANDLE, m_vkFlowOut.view, VK_IMAGE_LAYOUT_GENERAL};
+      si[5] = {VK_NULL_HANDLE, m_vkConfOut.view, VK_IMAGE_LAYOUT_GENERAL};
+
+      VkWriteDescriptorSet ws[6] = {};
+      VkDescriptorType types[] = {
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+        VK_DESCRIPTOR_TYPE_STORAGE_IMAGE
+      };
+      for (int i = 0; i < 6; i++) {
+        ws[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        ws[i].dstSet = m_vkFlowDecoderFullSet;
+        ws[i].dstBinding = i;
+        ws[i].descriptorCount = 1;
+        ws[i].descriptorType = types[i];
+        ws[i].pImageInfo = &si[i];
+      }
+      vkUpdateDescriptorSets(dev, 6, ws, 0, nullptr);
+    }
+
+    // -- Interpolate Full: uses VK intermediates for motion/conf/feat instead of shared --
+    // binding 0=prev, 1=curr, 2=flowFwd, 3=flowFwd(bwd=same), 4=confFwd, 5=confFwd,
+    //         6=featPrev, 7=featCurr, 8=linear(curr), 9=point(flow), 10=output
+    {
+      VkDescriptorImageInfo si[10];
+      si[0] = {m_vkLinearSampler, m_sharedPrev.vkView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+      si[1] = {m_vkLinearSampler, m_sharedCurr.vkView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+      si[2] = {m_vkLinearSampler, m_vkFlowOut.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+      si[3] = {m_vkLinearSampler, m_vkFlowOut.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+      si[4] = {m_vkLinearSampler, m_vkConfOut.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+      si[5] = {m_vkLinearSampler, m_vkConfOut.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+      si[6] = {m_vkLinearSampler, m_vkFeatPrev.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+      si[7] = {m_vkLinearSampler, m_vkFeatCurr.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+      si[8] = {m_vkLinearSampler, m_sharedCurr.vkView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+      si[9] = {m_vkPointSampler, m_vkFlowOut.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+
+      VkDescriptorImageInfo oi = {};
+      oi.imageView = m_sharedOutput.vkView;
+      oi.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+      VkWriteDescriptorSet ws[11] = {};
+      for (int i = 0; i < 10; i++) {
+        ws[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        ws[i].dstSet = m_vkInterpolateFullSet;
+        ws[i].dstBinding = i;
+        ws[i].descriptorCount = 1;
+        ws[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        ws[i].pImageInfo = &si[i];
+      }
+      ws[10].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+      ws[10].dstSet = m_vkInterpolateFullSet;
+      ws[10].dstBinding = 10;
+      ws[10].descriptorCount = 1;
+      ws[10].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+      ws[10].pImageInfo = &oi;
+      vkUpdateDescriptorSets(dev, 11, ws, 0, nullptr);
+    }
+
+    m_vkFullPipeline = true;
+    log << "CreateVulkanResources: Full VK pipeline descriptor sets configured\n"; log.flush();
+  } else {
+    log << "CreateVulkanResources: Full VK pipeline NOT available (intermediates or sets failed)\n";
+    log.flush();
+  }
+
+  m_vkResCreated = true;
+  log << "CreateVulkanResources: SUCCESS (zero-copy=" << m_vkZeroCopy
+      << " fullPipeline=" << m_vkFullPipeline << ")\n"; log.flush();
+}
+
+void Interpolator::DestroyVulkanResources() {
+  if (!m_renderDevice) return;
+  VkDevice dev = m_renderDevice->GetVkDevice();
+  if (!dev) return;
+  vkDeviceWaitIdle(dev);
+
+  DestroySharedImg(m_sharedPrev); DestroySharedImg(m_sharedCurr);
+  DestroySharedImg(m_sharedMotion); DestroySharedImg(m_sharedConf);
+  DestroySharedImg(m_sharedFeatPrev); DestroySharedImg(m_sharedFeatCurr);
+  DestroySharedImg(m_sharedOutput);
+  DestroyVkImg(m_vkImgOutput);
+
+  // Destroy full pipeline intermediates
+  DestroyVkImg(m_vkFeatPrev); DestroyVkImg(m_vkFeatCurr);
+  DestroyVkImg(m_vkCostVol);
+  DestroyVkImg(m_vkFlowOut); DestroyVkImg(m_vkConfOut);
+  DestroyVkImg(m_vkDummy);
+
+  if (m_vkLinearSampler) { vkDestroySampler(dev, m_vkLinearSampler, nullptr); m_vkLinearSampler = VK_NULL_HANDLE; }
+  if (m_vkPointSampler) { vkDestroySampler(dev, m_vkPointSampler, nullptr); m_vkPointSampler = VK_NULL_HANDLE; }
+  if (m_vkComputeFence) { vkDestroyFence(dev, m_vkComputeFence, nullptr); m_vkComputeFence = VK_NULL_HANDLE; }
+
+  // Descriptor sets are freed when pool is reset/destroyed — just null them
+  m_vkInterpolateSet = VK_NULL_HANDLE;
+  m_vkDownsamplePrevSet = VK_NULL_HANDLE;
+  m_vkDownsampleCurrSet = VK_NULL_HANDLE;
+  m_vkCostVolumeFullSet = VK_NULL_HANDLE;
+  m_vkFlowDecoderFullSet = VK_NULL_HANDLE;
+  m_vkInterpolateFullSet = VK_NULL_HANDLE;
+
+  m_vkResCreated = false;
+  m_vkZeroCopy = false;
+  m_vkFullPipeline = false;
+}
+
+// -----------------------------------------------------------------------
+// VulkanDispatchInterpolate: ZERO-COPY path
+//   D3D11 CopyResource (GPU→GPU) into shared textures → Vulkan reads directly.
+//   Output: Vulkan writes shared output → D3D11 CopyResource to m_outputTexture.
+//   NO staging buffers. NO CPU copies. NO memcpy. All GPU.
+// -----------------------------------------------------------------------
+bool Interpolator::VulkanDispatchInterpolate(
+    ID3D11ShaderResourceView* prev,
+    ID3D11ShaderResourceView* curr,
+    float alpha) {
+  if (!m_vkResCreated || !m_renderDevice || !m_vkInterpolateSet) return false;
+  if (m_vkInterpolatePipeline == VK_NULL_HANDLE) return false;
+  if (!m_vkZeroCopy) return false;
+
+  VkDevice dev = m_renderDevice->GetVkDevice();
+  VkQueue queue = m_renderDevice->GetVkComputeQueue();
+  VkCommandBuffer cmd = m_renderDevice->GetVkCommandBuffer();
+  uint32_t oW = (uint32_t)m_outputWidth, oH = (uint32_t)m_outputHeight;
+  uint32_t iW = (uint32_t)m_inputWidth, iH = (uint32_t)m_inputHeight;
+  uint32_t hW = (uint32_t)m_lumaWidth, hH = (uint32_t)m_lumaHeight;
+
+  // One-time dispatch log
+  static bool loggedOnce = false;
+  if (!loggedOnce) {
+    std::ofstream log("vulkan_debug.txt", std::ios::app);
+    log << "VulkanDispatchInterpolate: ENTER (zero-copy) input=" << iW << "x" << iH
+        << " output=" << oW << "x" << oH << " luma=" << hW << "x" << hH << "\n";
+    log.flush();
+    loggedOnce = true;
+  }
+
+  // Select best motion/confidence from D3D11 pipeline
+  ID3D11ShaderResourceView* motSrv =
+      m_motionSmoothSrv ? m_motionSmoothSrv.Get() : m_motionSrv.Get();
+  ID3D11ShaderResourceView* cfSrv =
+      m_confidenceSmoothSrv ? m_confidenceSmoothSrv.Get() : m_confidenceSrv.Get();
+
+  // ---- D3D11 side: GPU-to-GPU copy into shared textures ----
+  // These are fast internal GPU copies (no CPU, no staging).
+  auto d3dCopyFromSrv = [&](ID3D11ShaderResourceView* srv, ID3D11Texture2D* dst) {
+    if (!srv || !dst) return;
+    Microsoft::WRL::ComPtr<ID3D11Resource> res;
+    srv->GetResource(&res);
+    m_context->CopyResource(dst, res.Get());
+  };
+
+  d3dCopyFromSrv(prev,                m_sharedPrev.d3dTex.Get());
+  d3dCopyFromSrv(curr,                m_sharedCurr.d3dTex.Get());
+  d3dCopyFromSrv(motSrv,              m_sharedMotion.d3dTex.Get());
+  d3dCopyFromSrv(cfSrv,               m_sharedConf.d3dTex.Get());
+  d3dCopyFromSrv(m_prevLumaSrv.Get(), m_sharedFeatPrev.d3dTex.Get());
+  d3dCopyFromSrv(m_currLumaSrv.Get(), m_sharedFeatCurr.d3dTex.Get());
+
+  // Flush D3D11 to ensure all copies are committed to GPU before Vulkan reads
+  m_context->Flush();
+
+  // ---- Vulkan side: single command buffer ----
+  vkResetCommandBuffer(cmd, 0);
+  VkCommandBufferBeginInfo cbi = {};
+  cbi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+  cbi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+  vkBeginCommandBuffer(cmd, &cbi);
+
+  // Barrier: transition shared input images UNDEFINED → SHADER_READ_ONLY
+  //          and output UNDEFINED → GENERAL
+  VkImageMemoryBarrier barriers[7] = {};
+  VkImage inputImgs[] = {
+    m_sharedPrev.vkImage, m_sharedCurr.vkImage,
+    m_sharedMotion.vkImage, m_sharedConf.vkImage,
+    m_sharedFeatPrev.vkImage, m_sharedFeatCurr.vkImage,
+  };
+  for (int i = 0; i < 6; i++) {
+    barriers[i].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barriers[i].srcQueueFamilyIndex = barriers[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barriers[i].image = inputImgs[i];
+    barriers[i].subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+    barriers[i].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    barriers[i].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    barriers[i].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+  }
+  barriers[6].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+  barriers[6].srcQueueFamilyIndex = barriers[6].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+  barriers[6].image = m_sharedOutput.vkImage;
+  barriers[6].subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+  barriers[6].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  barriers[6].newLayout = VK_IMAGE_LAYOUT_GENERAL;
+  barriers[6].dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+  vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+      VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 7, barriers);
+
+  // Update descriptor set with shared image views
+  {
+    VkDescriptorImageInfo si[10];
+    si[0] = {m_vkLinearSampler, m_sharedPrev.vkView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+    si[1] = {m_vkLinearSampler, m_sharedCurr.vkView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+    si[2] = {m_vkLinearSampler, m_sharedMotion.vkView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+    si[3] = {m_vkLinearSampler, m_sharedMotion.vkView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+    si[4] = {m_vkLinearSampler, m_sharedConf.vkView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+    si[5] = {m_vkLinearSampler, m_sharedConf.vkView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+    si[6] = {m_vkLinearSampler, m_sharedFeatPrev.vkView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+    si[7] = {m_vkLinearSampler, m_sharedFeatCurr.vkView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+    si[8] = {m_vkLinearSampler, m_sharedCurr.vkView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+    si[9] = {m_vkPointSampler, m_sharedMotion.vkView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+
+    VkDescriptorImageInfo oi = {};
+    oi.imageView = m_sharedOutput.vkView;
+    oi.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+    VkWriteDescriptorSet ws[11] = {};
+    for (int i = 0; i < 10; i++) {
+      ws[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+      ws[i].dstSet = m_vkInterpolateSet;
+      ws[i].dstBinding = i;
+      ws[i].descriptorCount = 1;
+      ws[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+      ws[i].pImageInfo = &si[i];
+    }
+    ws[10].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    ws[10].dstSet = m_vkInterpolateSet;
+    ws[10].dstBinding = 10;
+    ws[10].descriptorCount = 1;
+    ws[10].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+    ws[10].pImageInfo = &oi;
+    vkUpdateDescriptorSets(dev, 11, ws, 0, nullptr);
+  }
+
+  // Bind pipeline + push constants
+  vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_vkInterpolatePipeline);
+  vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
+      m_vkInterpolateLayout, 0, 1, &m_vkInterpolateSet, 0, nullptr);
+
+  struct {
+    float frameSize[4];
+    float motionSize[4];
+    float alpha;
+    float confPower;
+    float diffScale;
+    int useBidirectional;
+    int useOcclusion;
+    int qualityMode;
+    int padding;
+  } pc;
+  pc.frameSize[0] = (float)oW; pc.frameSize[1] = (float)oH;
+  pc.frameSize[2] = 1.0f / (float)oW; pc.frameSize[3] = 1.0f / (float)oH;
+  pc.motionSize[0] = (float)hW; pc.motionSize[1] = (float)hH;
+  pc.motionSize[2] = 1.0f / (float)hW; pc.motionSize[3] = 1.0f / (float)hH;
+  pc.alpha = alpha;
+  pc.confPower = std::clamp(m_confPower, 0.25f, 4.0f);
+  pc.diffScale = 2.0f;
+  pc.useBidirectional = 0;
+  pc.useOcclusion = (m_qualityMode >= 1) ? 1 : 0;
+  pc.qualityMode = m_qualityMode;
+  pc.padding = 0;
+  vkCmdPushConstants(cmd, m_vkInterpolateLayout,
+      VK_SHADER_STAGE_COMPUTE_BIT, 0, 60, &pc);
+
+  // Dispatch
+  vkCmdDispatch(cmd, (oW + 15) / 16, (oH + 15) / 16, 1);
+
+  // Barrier: output GENERAL → shader complete (ensure writes visible)
+  {
+    VkImageMemoryBarrier b = {};
+    b.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    b.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+    b.dstAccessMask = 0;
+    b.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+    b.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+    b.srcQueueFamilyIndex = b.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    b.image = m_sharedOutput.vkImage;
+    b.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+        VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &b);
+  }
+
+  // Submit and wait
+  vkEndCommandBuffer(cmd);
+  VkSubmitInfo si = {};
+  si.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+  si.commandBufferCount = 1;
+  si.pCommandBuffers = &cmd;
+  vkQueueSubmit(queue, 1, &si, m_vkComputeFence);
+  vkWaitForFences(dev, 1, &m_vkComputeFence, VK_TRUE, UINT64_MAX);
+  vkResetFences(dev, 1, &m_vkComputeFence);
+
+  // ---- D3D11 readback: shared output → m_outputTexture (GPU copy, no CPU) ----
+  m_context->CopyResource(m_outputTexture.Get(), m_sharedOutput.d3dTex.Get());
+
+  return true;
+}
+
+// -----------------------------------------------------------------------
+// VulkanReWarp: FAST re-warp path for InterpolateOnly
+//   Data already present from first Execute() call.  Only alpha changes.
+//   Handles both full-VK path (intermediates) and hybrid path (shared textures).
+//   NO D3D11 CopyResource.  NO Flush.  Just barriers + dispatch + fence.
+// -----------------------------------------------------------------------
+bool Interpolator::VulkanReWarp(float alpha) {
+  if (!m_vkResCreated || !m_renderDevice) return false;
+  if (m_vkInterpolatePipeline == VK_NULL_HANDLE) return false;
+  if (!m_vkZeroCopy) return false;
+
+  // Choose descriptor set: full-VK path uses VK intermediates for motion,
+  // hybrid path uses shared D3D11 textures.
+  bool fullPath = m_vkFullPipeline && m_vkInterpolateFullSet;
+  VkDescriptorSet interpSet = fullPath ? m_vkInterpolateFullSet : m_vkInterpolateSet;
+  if (!interpSet) return false;
+
+  VkDevice dev = m_renderDevice->GetVkDevice();
+  VkQueue queue = m_renderDevice->GetVkComputeQueue();
+  VkCommandBuffer cmd = m_renderDevice->GetVkCommandBuffer();
+  uint32_t oW = (uint32_t)m_outputWidth, oH = (uint32_t)m_outputHeight;
+  uint32_t hW = (uint32_t)m_lumaWidth, hH = (uint32_t)m_lumaHeight;
+
+  // ---- Vulkan command buffer ----
+  vkResetCommandBuffer(cmd, 0);
+  VkCommandBufferBeginInfo cbi = {};
+  cbi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+  cbi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+  vkBeginCommandBuffer(cmd, &cbi);
+
+  if (fullPath) {
+    // Full-VK path: VK intermediates hold motion data from VulkanFullDispatch
+    VkImageMemoryBarrier barriers[7] = {};
+    int n = 0;
+    auto addBar = [&](VkImage img, VkImageLayout newLay, VkAccessFlags access) {
+      barriers[n].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+      barriers[n].srcQueueFamilyIndex = barriers[n].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+      barriers[n].image = img;
+      barriers[n].subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+      barriers[n].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+      barriers[n].newLayout = newLay;
+      barriers[n].dstAccessMask = access;
+      n++;
+    };
+    addBar(m_sharedPrev.vkImage, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT);
+    addBar(m_sharedCurr.vkImage, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT);
+    addBar(m_vkFlowOut.image, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT);
+    addBar(m_vkConfOut.image, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT);
+    addBar(m_vkFeatPrev.image, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT);
+    addBar(m_vkFeatCurr.image, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT);
+    addBar(m_sharedOutput.vkImage, VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT);
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr, 0, nullptr, n, barriers);
+  } else {
+    // Hybrid path: shared D3D11 textures hold motion data
+    VkImageMemoryBarrier barriers[7] = {};
+    VkImage imgs[] = {
+      m_sharedPrev.vkImage, m_sharedCurr.vkImage,
+      m_sharedMotion.vkImage, m_sharedConf.vkImage,
+      m_sharedFeatPrev.vkImage, m_sharedFeatCurr.vkImage,
+    };
+    for (int i = 0; i < 6; i++) {
+      barriers[i].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+      barriers[i].srcQueueFamilyIndex = barriers[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+      barriers[i].image = imgs[i];
+      barriers[i].subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+      barriers[i].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+      barriers[i].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+      barriers[i].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    }
+    barriers[6].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barriers[6].srcQueueFamilyIndex = barriers[6].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barriers[6].image = m_sharedOutput.vkImage;
+    barriers[6].subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+    barriers[6].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    barriers[6].newLayout = VK_IMAGE_LAYOUT_GENERAL;
+    barriers[6].dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 7, barriers);
+  }
+
+  // Bind pipeline + descriptor set
+  vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_vkInterpolatePipeline);
+  vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
+      m_vkInterpolateLayout, 0, 1, &interpSet, 0, nullptr);
+
+  // Push constants — only alpha differs from the first dispatch
+  struct {
+    float frameSize[4];
+    float motionSize[4];
+    float alpha;
+    float confPower;
+    float diffScale;
+    int useBidirectional;
+    int useOcclusion;
+    int qualityMode;
+    int padding;
+  } pc;
+  pc.frameSize[0] = (float)oW; pc.frameSize[1] = (float)oH;
+  pc.frameSize[2] = 1.0f / (float)oW; pc.frameSize[3] = 1.0f / (float)oH;
+  pc.motionSize[0] = (float)hW; pc.motionSize[1] = (float)hH;
+  pc.motionSize[2] = 1.0f / (float)hW; pc.motionSize[3] = 1.0f / (float)hH;
+  pc.alpha = alpha;
+  pc.confPower = std::clamp(m_confPower, 0.25f, 4.0f);
+  pc.diffScale = 2.0f;
+  pc.useBidirectional = 0;
+  pc.useOcclusion = (m_qualityMode >= 1) ? 1 : 0;
+  pc.qualityMode = m_qualityMode;
+  pc.padding = 0;
+  vkCmdPushConstants(cmd, m_vkInterpolateLayout,
+      VK_SHADER_STAGE_COMPUTE_BIT, 0, 60, &pc);
+
+  // Dispatch
+  vkCmdDispatch(cmd, (oW + 15) / 16, (oH + 15) / 16, 1);
+
+  // Barrier: output writes complete before D3D11 reads
+  {
+    VkImageMemoryBarrier b = {};
+    b.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    b.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+    b.dstAccessMask = 0;
+    b.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+    b.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+    b.srcQueueFamilyIndex = b.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    b.image = m_sharedOutput.vkImage;
+    b.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+        VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &b);
+  }
+
+  // Submit and wait
+  vkEndCommandBuffer(cmd);
+  VkSubmitInfo si = {};
+  si.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+  si.commandBufferCount = 1;
+  si.pCommandBuffers = &cmd;
+  vkQueueSubmit(queue, 1, &si, m_vkComputeFence);
+  vkWaitForFences(dev, 1, &m_vkComputeFence, VK_TRUE, UINT64_MAX);
+  vkResetFences(dev, 1, &m_vkComputeFence);
+
+  // D3D11: shared output → presentation texture (GPU copy, no CPU)
+  m_context->CopyResource(m_outputTexture.Get(), m_sharedOutput.d3dTex.Get());
+
+  return true;
+}
+
+// -----------------------------------------------------------------------
+// VulkanFullDispatch: Complete Vulkan pipeline — D3D11 copies ONLY prev/curr
+//   D3D11 copy prev+curr → shared textures → Flush
+//   Vulkan: downsample(prev) → downsample(curr) → cost_volume → flow_decoder → interpolate
+//   D3D11 copy output back for presentation
+//   Motion estimation + interpolation entirely in Vulkan.
+// -----------------------------------------------------------------------
+bool Interpolator::VulkanFullDispatch(
+    ID3D11ShaderResourceView* prev,
+    ID3D11ShaderResourceView* curr,
+    float alpha) {
+  if (!m_vkResCreated || !m_renderDevice || !m_vkFullPipeline) return false;
+  if (!m_vkZeroCopy) return false;
+  if (m_vkDownsamplePipeline == VK_NULL_HANDLE ||
+      m_vkCostVolumePipeline == VK_NULL_HANDLE ||
+      m_vkFlowDecoderPipeline == VK_NULL_HANDLE ||
+      m_vkInterpolatePipeline == VK_NULL_HANDLE) return false;
+
+  VkDevice dev = m_renderDevice->GetVkDevice();
+  VkQueue queue = m_renderDevice->GetVkComputeQueue();
+  VkCommandBuffer cmd = m_renderDevice->GetVkCommandBuffer();
+  uint32_t oW = (uint32_t)m_outputWidth, oH = (uint32_t)m_outputHeight;
+  uint32_t iW = (uint32_t)m_inputWidth, iH = (uint32_t)m_inputHeight;
+  uint32_t hW = (uint32_t)m_lumaWidth, hH = (uint32_t)m_lumaHeight;
+
+  static bool loggedOnce = false;
+  if (!loggedOnce) {
+    std::ofstream log("vulkan_debug.txt", std::ios::app);
+    log << "VulkanFullDispatch: ENTER input=" << iW << "x" << iH
+        << " output=" << oW << "x" << oH << " luma=" << hW << "x" << hH << "\n";
+    log.flush();
+    loggedOnce = true;
+  }
+
+  // ---- D3D11: copy ONLY prev + curr into shared textures ----
+  auto d3dCopyFromSrv = [&](ID3D11ShaderResourceView* srv, ID3D11Texture2D* dst) {
+    if (!srv || !dst) return;
+    Microsoft::WRL::ComPtr<ID3D11Resource> res;
+    srv->GetResource(&res);
+    m_context->CopyResource(dst, res.Get());
+  };
+  d3dCopyFromSrv(prev, m_sharedPrev.d3dTex.Get());
+  d3dCopyFromSrv(curr, m_sharedCurr.d3dTex.Get());
+  m_context->Flush();
+
+  // ---- Vulkan: single command buffer with all stages ----
+  vkResetCommandBuffer(cmd, 0);
+  VkCommandBufferBeginInfo cbi = {};
+  cbi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+  cbi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+  vkBeginCommandBuffer(cmd, &cbi);
+
+  // === Stage 0: Initial barriers ===
+  // Inputs: sharedPrev, sharedCurr → SHADER_READ_ONLY
+  // Intermediates: featPrev, featCurr, costVol, flowOut, confOut, dummy → GENERAL
+  // Output: sharedOutput → GENERAL
+  {
+    VkImageMemoryBarrier bars[10] = {};
+    int n = 0;
+    auto addBar = [&](VkImage img, VkImageLayout newLay, VkAccessFlags access) {
+      bars[n].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+      bars[n].srcQueueFamilyIndex = bars[n].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+      bars[n].image = img;
+      bars[n].subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+      bars[n].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+      bars[n].newLayout = newLay;
+      bars[n].dstAccessMask = access;
+      n++;
+    };
+    addBar(m_sharedPrev.vkImage, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT);
+    addBar(m_sharedCurr.vkImage, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT);
+    addBar(m_vkFeatPrev.image, VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT);
+    addBar(m_vkFeatCurr.image, VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT);
+    addBar(m_vkCostVol.image, VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT);
+    addBar(m_vkFlowOut.image, VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT);
+    addBar(m_vkConfOut.image, VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT);
+    addBar(m_vkDummy.image, VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT);
+    addBar(m_sharedOutput.vkImage, VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT);
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr, 0, nullptr, n, bars);
+  }
+
+  // === Stage 1: Downsample prev → featPrev ===
+  {
+    struct {
+      float inputSize[4];
+      float outputSize0[4];
+      float outputSize1[4];
+      float outputSize2[4];
+      float outputSize3[4];
+      int numLevels;
+      int padding;
+    } pc;
+    pc.inputSize[0] = (float)iW; pc.inputSize[1] = (float)iH;
+    pc.inputSize[2] = 1.0f / (float)iW; pc.inputSize[3] = 1.0f / (float)iH;
+    pc.outputSize0[0] = (float)hW; pc.outputSize0[1] = (float)hH;
+    pc.outputSize0[2] = 1.0f / (float)hW; pc.outputSize0[3] = 1.0f / (float)hH;
+    // levels 1-3 unused, set to 1×1
+    for (int i = 0; i < 4; i++) {
+      pc.outputSize1[i] = (i < 2) ? 1.0f : 1.0f;
+      pc.outputSize2[i] = (i < 2) ? 1.0f : 1.0f;
+      pc.outputSize3[i] = (i < 2) ? 1.0f : 1.0f;
+    }
+    pc.numLevels = 1;
+    pc.padding = 0;
+
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_vkDownsamplePipeline);
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
+        m_vkDownsampleLayout, 0, 1, &m_vkDownsamplePrevSet, 0, nullptr);
+    vkCmdPushConstants(cmd, m_vkDownsampleLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, 88, &pc);
+    vkCmdDispatch(cmd, (hW + 15) / 16, (hH + 15) / 16, 1); // z=1 → only level 0
+  }
+
+  // === Stage 2: Downsample curr → featCurr ===
+  {
+    struct {
+      float inputSize[4]; float outputSize0[4]; float outputSize1[4];
+      float outputSize2[4]; float outputSize3[4]; int numLevels; int padding;
+    } pc;
+    pc.inputSize[0] = (float)iW; pc.inputSize[1] = (float)iH;
+    pc.inputSize[2] = 1.0f / (float)iW; pc.inputSize[3] = 1.0f / (float)iH;
+    pc.outputSize0[0] = (float)hW; pc.outputSize0[1] = (float)hH;
+    pc.outputSize0[2] = 1.0f / (float)hW; pc.outputSize0[3] = 1.0f / (float)hH;
+    for (int i = 0; i < 4; i++) {
+      pc.outputSize1[i] = (i < 2) ? 1.0f : 1.0f;
+      pc.outputSize2[i] = (i < 2) ? 1.0f : 1.0f;
+      pc.outputSize3[i] = (i < 2) ? 1.0f : 1.0f;
+    }
+    pc.numLevels = 1; pc.padding = 0;
+
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
+        m_vkDownsampleLayout, 0, 1, &m_vkDownsampleCurrSet, 0, nullptr);
+    vkCmdPushConstants(cmd, m_vkDownsampleLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, 88, &pc);
+    vkCmdDispatch(cmd, (hW + 15) / 16, (hH + 15) / 16, 1);
+  }
+
+  // Barrier: featPrev + featCurr GENERAL → SHADER_READ_ONLY (downsample writes must complete)
+  {
+    VkImageMemoryBarrier bars[3] = {};
+    for (int i = 0; i < 3; i++) {
+      bars[i].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+      bars[i].srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+      bars[i].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+      bars[i].oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+      bars[i].srcQueueFamilyIndex = bars[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+      bars[i].subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+    }
+    bars[0].image = m_vkFeatPrev.image;
+    bars[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    bars[1].image = m_vkFeatCurr.image;
+    bars[1].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    bars[2].image = m_vkDummy.image;
+    bars[2].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 3, bars);
+  }
+
+  // === Stage 3: Cost Volume ===
+  {
+    struct {
+      float srcSize[4];
+      float costVolumeSize[4];
+      int level;
+      int searchRange;
+      int isBackward;
+      int usePrevFlow;
+      float flowScale;
+      float padding;
+    } pc;
+    pc.srcSize[0] = (float)iW; pc.srcSize[1] = (float)iH;
+    pc.srcSize[2] = 1.0f / (float)iW; pc.srcSize[3] = 1.0f / (float)iH;
+    pc.costVolumeSize[0] = (float)hW; pc.costVolumeSize[1] = (float)hH;
+    pc.costVolumeSize[2] = 1.0f / (float)hW; pc.costVolumeSize[3] = 1.0f / (float)hH;
+    pc.level = 0;
+    pc.searchRange = 4;
+    pc.isBackward = 0;
+    pc.usePrevFlow = 0;
+    pc.flowScale = 1.0f;
+    pc.padding = 0.0f;
+
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_vkCostVolumePipeline);
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
+        m_vkCostVolumeLayout, 0, 1, &m_vkCostVolumeFullSet, 0, nullptr);
+    vkCmdPushConstants(cmd, m_vkCostVolumeLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, 56, &pc);
+    vkCmdDispatch(cmd, (hW + 15) / 16, (hH + 15) / 16, 1);
+  }
+
+  // Barrier: costVol GENERAL → SHADER_READ_ONLY
+  {
+    VkImageMemoryBarrier b = {};
+    b.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    b.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+    b.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    b.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+    b.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    b.srcQueueFamilyIndex = b.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    b.image = m_vkCostVol.image;
+    b.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &b);
+  }
+
+  // === Stage 4: Flow Decoder → motion + confidence ===
+  {
+    struct {
+      float costVolumeSize[4];
+      float srcSize[4];
+      int level;
+      int searchRange;
+      int isLastLevel;
+      int iteration;
+      float flowScale;
+      float confidenceScale;
+    } pc;
+    pc.costVolumeSize[0] = (float)hW; pc.costVolumeSize[1] = (float)hH;
+    pc.costVolumeSize[2] = 1.0f / (float)hW; pc.costVolumeSize[3] = 1.0f / (float)hH;
+    pc.srcSize[0] = (float)iW; pc.srcSize[1] = (float)iH;
+    pc.srcSize[2] = 1.0f / (float)iW; pc.srcSize[3] = 1.0f / (float)iH;
+    pc.level = 0;
+    pc.searchRange = 4;
+    pc.isLastLevel = 1;
+    pc.iteration = 0;
+    pc.flowScale = 1.0f;
+    pc.confidenceScale = 1.0f;
+
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_vkFlowDecoderPipeline);
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
+        m_vkFlowDecoderLayout, 0, 1, &m_vkFlowDecoderFullSet, 0, nullptr);
+    vkCmdPushConstants(cmd, m_vkFlowDecoderLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, 56, &pc);
+    vkCmdDispatch(cmd, (hW + 15) / 16, (hH + 15) / 16, 1);
+  }
+
+  // Barrier: flowOut + confOut GENERAL → SHADER_READ_ONLY
+  {
+    VkImageMemoryBarrier bars[2] = {};
+    for (int i = 0; i < 2; i++) {
+      bars[i].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+      bars[i].srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+      bars[i].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+      bars[i].oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+      bars[i].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+      bars[i].srcQueueFamilyIndex = bars[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+      bars[i].subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+    }
+    bars[0].image = m_vkFlowOut.image;
+    bars[1].image = m_vkConfOut.image;
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 2, bars);
+  }
+
+  // === Stage 5: Interpolate ===
+  {
+    struct {
+      float frameSize[4];
+      float motionSize[4];
+      float alpha;
+      float confPower;
+      float diffScale;
+      int useBidirectional;
+      int useOcclusion;
+      int qualityMode;
+      int padding;
+    } pc;
+    pc.frameSize[0] = (float)oW; pc.frameSize[1] = (float)oH;
+    pc.frameSize[2] = 1.0f / (float)oW; pc.frameSize[3] = 1.0f / (float)oH;
+    pc.motionSize[0] = (float)hW; pc.motionSize[1] = (float)hH;
+    pc.motionSize[2] = 1.0f / (float)hW; pc.motionSize[3] = 1.0f / (float)hH;
+    pc.alpha = alpha;
+    pc.confPower = std::clamp(m_confPower, 0.25f, 4.0f);
+    pc.diffScale = 2.0f;
+    pc.useBidirectional = 0;
+    pc.useOcclusion = (m_qualityMode >= 1) ? 1 : 0;
+    pc.qualityMode = m_qualityMode;
+    pc.padding = 0;
+
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_vkInterpolatePipeline);
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
+        m_vkInterpolateLayout, 0, 1, &m_vkInterpolateFullSet, 0, nullptr);
+    vkCmdPushConstants(cmd, m_vkInterpolateLayout,
+        VK_SHADER_STAGE_COMPUTE_BIT, 0, 60, &pc);
+    vkCmdDispatch(cmd, (oW + 15) / 16, (oH + 15) / 16, 1);
+  }
+
+  // Barrier: output writes complete
+  {
+    VkImageMemoryBarrier b = {};
+    b.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    b.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+    b.dstAccessMask = 0;
+    b.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+    b.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+    b.srcQueueFamilyIndex = b.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    b.image = m_sharedOutput.vkImage;
+    b.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+        VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &b);
+  }
+
+  // Submit and wait
+  vkEndCommandBuffer(cmd);
+  VkSubmitInfo si = {};
+  si.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+  si.commandBufferCount = 1;
+  si.pCommandBuffers = &cmd;
+  vkQueueSubmit(queue, 1, &si, m_vkComputeFence);
+  vkWaitForFences(dev, 1, &m_vkComputeFence, VK_TRUE, UINT64_MAX);
+  vkResetFences(dev, 1, &m_vkComputeFence);
+
+  // D3D11: shared output → presentation texture
+  m_context->CopyResource(m_outputTexture.Get(), m_sharedOutput.d3dTex.Get());
+
+  return true;
+}
+
+#endif // USE_VULKAN

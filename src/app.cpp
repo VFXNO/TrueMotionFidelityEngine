@@ -172,6 +172,13 @@ bool App::Initialize(HINSTANCE hInstance) {
     return false;
   }
 
+#ifdef USE_VULKAN
+  // Initialize Vulkan render device for compute shaders
+  if (m_renderDevice.Initialize(m_hwnd, true)) {
+    m_interpolator.SetRenderDevice(&m_renderDevice);
+  }
+#endif
+
   if (!CreateUiWindow(hInstance)) {
     m_captureStatus = "Error: Failed to create UI window";
     MessageBoxW(nullptr, L"Error: Failed to create UI window", L"True Motion Fidelity Engine Error", MB_OK);

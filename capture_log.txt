@@ -1,6 +1,6 @@
 
 === StartWindowCapture called ===
-hwnd: 000000000005050C
+hwnd: 000000000005064A
 Monitor handle: 0000000000010001
 requireWgc: 0
 useWgc: 1
@@ -9,7 +9,2575 @@ WGC capture started successfully
 StartWindowCapture returning true
 
 === StartWindowCapture called ===
-hwnd: 0000000000030948
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000147062E
 Monitor handle: 0000000000010001
 requireWgc: 0
 useWgc: 1
@@ -18,16 +2586,1603 @@ WGC capture started successfully
 StartWindowCapture returning true
 
 === StartWindowCapture called ===
-hwnd: 00000000000203DE
+hwnd: 000000000001000C
 Monitor handle: 0000000000010001
 requireWgc: 0
 useWgc: 1
 Trying WGC capture...
-WGC capture started successfully
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
 StartWindowCapture returning true
 
 === StartWindowCapture called ===
-hwnd: 00000000000203DE
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000001000C
+Monitor handle: 0000000000010001
+requireWgc: 0
+useWgc: 1
+Trying WGC capture...
+WGC failed, fallback disabled
+Trying Desktop Duplication capture...
+OutputForMonitor succeeded
+Desktop Duplication capture started
+StartWindowCapture returning true
+
+=== StartWindowCapture called ===
+hwnd: 000000000005064A
 Monitor handle: 0000000000010001
 requireWgc: 0
 useWgc: 1

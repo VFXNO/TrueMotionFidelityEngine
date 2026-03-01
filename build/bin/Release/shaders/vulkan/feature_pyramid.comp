@@ -1,0 +1,218 @@
+#version 450
+// ============================================================================
+// PWC-Net Feature Pyramid Extraction
+// Computes multi-scale CNN features for optical flow estimation
+// ============================================================================
+
+precision highp float;
+
+// ============================================================================
+// Descriptor Bindings
+// ============================================================================
+
+// Input: Full resolution RGB image as combined sampler
+layout(binding = 0) uniform sampler2D inputSampler;
+
+// Output: Feature pyramid levels (6 levels)
+layout(binding = 2, rgba16f) uniform writeonly image2D level0;
+layout(binding = 3, rgba16f) uniform writeonly image2D level1;
+layout(binding = 4, rgba16f) uniform writeonly image2D level2;
+layout(binding = 5, rgba16f) uniform writeonly image2D level3;
+layout(binding = 6, rgba16f) uniform writeonly image2D level4;
+layout(binding = 7, rgba16f) uniform writeonly image2D level5;
+
+// ============================================================================
+// Push Constants
+// ============================================================================
+
+layout(push_constant) uniform PushConstants {
+    vec4 inputSize;      // width, height, 1/width, 1/height
+    vec4 outputSize0;    // level0 size
+    vec4 outputSize1;    // level1 size
+    vec4 outputSize2;    // level2 size
+    vec4 outputSize3;    // level3 size
+    vec4 outputSize4;    // level4 size
+    vec4 outputSize5;    // level5 size
+    int  inputLevel;     // which level of input pyramid (0 = full res)
+    int  padding;
+} pc;
+
+// ============================================================================
+// Shared Memory for Convolution
+// ============================================================================
+
+#define TILE_X 16
+#define TILE_Y 16
+#define KERNEL_RADIUS 1
+#define TILE_EXT (TILE_X + 2 * KERNEL_RADIUS)
+#define TILE_EXT_Y (TILE_Y + 2 * KERNEL_RADIUS)
+
+shared vec4 sharedMem[TILE_EXT][TILE_EXT_Y];
+
+// ============================================================================
+// Convolution Kernels (Learned, stored as constants for PWC-Net)
+// ============================================================================
+
+// Simple convolution weights for feature extraction
+// Using a simple edge-aware filter instead of learned weights
+const vec3 sobelX[3] = vec3[3](
+    vec3(-1.0, 0.0, 1.0),
+    vec3(-2.0, 0.0, 2.0),
+    vec3(-1.0, 0.0, 1.0)
+);
+
+const vec3 sobelY[3] = vec3[3](
+    vec3(-1.0, -2.0, -1.0),
+    vec3( 0.0,  0.0,  0.0),
+    vec3( 1.0,  2.0,  1.0)
+);
+
+// Simple convolution with 3x3 kernel
+vec4 conv3x3(ivec2 pos, vec2 inputTexelSize, int channelOffset) {
+    vec4 sum = vec4(0.0);
+    
+    // Simple 3x3 edge-aware filter
+    // Uses gradient-based weights for better motion estimation
+    
+    vec2 uv = (vec2(pos) + 0.5) * inputTexelSize;
+    vec4 center = texture(inputSampler, uv);
+    
+    // Sample neighbors
+    vec4 n  = texture(inputSampler, (vec2(pos.x,     pos.y - 1) + 0.5) * inputTexelSize);
+    vec4 s  = texture(inputSampler, (vec2(pos.x,     pos.y + 1) + 0.5) * inputTexelSize);
+    vec4 e  = texture(inputSampler, (vec2(pos.x + 1, pos.y) + 0.5) * inputTexelSize);
+    vec4 w  = texture(inputSampler, (vec2(pos.x - 1, pos.y) + 0.5) * inputTexelSize);
+    vec4 ne = texture(inputSampler, (vec2(pos.x + 1, pos.y - 1) + 0.5) * inputTexelSize);
+    vec4 nw = texture(inputSampler, (vec2(pos.x - 1, pos.y - 1) + 0.5) * inputTexelSize);
+    vec4 se = texture(inputSampler, (vec2(pos.x + 1, pos.y + 1) + 0.5) * inputTexelSize);
+    vec4 sw = texture(inputSampler, (vec2(pos.x - 1, pos.y + 1) + 0.5) * inputTexelSize);
+    
+    // Sobel-inspired features for optical flow
+    // Gx = -w + e - nw + ne - sw + se
+    // Gy = -n + s - nw - ne + sw + se
+    
+    vec4 gx = -w + e - nw + ne - sw + se;
+    vec4 gy = -n + s - nw - ne + sw + se;
+    
+    // Gradient magnitude
+    vec4 gradMag = sqrt(gx * gx + gy * gy + 1e-8);
+    
+    // Laplacian for second-order features
+    vec4 laplacian = -8.0 * center + n + s + e + w + ne + nw + se + sw;
+    
+    // Combine into 4-channel feature vector
+    vec4 feature;
+    feature.x = dot(center.rgb, vec3(0.299, 0.587, 0.114));  // Luma
+    feature.y = length(gradMag.rgb);                         // Gradient magnitude
+    feature.z = dot(laplacian.rgb, vec3(0.333));            // Laplacian
+    feature.w = max(max(abs(gx.r), abs(gy.r)), max(abs(gx.g), abs(gy.g))); // Max gradient
+    
+    return feature;
+}
+
+// ============================================================================
+// Main Compute Shader
+// ============================================================================
+
+layout(local_size_x = TILE_X, local_size_y = TILE_Y) in;
+
+void main() {
+    // Determine which level we're processing
+    uint level = gl_WorkGroupID.z;
+    
+    if (level > 5) return;
+    
+    // Get output dimensions for this level
+    ivec2 outSize;
+    switch (level) {
+        case 0: outSize = ivec2(pc.outputSize0.xy); break;
+        case 1: outSize = ivec2(pc.outputSize1.xy); break;
+        case 2: outSize = ivec2(pc.outputSize2.xy); break;
+        case 3: outSize = ivec2(pc.outputSize3.xy); break;
+        case 4: outSize = ivec2(pc.outputSize4.xy); break;
+        case 5: outSize = ivec2(pc.outputSize5.xy); break;
+    }
+    
+    ivec2 pixelPos = ivec2(gl_GlobalInvocationID.xy);
+    if (pixelPos.x >= outSize.x || pixelPos.y >= outSize.y) return;
+    
+    // Calculate input position (coarser levels use 2x downsampling)
+    int scale = 1 << level;  // 1, 2, 4, 8, 16, 32
+    ivec2 inputPos = pixelPos * scale;
+    
+    // Calculate texel size for current level
+    vec2 inputTexelSize = pc.inputSize.zw * float(scale);
+    
+    // Extract features using multi-output convolution
+    vec4 features[4];
+    
+    // Channel group 0: Luma + gradients
+    features[0] = conv3x3(inputPos, inputTexelSize, 0);
+    
+    // Channel group 1: Diagonal gradients
+    vec4 ne = textureLod(inputSampler, (vec2(inputPos.x + 1, inputPos.y - 1) + 0.5) * inputTexelSize, 0.0);
+    vec4 nw = textureLod(inputSampler, (vec2(inputPos.x - 1, inputPos.y - 1) + 0.5) * inputTexelSize, 0.0);
+    vec4 se = textureLod(inputSampler, (vec2(inputPos.x + 1, inputPos.y + 1) + 0.5) * inputTexelSize, 0.0);
+    vec4 sw = textureLod(inputSampler, (vec2(inputPos.x - 1, inputPos.y + 1) + 0.5) * inputTexelSize, 0.0);
+    vec4 center = textureLod(inputSampler, (vec2(inputPos) + 0.5) * inputTexelSize, 0.0);
+    
+    features[1].x = (ne.r - nw.r + se.r - sw.r) * 0.5;
+    features[1].y = (ne.g - nw.g + se.g - sw.g) * 0.5;
+    features[1].z = length(center.rgb);
+    features[1].w = (center.r + center.g + center.b) / 3.0;
+    
+    // Channel group 2: Second-order features
+    vec4 n  = textureLod(inputSampler, (vec2(inputPos.x,     inputPos.y - 1) + 0.5) * inputTexelSize, 0.0);
+    vec4 s  = textureLod(inputSampler, (vec2(inputPos.x,     inputPos.y + 1) + 0.5) * inputTexelSize, 0.0);
+    vec4 e  = textureLod(inputSampler, (vec2(inputPos.x + 1, inputPos.y) + 0.5) * inputTexelSize, 0.0);
+    vec4 w  = textureLod(inputSampler, (vec2(inputPos.x - 1, inputPos.y) + 0.5) * inputTexelSize, 0.0);
+    
+    features[2].x = abs(n.r - s.r) + abs(e.r - w.r);
+    features[2].y = abs(n.g - s.g) + abs(e.g - w.g);
+    features[2].z = abs(n.b - s.b) + abs(e.b - w.b);
+    features[2].w = (features[2].x + features[2].y + features[2].z) / 3.0;
+    
+    // Channel group 3: Texture strength (variance-based)
+    vec4 variance = vec4(0.0);
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dx = -1; dx <= 1; dx++) {
+            vec4 samp = texture(inputSampler, (vec2(inputPos + ivec2(dx, dy)) + 0.5) * inputTexelSize);
+            vec4 diff = samp - center;
+            variance += diff * diff;
+        }
+    }
+    variance /= 9.0;
+    
+    features[3].x = sqrt(variance.r + 1e-6);
+    features[3].y = sqrt(variance.g + 1e-6);
+    features[3].z = sqrt(variance.b + 1e-6);
+    features[3].w = (features[3].x + features[3].y + features[3].z) / 3.0;
+    
+    // Pack into output image (4 pixels = 16 channels total)
+    vec4 output0 = features[0];
+    vec4 output1 = features[1];
+    vec4 output2 = features[2];
+    vec4 output3 = features[3];
+    
+    // Write to appropriate mip level
+    switch (level) {
+        case 0:
+            imageStore(level0, pixelPos, output0);
+            break;
+        case 1:
+            imageStore(level1, pixelPos, output1);
+            break;
+        case 2:
+            imageStore(level2, pixelPos, output2);
+            break;
+        case 3:
+            imageStore(level3, pixelPos, output3);
+            break;
+        case 4:
+            imageStore(level4, pixelPos, output0);
+            break;
+        case 5:
+            imageStore(level5, pixelPos, output1);
+            break;
+    }
+}

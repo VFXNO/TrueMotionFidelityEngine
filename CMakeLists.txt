@@ -48,6 +48,43 @@ add_custom_command(TARGET graphics_hook POST_BUILD
   "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/"
 )
 
+# --- Vulkan SDK (optional) ---
+option(USE_VULKAN "Enable Vulkan backend (requires Vulkan SDK)" ON)
+set(VULKAN_SDK_ROOT "" CACHE PATH "Vulkan SDK root directory")
+
+if(USE_VULKAN)
+  # Try to find Vulkan SDK
+  if(VULKAN_SDK_ROOT)
+    set(ENV{VULKAN_SDK} "${VULKAN_SDK_ROOT}")
+  endif()
+  find_package(Vulkan QUIET)
+  if(NOT Vulkan_FOUND)
+    # Try common install paths
+    file(GLOB VULKAN_SDK_DIRS "C:/VulkanSDK/*")
+    list(SORT VULKAN_SDK_DIRS ORDER DESCENDING)
+    foreach(SDK_DIR ${VULKAN_SDK_DIRS})
+      if(EXISTS "${SDK_DIR}/Include/vulkan/vulkan.h")
+        set(Vulkan_INCLUDE_DIR "${SDK_DIR}/Include")
+        set(Vulkan_LIBRARY "${SDK_DIR}/Lib/vulkan-1.lib")
+        set(Vulkan_FOUND TRUE)
+        set(GLSLANG_EXECUTABLE "${SDK_DIR}/Bin/glslangValidator.exe")
+        break()
+      endif()
+    endforeach()
+  endif()
+  if(Vulkan_FOUND)
+    message(STATUS "Vulkan SDK found: ${Vulkan_INCLUDE_DIR}")
+    # Find glslangValidator for SPIR-V compilation
+    if(NOT GLSLANG_EXECUTABLE)
+      find_program(GLSLANG_EXECUTABLE glslangValidator
+        PATHS "$ENV{VULKAN_SDK}/Bin" "$ENV{VULKAN_SDK}/bin")
+    endif()
+  else()
+    message(WARNING "Vulkan SDK not found - Vulkan backend disabled")
+    set(USE_VULKAN OFF)
+  endif()
+endif()
+
 # Main application
 add_executable(TrueMotionFidelityEngine WIN32
   src/app.cpp
@@ -55,6 +92,8 @@ add_executable(TrueMotionFidelityEngine WIN32
   src/capture_frame.h
   src/d3d11_device.cpp
   src/d3d11_device.h
+  src/render_device.cpp
+  src/render_device.h
   src/dll_injector.cpp
   src/dll_injector.h
   src/dup_capture.cpp
@@ -109,6 +148,13 @@ target_compile_definitions(TrueMotionFidelityEngine PRIVATE
   NOMINMAX
 )
 
+# Vulkan support
+if(USE_VULKAN)
+  target_compile_definitions(TrueMotionFidelityEngine PRIVATE USE_VULKAN VK_USE_PLATFORM_WIN32_KHR)
+  target_include_directories(TrueMotionFidelityEngine PRIVATE ${Vulkan_INCLUDE_DIR})
+  target_link_libraries(TrueMotionFidelityEngine PRIVATE ${Vulkan_LIBRARY})
+endif()
+
 # Find Windows SDK fxc.exe shader compiler
 find_program(FXC_EXECUTABLE fxc
   PATHS
@@ -143,4 +189,29 @@ if(FXC_EXECUTABLE)
   endforeach()
 else()
   message(WARNING "fxc.exe not found - shaders will be compiled at runtime (slower startup)")
+endif()
+
+# Compile Vulkan SPIR-V shaders
+if(USE_VULKAN AND GLSLANG_EXECUTABLE)
+  message(STATUS "Found glslangValidator: ${GLSLANG_EXECUTABLE}")
+  set(VK_SHADER_OUTPUT_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/shaders/vulkan")
+  add_custom_command(TARGET TrueMotionFidelityEngine POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${VK_SHADER_OUTPUT_DIR}"
+    COMMENT "Creating Vulkan shader output directory"
+  )
+  set(VK_SHADER_NAMES feature_pyramid cost_volume flow_decoder interpolate downsample)
+  foreach(VK_SHADER ${VK_SHADER_NAMES})
+    add_custom_command(TARGET TrueMotionFidelityEngine POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/src/shaders/vulkan/${VK_SHADER}.comp"
+        "${VK_SHADER_OUTPUT_DIR}/${VK_SHADER}.comp"
+      COMMAND ${GLSLANG_EXECUTABLE} -V
+        "${CMAKE_SOURCE_DIR}/src/shaders/vulkan/${VK_SHADER}.comp"
+        -o "${VK_SHADER_OUTPUT_DIR}/${VK_SHADER}.spv"
+        --target-env vulkan1.2 || echo "Warning: ${VK_SHADER} SPIR-V compilation failed"
+      COMMENT "Compiling ${VK_SHADER}.comp to SPIR-V"
+    )
+  endforeach()
+elseif(USE_VULKAN)
+  message(WARNING "glslangValidator not found - Vulkan shaders will not be compiled")
 endif()

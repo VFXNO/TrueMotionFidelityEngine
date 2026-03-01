@@ -8,6 +8,10 @@
 #include "wgc_capture.h"
 #include "window_list.h"
 
+#ifdef USE_VULKAN
+#include "render_device.h"
+#endif
+
 #include <windows.h>
 
 #include <array>
@@ -68,6 +72,9 @@ private:
   HWND m_uiHwnd = nullptr;
 
   D3D11Device m_device;
+#ifdef USE_VULKAN
+  tfe::RenderDevice m_renderDevice;
+#endif
   Microsoft::WRL::ComPtr<IDXGISwapChain1> m_uiSwapChain;
   Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_uiRtv;
   int m_uiWidth = 480;
@@ -95,7 +102,7 @@ private:
 
   bool m_interpolationEnabled = true;
   bool m_useMotionPrediction = true;
-  bool m_minimalMotionPipeline = true;
+  bool m_minimalMotionPipeline = false;
   bool m_limitOutputFps = true;
   bool m_useVsync = false;
   bool m_cadenceVsyncOverrideActive = false;

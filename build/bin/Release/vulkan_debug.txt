@@ -1,0 +1,456 @@
+RenderDevice::Initialize start, preferVulkan=1
+InitializeVulkan ENTER
+VkDevice exts: hasExtMem=1
+  VK_KHR_storage_buffer_storage_class
+  VK_KHR_external_memory
+  VK_KHR_external_memory_win32
+  VK_KHR_dedicated_allocation
+  VK_KHR_get_memory_requirements2
+RenderDevice::Initialize Vulkan succeeded, m_useVulkan=true
+LoadVulkanShaders ENTER
+Passed Vulkan check
+Shader dir: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\feature_pyramid.spv
+Creating shader module, size=16664
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: FeaturePyramid
+Pipeline created: FeaturePyramid
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\cost_volume.spv
+Creating shader module, size=10748
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: CostVolume
+Pipeline created: CostVolume
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\flow_decoder.spv
+Creating shader module, size=7524
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: FlowDecoder
+Pipeline created: FlowDecoder
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\interpolate.spv
+Creating shader module, size=17236
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: Interpolate
+Pipeline created: Interpolate
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\downsample.spv
+Creating shader module, size=13228
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: Downsample
+Pipeline created: Downsample
+All Vulkan shaders loaded successfully
+After Vulkan check, m_useVulkan=1
+CreateResources: START, m_useVulkan=1 outputW=2560 outputH=1440 lumaW=1281 lumaH=736
+CreateResources: SUCCESS
+CreateVulkanResources: START
+  input=2562x1472 output=2560x1440 luma=1281x736
+CreateVulkanResources: ZERO-COPY shared textures OK
+CreateVulkanResources: SUCCESS (zero-copy=1)
+VulkanDispatchInterpolate: ENTER (zero-copy) input=2562x1472 output=2560x1440 luma=1281x736
+RenderDevice::Initialize start, preferVulkan=1
+InitializeVulkan ENTER
+VkDevice exts: hasExtMem=1
+  VK_KHR_storage_buffer_storage_class
+  VK_KHR_external_memory
+  VK_KHR_external_memory_win32
+  VK_KHR_dedicated_allocation
+  VK_KHR_get_memory_requirements2
+RenderDevice::Initialize Vulkan succeeded, m_useVulkan=true
+LoadVulkanShaders ENTER
+Passed Vulkan check
+Shader dir: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\feature_pyramid.spv
+Creating shader module, size=16664
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: FeaturePyramid
+Pipeline created: FeaturePyramid
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\cost_volume.spv
+Creating shader module, size=10748
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: CostVolume
+Pipeline created: CostVolume
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\flow_decoder.spv
+Creating shader module, size=7524
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: FlowDecoder
+Pipeline created: FlowDecoder
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\interpolate.spv
+Creating shader module, size=17080
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: Interpolate
+Pipeline created: Interpolate
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\downsample.spv
+Creating shader module, size=13228
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: Downsample
+Pipeline created: Downsample
+All Vulkan shaders loaded successfully
+After Vulkan check, m_useVulkan=1
+CreateResources: START, m_useVulkan=1 outputW=2560 outputH=1440 lumaW=1281 lumaH=736
+CreateResources: SUCCESS
+CreateVulkanResources: START
+  input=2562x1472 output=2560x1440 luma=1281x736
+CreateVulkanResources: ZERO-COPY shared textures OK
+CreateVulkanResources: SUCCESS (zero-copy=1)
+VulkanDispatchInterpolate: ENTER (zero-copy) input=2562x1472 output=2560x1440 luma=1281x736
+RenderDevice::Initialize start, preferVulkan=1
+InitializeVulkan ENTER
+VkDevice exts: hasExtMem=1
+  VK_KHR_storage_buffer_storage_class
+  VK_KHR_external_memory
+  VK_KHR_external_memory_win32
+  VK_KHR_dedicated_allocation
+  VK_KHR_get_memory_requirements2
+RenderDevice::Initialize Vulkan succeeded, m_useVulkan=true
+LoadVulkanShaders ENTER
+Passed Vulkan check
+Shader dir: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\feature_pyramid.spv
+Creating shader module, size=16664
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: FeaturePyramid
+Pipeline created: FeaturePyramid
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\cost_volume.spv
+Creating shader module, size=10748
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: CostVolume
+Pipeline created: CostVolume
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\flow_decoder.spv
+Creating shader module, size=7524
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: FlowDecoder
+Pipeline created: FlowDecoder
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\interpolate.spv
+Creating shader module, size=17080
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: Interpolate
+Pipeline created: Interpolate
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\downsample.spv
+Creating shader module, size=13228
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: Downsample
+Pipeline created: Downsample
+All Vulkan shaders loaded successfully
+After Vulkan check, m_useVulkan=1
+CreateResources: START, m_useVulkan=1 outputW=2560 outputH=1440 lumaW=1281 lumaH=736
+CreateResources: SUCCESS
+CreateVulkanResources: START
+  input=2562x1472 output=2560x1440 luma=1281x736
+CreateVulkanResources: ZERO-COPY shared textures OK
+CreateVulkanResources: SUCCESS (zero-copy=1)
+VulkanDispatchInterpolate: ENTER (zero-copy) input=2562x1472 output=2560x1440 luma=1281x736
+RenderDevice::Initialize start, preferVulkan=1
+InitializeVulkan ENTER
+VkDevice exts: hasExtMem=1
+  VK_KHR_storage_buffer_storage_class
+  VK_KHR_external_memory
+  VK_KHR_external_memory_win32
+  VK_KHR_dedicated_allocation
+  VK_KHR_get_memory_requirements2
+RenderDevice::Initialize Vulkan succeeded, m_useVulkan=true
+LoadVulkanShaders ENTER
+Passed Vulkan check
+Shader dir: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\feature_pyramid.spv
+Creating shader module, size=16664
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: FeaturePyramid
+Pipeline created: FeaturePyramid
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\cost_volume.spv
+Creating shader module, size=10748
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: CostVolume
+Pipeline created: CostVolume
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\flow_decoder.spv
+Creating shader module, size=7524
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: FlowDecoder
+Pipeline created: FlowDecoder
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\interpolate.spv
+Creating shader module, size=17080
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: Interpolate
+Pipeline created: Interpolate
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\downsample.spv
+Creating shader module, size=13228
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: Downsample
+Pipeline created: Downsample
+All Vulkan shaders loaded successfully
+After Vulkan check, m_useVulkan=1
+CreateResources: START, m_useVulkan=1 outputW=2560 outputH=1440 lumaW=1281 lumaH=736
+CreateResources: SUCCESS
+CreateVulkanResources: START
+  input=2562x1472 output=2560x1440 luma=1281x736
+CreateVulkanResources: ZERO-COPY shared textures OK
+CreateVulkanResources: SUCCESS (zero-copy=1)
+VulkanDispatchInterpolate: ENTER (zero-copy) input=2562x1472 output=2560x1440 luma=1281x736
+RenderDevice::Initialize start, preferVulkan=1
+InitializeVulkan ENTER
+VkDevice exts: hasExtMem=1
+  VK_KHR_storage_buffer_storage_class
+  VK_KHR_external_memory
+  VK_KHR_external_memory_win32
+  VK_KHR_dedicated_allocation
+  VK_KHR_get_memory_requirements2
+RenderDevice::Initialize Vulkan succeeded, m_useVulkan=true
+LoadVulkanShaders ENTER
+Passed Vulkan check
+Shader dir: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\feature_pyramid.spv
+Creating shader module, size=16664
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: FeaturePyramid
+Pipeline created: FeaturePyramid
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\cost_volume.spv
+Creating shader module, size=10748
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: CostVolume
+Pipeline created: CostVolume
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\flow_decoder.spv
+Creating shader module, size=7524
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: FlowDecoder
+Pipeline created: FlowDecoder
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\interpolate.spv
+Creating shader module, size=17080
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: Interpolate
+Pipeline created: Interpolate
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\downsample.spv
+Creating shader module, size=13228
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: Downsample
+Pipeline created: Downsample
+All Vulkan shaders loaded successfully
+After Vulkan check, m_useVulkan=1
+CreateResources: START, m_useVulkan=1 outputW=2560 outputH=1440 lumaW=1281 lumaH=736
+CreateResources: SUCCESS
+CreateVulkanResources: START
+  input=2562x1472 output=2560x1440 luma=1281x736
+CreateVulkanResources: ZERO-COPY shared textures OK
+CreateVulkanResources: Intermediate VkImages OK
+CreateVulkanResources: Full VK pipeline descriptor sets configured
+CreateVulkanResources: SUCCESS (zero-copy=1 fullPipeline=1)
+VulkanFullDispatch: ENTER input=2562x1472 output=2560x1440 luma=1281x736
+RenderDevice::Initialize start, preferVulkan=1
+InitializeVulkan ENTER
+VkDevice exts: hasExtMem=1
+  VK_KHR_storage_buffer_storage_class
+  VK_KHR_external_memory
+  VK_KHR_external_memory_win32
+  VK_KHR_dedicated_allocation
+  VK_KHR_get_memory_requirements2
+RenderDevice::Initialize Vulkan succeeded, m_useVulkan=true
+LoadVulkanShaders ENTER
+Passed Vulkan check
+Shader dir: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\feature_pyramid.spv
+Creating shader module, size=16664
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: FeaturePyramid
+Pipeline created: FeaturePyramid
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\cost_volume.spv
+Creating shader module, size=10748
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: CostVolume
+Pipeline created: CostVolume
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\flow_decoder.spv
+Creating shader module, size=7524
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: FlowDecoder
+Pipeline created: FlowDecoder
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\interpolate.spv
+Creating shader module, size=17080
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: Interpolate
+Pipeline created: Interpolate
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\downsample.spv
+Creating shader module, size=13228
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: Downsample
+Pipeline created: Downsample
+All Vulkan shaders loaded successfully
+After Vulkan check, m_useVulkan=1
+CreateResources: START, m_useVulkan=1 outputW=2560 outputH=1440 lumaW=1281 lumaH=736
+CreateResources: SUCCESS
+CreateVulkanResources: START
+  input=2562x1472 output=2560x1440 luma=1281x736
+CreateVulkanResources: ZERO-COPY shared textures OK
+CreateVulkanResources: Intermediate VkImages OK
+CreateVulkanResources: Full VK pipeline descriptor sets configured
+CreateVulkanResources: SUCCESS (zero-copy=1 fullPipeline=1)
+VulkanDispatchInterpolate: ENTER (zero-copy) input=2562x1472 output=2560x1440 luma=1281x736
+RenderDevice::Initialize start, preferVulkan=1
+InitializeVulkan ENTER
+VkDevice exts: hasExtMem=1
+  VK_KHR_storage_buffer_storage_class
+  VK_KHR_external_memory
+  VK_KHR_external_memory_win32
+  VK_KHR_dedicated_allocation
+  VK_KHR_get_memory_requirements2
+RenderDevice::Initialize Vulkan succeeded, m_useVulkan=true
+LoadVulkanShaders ENTER
+Passed Vulkan check
+Shader dir: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\feature_pyramid.spv
+Creating shader module, size=16664
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: FeaturePyramid
+Pipeline created: FeaturePyramid
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\cost_volume.spv
+Creating shader module, size=16776
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: CostVolume
+Pipeline created: CostVolume
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\flow_decoder.spv
+Creating shader module, size=12112
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: FlowDecoder
+Pipeline created: FlowDecoder
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\interpolate.spv
+Creating shader module, size=17080
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: Interpolate
+Pipeline created: Interpolate
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\downsample.spv
+Creating shader module, size=13228
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: Downsample
+Pipeline created: Downsample
+All Vulkan shaders loaded successfully
+After Vulkan check, m_useVulkan=1
+CreateResources: START, m_useVulkan=1 outputW=2560 outputH=1440 lumaW=1281 lumaH=736
+CreateResources: SUCCESS
+CreateVulkanResources: START
+  input=2562x1472 output=2560x1440 luma=1281x736
+CreateVulkanResources: ZERO-COPY shared textures OK
+CreateVulkanResources: Intermediate VkImages OK
+CreateVulkanResources: Full VK pipeline descriptor sets configured
+CreateVulkanResources: SUCCESS (zero-copy=1 fullPipeline=1)
+VulkanFullDispatch: ENTER input=2562x1472 output=2560x1440 luma=1281x736
+RenderDevice::Initialize start, preferVulkan=1
+InitializeVulkan ENTER
+VkDevice exts: hasExtMem=1
+  VK_KHR_storage_buffer_storage_class
+  VK_KHR_external_memory
+  VK_KHR_external_memory_win32
+  VK_KHR_dedicated_allocation
+  VK_KHR_get_memory_requirements2
+RenderDevice::Initialize Vulkan succeeded, m_useVulkan=true
+LoadVulkanShaders ENTER
+Passed Vulkan check
+Shader dir: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\feature_pyramid.spv
+Creating shader module, size=16664
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: FeaturePyramid
+Pipeline created: FeaturePyramid
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\cost_volume.spv
+Creating shader module, size=16776
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: CostVolume
+Pipeline created: CostVolume
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\flow_decoder.spv
+Creating shader module, size=12112
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: FlowDecoder
+Pipeline created: FlowDecoder
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\interpolate.spv
+Creating shader module, size=17080
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: Interpolate
+Pipeline created: Interpolate
+Loading: C:\Users\vfxno\Documents\GITHUB\TrueMotionFidelityEngine\build\bin\Release\shaders\vulkan\downsample.spv
+Creating shader module, size=13228
+Shader module created successfully
+Descriptor set layout created
+Pipeline layout created
+About to create compute pipeline: Downsample
+Pipeline created: Downsample
+All Vulkan shaders loaded successfully
+After Vulkan check, m_useVulkan=1
+CreateResources: START, m_useVulkan=1 outputW=2560 outputH=1440 lumaW=1281 lumaH=736
+CreateResources: SUCCESS
+CreateVulkanResources: START
+  input=2562x1472 output=2560x1440 luma=1281x736
+CreateVulkanResources: ZERO-COPY shared textures OK
+CreateVulkanResources: Intermediate VkImages OK
+CreateVulkanResources: Full VK pipeline descriptor sets configured
+CreateVulkanResources: SUCCESS (zero-copy=1 fullPipeline=1)
+VulkanFullDispatch: ENTER input=2562x1472 output=2560x1440 luma=1281x736

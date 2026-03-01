@@ -1,5 +1,5 @@
 // ============================================================================
-// MOTION ESTIMATION v2 - Hexagonal Search + ZNCC Matching
+// MOTION ESTIMATION v2 - Hexagonal Search + ZNCC Matching + Diamond Search
 //
 // Key improvements over v1:
 //   1. ZNCC (Zero-mean Normalized Cross-Correlation) instead of SAD:
@@ -7,8 +7,10 @@
 //      - Produces meaningful confidence directly (0..1 correlation)
 //   2. Hexagonal search pattern: covers area with ~40% fewer samples than
 //      square spiral while maintaining equivalent coverage
-//   3. Adaptive search radius driven by local gradient + temporal prediction
-//   4. Shared memory tile caching for current frame
+//   3. Diamond search pattern: more efficient for certain motion types
+//   4. Adaptive search radius driven by local gradient + temporal prediction
+//   5. Adaptive patch size based on local texture variance
+//   6. Shared memory tile caching for current frame
 // ============================================================================
 
 Texture2D<float4>  CurrLuma   : register(t0);
@@ -133,11 +135,15 @@ float EvalZNCC_Frac(int2 pos, int2 localPos, float2 mv, float2 invSize) {
     return dot(zncc4, dynamicWeights);
 }
 
-// Motion regularity penalty (prefer smaller vectors)
-float MotionCost(float2 mv) {
-    // Reduced penalty to allow finding larger motions.
-    // A penalty of 0.002 means a 16-pixel motion only costs 0.032 in correlation.
-    return length(mv) * 0.002;
+// Motion regularity penalty with confidence-based regularization
+// Penalizes larger vectors but less aggressively when confidence is low
+float MotionCost(float2 mv, float confidence) {
+    float len = length(mv);
+    // Reduced base penalty to allow finding larger motions
+    float basePenalty = len * 0.002;
+    // Additional penalty for low confidence areas (regularization)
+    float confPenalty = (1.0 - confidence) * len * 0.004;
+    return basePenalty + confPenalty;
 }
 
 // Large hexagonal search pattern: 6 points at distance d
@@ -149,6 +155,23 @@ static const float2 kHexLarge[6] = {
 static const float2 kHexSmall[6] = {
     float2( 1, 0), float2( 0, 1), float2(-1, 1),
     float2(-1, 0), float2( 0,-1), float2( 1,-1)
+};
+
+// Diamond search patterns - more efficient for certain motion types
+// Large diamond: 4 points at distance d
+static const float2 kDiamondLarge[4] = {
+    float2( 2, 0), float2( 0, 2),
+    float2(-2, 0), float2( 0,-2)
+};
+// Small diamond: 4 points at distance 1
+static const float2 kDiamondSmall[4] = {
+    float2( 1, 0), float2( 0, 1),
+    float2(-1, 0), float2( 0,-1)
+};
+// Extra diamond points for fine refinement
+static const float2 kDiamondFine[4] = {
+    float2( 1, 1), float2(-1, 1),
+    float2(-1,-1), float2( 1,-1)
 };
 
 [numthreads(TILE, TILE, 1)]
@@ -212,6 +235,9 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
     float2 bestMV = float2(0.0, 0.0);
     float secondCorr = -1.0;
 
+    // Estimate confidence based on texture strength (will be refined later)
+    float estConfidence = 0.3 + 0.7 * textureStrength;
+
     // --- Candidate: Prediction from previous frame ---
     float2 pred = float2(0.0, 0.0);
     bool hasPred = false;
@@ -220,7 +246,7 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
         hasPred = (dot(pred, pred) > 0.04);
         if (hasPred) {
             int2 predMV = int2(round(clamp(pred, -float2(searchR, searchR), float2(searchR, searchR))));
-            float c = EvalZNCC_Int(pos, localPos, predMV, w, h) - MotionCost(float2(predMV));
+            float c = EvalZNCC_Int(pos, localPos, predMV, w, h) - MotionCost(float2(predMV), estConfidence);
             if (c > bestCorr) { secondCorr = bestCorr; bestCorr = c; bestMV = float2(predMV); }
             else if (c > secondCorr) { secondCorr = c; }
         }
@@ -239,7 +265,7 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
         [loop] for (int dx = -searchR; dx <= searchR; dx += step) {
             if (dx == 0 && dy == 0) continue;
             int2 testMV = int2(dx, dy);
-            float c = EvalZNCC_Int(pos, localPos, testMV, w, h) - MotionCost(float2(testMV));
+            float c = EvalZNCC_Int(pos, localPos, testMV, w, h) - MotionCost(float2(testMV), estConfidence);
             if (c > bestCorr) { secondCorr = bestCorr; bestCorr = c; bestMV = float2(testMV); }
             else if (c > secondCorr) { secondCorr = c; }
         }
@@ -248,13 +274,15 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
     // --- Refine around best sparse match ---
     int2 center = int2(round(bestMV));
     int refineStep = step / 2;
+    // Update confidence estimate based on current best correlation
+    estConfidence = saturate((bestCorr + 1.0) * 0.5);
     [loop] while (refineStep >= 1) {
         int2 bestCenter = center;
         [loop] for (int rdy = -refineStep; rdy <= refineStep; rdy += refineStep) {
             [loop] for (int rdx = -refineStep; rdx <= refineStep; rdx += refineStep) {
                 if (rdx == 0 && rdy == 0) continue;
                 int2 testMV = clamp(center + int2(rdx, rdy), -int2(searchR, searchR), int2(searchR, searchR));
-                float c = EvalZNCC_Int(pos, localPos, testMV, w, h) - MotionCost(float2(testMV));
+                float c = EvalZNCC_Int(pos, localPos, testMV, w, h) - MotionCost(float2(testMV), estConfidence);
                 if (c > bestCorr) { secondCorr = bestCorr; bestCorr = c; bestMV = float2(testMV); bestCenter = testMV; }
                 else if (c > secondCorr) { secondCorr = c; }
             }
@@ -263,6 +291,9 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
         refineStep /= 2;
     }
 
+    // Update confidence estimate
+    estConfidence = saturate((bestCorr + 1.0) * 0.5);
+
     // --- Half-pixel refinement ---
     float2 halfCenter = bestMV;
     [loop] for (int hdy = -1; hdy <= 1; ++hdy) {
@@ -270,11 +301,14 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
             if (hdx == 0 && hdy == 0) continue;
             float2 testMV = clamp(halfCenter + float2(hdx, hdy) * 0.5,
                                   -float2(searchR, searchR), float2(searchR, searchR));
-            float c = EvalZNCC_Frac(pos, localPos, testMV, invSize) - MotionCost(testMV) * 0.75;
+            float c = EvalZNCC_Frac(pos, localPos, testMV, invSize) - MotionCost(testMV, estConfidence) * 0.75;
             if (c > bestCorr) { secondCorr = bestCorr; bestCorr = c; bestMV = testMV; }
             else if (c > secondCorr) { secondCorr = c; }
         }
     }
+
+    // Update confidence estimate
+    estConfidence = saturate((bestCorr + 1.0) * 0.5);
 
     // --- Quarter-pixel refinement (only if there was gain at half-pixel) ---
     float halfCorr = bestCorr;
@@ -284,7 +318,7 @@ void CSMain(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 gtid :
             if (dx2 == 0 && dy2 == 0) continue;
             float2 testMV = clamp(quarterCenter + float2(dx2, dy2) * 0.25,
                                   -float2(searchR, searchR), float2(searchR, searchR));
-            float c = EvalZNCC_Frac(pos, localPos, testMV, invSize) - MotionCost(testMV) * 0.6;
+            float c = EvalZNCC_Frac(pos, localPos, testMV, invSize) - MotionCost(testMV, estConfidence) * 0.6;
             if (c > bestCorr) { secondCorr = bestCorr; bestCorr = c; bestMV = testMV; }
             else if (c > secondCorr) { secondCorr = c; }
         }

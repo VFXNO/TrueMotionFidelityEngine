@@ -561,11 +561,12 @@ void CSMain(uint3 id : SV_DispatchThreadID) {
 
     // --- Iterative Lucas-Kanade refinement ---
     float2 mv = coarseMV;
-    int maxIter = clamp(radius, 1, 3);
+    int maxIter = clamp(radius, 1, 4);
     
-    // Reduce iterations for high-confidence inputs
-    if (coarseConf > 0.75) maxIter = 1;
-    else if (coarseConf > 0.5) maxIter = min(maxIter, 2);
+    // Reduce iterations for high-confidence inputs (but keep more for quality)
+    if (coarseConf > 0.85) maxIter = 2;
+    else if (coarseConf > 0.6) maxIter = min(maxIter, 3);
+    else if (coarseConf > 0.4) maxIter = min(maxIter, 4);
 
     [loop] for (int iter = 0; iter < maxIter; ++iter) {
         float2 delta = LKStep(pos, mv, w, h, invSize, priorW1, priorW2, priorW3);

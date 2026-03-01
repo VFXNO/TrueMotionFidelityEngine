@@ -1,8 +1,0 @@
-WGC StartCapture failed - hresult_error
-HRESULT: 0x80070057
-WGC StartCapture failed - hresult_error
-HRESULT: 0x80070057
-WGC StartCapture failed - hresult_error
-HRESULT: 0x80070057
-WGC StartCapture failed - hresult_error
-HRESULT: 0x80070057

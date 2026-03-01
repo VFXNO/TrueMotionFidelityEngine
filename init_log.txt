@@ -1,196 +1,144 @@
-Interpolator::Initialize started
-LoadShaders succeeded
-Interpolator::Initialize succeeded
 
 [D3D11Device::Initialize] begin
-GPU preference: high_performance (TMFE_GPU_PREFERENCE)
+GPU preference: display_attached (default)
 CreateDXGIFactory1 succeeded
-Trying adapter [NVIDIA GeForce RTX 3050 Ti Laptop GPU] hasOutputs=true
-Adapter NVIDIA GeForce RTX 3050 Ti Laptop GPU D3D11CreateDevice: 0x0
-Adapter NVIDIA GeForce RTX 3050 Ti Laptop GPU feature level: 45312
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
 EnumerateMonitors count: 1
 DXGI outputs available: true
-Active adapter: NVIDIA GeForce RTX 3050 Ti Laptop GPU
+Active adapter: AMD Radeon RX 6700
 D3D11Device::Initialize succeeded
-Interpolator::Initialize started
-LoadShaders succeeded
-Interpolator::Initialize succeeded
-
-[D3D11Device::Initialize] begin
-GPU preference: high_performance (TMFE_GPU_PREFERENCE)
-CreateDXGIFactory1 succeeded
-Trying adapter [NVIDIA GeForce RTX 3050 Ti Laptop GPU] hasOutputs=true
-Adapter NVIDIA GeForce RTX 3050 Ti Laptop GPU D3D11CreateDevice: 0x0
-Adapter NVIDIA GeForce RTX 3050 Ti Laptop GPU feature level: 45312
-EnumerateMonitors count: 1
-DXGI outputs available: true
-Active adapter: NVIDIA GeForce RTX 3050 Ti Laptop GPU
-D3D11Device::Initialize succeeded
-Interpolator::Initialize started
-LoadShaders succeeded
+=== NEW CODE RUNNING - Interpolator::Initialize started ===
+About to check Vulkan...
+>>> USE_VULKAN is DEFINED at compile time!
+Using Vulkan backend
+>>> Finished Vulkan check block
+Using Vulkan, skipping D3D11 shaders
 Interpolator::Initialize succeeded
 
 [D3D11Device::Initialize] begin
 GPU preference: display_attached (default)
 CreateDXGIFactory1 succeeded
-Trying adapter [NVIDIA GeForce RTX 3050 Ti Laptop GPU] hasOutputs=false
-Trying adapter [AMD Radeon(TM) Graphics] hasOutputs=true
-Adapter AMD Radeon(TM) Graphics D3D11CreateDevice: 0x0
-Adapter AMD Radeon(TM) Graphics feature level: 45312
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
 EnumerateMonitors count: 1
 DXGI outputs available: true
-Active adapter: AMD Radeon(TM) Graphics
+Active adapter: AMD Radeon RX 6700
 D3D11Device::Initialize succeeded
-Interpolator::Initialize started
-LoadShaders succeeded
+=== NEW CODE RUNNING - Interpolator::Initialize started ===
+About to check Vulkan...
+>>> USE_VULKAN is DEFINED at compile time!
+Using Vulkan backend
+>>> Finished Vulkan check block
+Using Vulkan, skipping D3D11 shaders
 Interpolator::Initialize succeeded
 
 [D3D11Device::Initialize] begin
 GPU preference: display_attached (default)
 CreateDXGIFactory1 succeeded
-Trying adapter [NVIDIA GeForce RTX 3050 Ti Laptop GPU] hasOutputs=false
-Trying adapter [AMD Radeon(TM) Graphics] hasOutputs=true
-Adapter AMD Radeon(TM) Graphics D3D11CreateDevice: 0x0
-Adapter AMD Radeon(TM) Graphics feature level: 45312
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
 EnumerateMonitors count: 1
 DXGI outputs available: true
-Active adapter: AMD Radeon(TM) Graphics
+Active adapter: AMD Radeon RX 6700
 D3D11Device::Initialize succeeded
-Interpolator::Initialize started
-LoadShaders succeeded
+=== NEW CODE RUNNING - Interpolator::Initialize started ===
+About to check Vulkan...
+>>> USE_VULKAN is DEFINED at compile time!
+Using Vulkan backend
+>>> Finished Vulkan check block
+Using Vulkan, skipping D3D11 shaders
 Interpolator::Initialize succeeded
 
 [D3D11Device::Initialize] begin
 GPU preference: display_attached (default)
 CreateDXGIFactory1 succeeded
-Trying adapter [NVIDIA GeForce RTX 3050 Ti Laptop GPU] hasOutputs=false
-Trying adapter [AMD Radeon(TM) Graphics] hasOutputs=true
-Adapter AMD Radeon(TM) Graphics D3D11CreateDevice: 0x0
-Adapter AMD Radeon(TM) Graphics feature level: 45312
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
 EnumerateMonitors count: 1
 DXGI outputs available: true
-Active adapter: AMD Radeon(TM) Graphics
+Active adapter: AMD Radeon RX 6700
 D3D11Device::Initialize succeeded
-Interpolator::Initialize started
-LoadShaders succeeded
+=== NEW CODE RUNNING - Interpolator::Initialize started ===
+About to check Vulkan...
+>>> USE_VULKAN is DEFINED at compile time!
+Using Vulkan backend
+>>> Finished Vulkan check block
+Using Vulkan, skipping D3D11 shaders
 Interpolator::Initialize succeeded
 
 [D3D11Device::Initialize] begin
 GPU preference: display_attached (default)
 CreateDXGIFactory1 succeeded
-Trying adapter [NVIDIA GeForce RTX 3050 Ti Laptop GPU] hasOutputs=false
-Trying adapter [AMD Radeon(TM) Graphics] hasOutputs=true
-Adapter AMD Radeon(TM) Graphics D3D11CreateDevice: 0x0
-Adapter AMD Radeon(TM) Graphics feature level: 45312
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
 EnumerateMonitors count: 1
 DXGI outputs available: true
-Active adapter: AMD Radeon(TM) Graphics
+Active adapter: AMD Radeon RX 6700
 D3D11Device::Initialize succeeded
-Interpolator::Initialize started
-LoadShaders succeeded
+=== NEW CODE RUNNING - Interpolator::Initialize started ===
+About to check Vulkan...
+>>> USE_VULKAN is DEFINED at compile time!
+Using Vulkan backend
+>>> Finished Vulkan check block
+Using Vulkan, skipping D3D11 shaders
 Interpolator::Initialize succeeded
 
 [D3D11Device::Initialize] begin
 GPU preference: display_attached (default)
 CreateDXGIFactory1 succeeded
-Trying adapter [NVIDIA GeForce RTX 3050 Ti Laptop GPU] hasOutputs=false
-Trying adapter [AMD Radeon(TM) Graphics] hasOutputs=true
-Adapter AMD Radeon(TM) Graphics D3D11CreateDevice: 0x0
-Adapter AMD Radeon(TM) Graphics feature level: 45312
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
 EnumerateMonitors count: 1
 DXGI outputs available: true
-Active adapter: AMD Radeon(TM) Graphics
+Active adapter: AMD Radeon RX 6700
 D3D11Device::Initialize succeeded
-Interpolator::Initialize started
-LoadShaders succeeded
+=== NEW CODE RUNNING - Interpolator::Initialize started ===
+About to check Vulkan...
+>>> USE_VULKAN is DEFINED at compile time!
+Using Vulkan backend
+>>> Finished Vulkan check block
+Using Vulkan, skipping D3D11 shaders
 Interpolator::Initialize succeeded
 
 [D3D11Device::Initialize] begin
 GPU preference: display_attached (default)
 CreateDXGIFactory1 succeeded
-Trying adapter [NVIDIA GeForce RTX 3050 Ti Laptop GPU] hasOutputs=false
-Trying adapter [AMD Radeon(TM) Graphics] hasOutputs=true
-Adapter AMD Radeon(TM) Graphics D3D11CreateDevice: 0x0
-Adapter AMD Radeon(TM) Graphics feature level: 45312
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
 EnumerateMonitors count: 1
 DXGI outputs available: true
-Active adapter: AMD Radeon(TM) Graphics
+Active adapter: AMD Radeon RX 6700
 D3D11Device::Initialize succeeded
-Interpolator::Initialize started
-LoadShaders succeeded
+=== NEW CODE RUNNING - Interpolator::Initialize started ===
+About to check Vulkan...
+>>> USE_VULKAN is DEFINED at compile time!
+Using Vulkan backend
+>>> Finished Vulkan check block
+Using Vulkan, skipping D3D11 shaders
 Interpolator::Initialize succeeded
 
 [D3D11Device::Initialize] begin
 GPU preference: display_attached (default)
 CreateDXGIFactory1 succeeded
-Trying adapter [NVIDIA GeForce RTX 3050 Ti Laptop GPU] hasOutputs=false
-Trying adapter [AMD Radeon(TM) Graphics] hasOutputs=true
-Adapter AMD Radeon(TM) Graphics D3D11CreateDevice: 0x0
-Adapter AMD Radeon(TM) Graphics feature level: 45312
+Trying adapter [AMD Radeon RX 6700] hasOutputs=true
+Adapter AMD Radeon RX 6700 D3D11CreateDevice: 0x0
+Adapter AMD Radeon RX 6700 feature level: 45312
 EnumerateMonitors count: 1
 DXGI outputs available: true
-Active adapter: AMD Radeon(TM) Graphics
+Active adapter: AMD Radeon RX 6700
 D3D11Device::Initialize succeeded
-Interpolator::Initialize started
-LoadShaders succeeded
-Interpolator::Initialize succeeded
-
-[D3D11Device::Initialize] begin
-GPU preference: display_attached (default)
-CreateDXGIFactory1 succeeded
-Trying adapter [NVIDIA GeForce RTX 3050 Ti Laptop GPU] hasOutputs=false
-Trying adapter [AMD Radeon(TM) Graphics] hasOutputs=true
-Adapter AMD Radeon(TM) Graphics D3D11CreateDevice: 0x0
-Adapter AMD Radeon(TM) Graphics feature level: 45312
-EnumerateMonitors count: 1
-DXGI outputs available: true
-Active adapter: AMD Radeon(TM) Graphics
-D3D11Device::Initialize succeeded
-Interpolator::Initialize started
-LoadShaders succeeded
-Interpolator::Initialize succeeded
-
-[D3D11Device::Initialize] begin
-GPU preference: display_attached (default)
-CreateDXGIFactory1 succeeded
-Trying adapter [NVIDIA GeForce RTX 3050 Ti Laptop GPU] hasOutputs=false
-Trying adapter [AMD Radeon(TM) Graphics] hasOutputs=true
-Adapter AMD Radeon(TM) Graphics D3D11CreateDevice: 0x0
-Adapter AMD Radeon(TM) Graphics feature level: 45312
-EnumerateMonitors count: 1
-DXGI outputs available: true
-Active adapter: AMD Radeon(TM) Graphics
-D3D11Device::Initialize succeeded
-Interpolator::Initialize started
-LoadShaders succeeded
-Interpolator::Initialize succeeded
-
-[D3D11Device::Initialize] begin
-GPU preference: display_attached (default)
-CreateDXGIFactory1 succeeded
-Trying adapter [NVIDIA GeForce RTX 3050 Ti Laptop GPU] hasOutputs=false
-Trying adapter [AMD Radeon(TM) Graphics] hasOutputs=true
-Adapter AMD Radeon(TM) Graphics D3D11CreateDevice: 0x0
-Adapter AMD Radeon(TM) Graphics feature level: 45312
-EnumerateMonitors count: 1
-DXGI outputs available: true
-Active adapter: AMD Radeon(TM) Graphics
-D3D11Device::Initialize succeeded
-Interpolator::Initialize started
-LoadShaders succeeded
-Interpolator::Initialize succeeded
-
-[D3D11Device::Initialize] begin
-GPU preference: display_attached (default)
-CreateDXGIFactory1 succeeded
-Trying adapter [NVIDIA GeForce RTX 3050 Ti Laptop GPU] hasOutputs=false
-Trying adapter [AMD Radeon(TM) Graphics] hasOutputs=true
-Adapter AMD Radeon(TM) Graphics D3D11CreateDevice: 0x0
-Adapter AMD Radeon(TM) Graphics feature level: 45312
-EnumerateMonitors count: 1
-DXGI outputs available: true
-Active adapter: AMD Radeon(TM) Graphics
-D3D11Device::Initialize succeeded
-Interpolator::Initialize started
-LoadShaders succeeded
+=== NEW CODE RUNNING - Interpolator::Initialize started ===
+About to check Vulkan...
+>>> USE_VULKAN is DEFINED at compile time!
+Using Vulkan backend
+>>> Finished Vulkan check block
+Using Vulkan, skipping D3D11 shaders
 Interpolator::Initialize succeeded

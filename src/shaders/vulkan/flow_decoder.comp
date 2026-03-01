@@ -1,0 +1,192 @@
+#version 450
+// ============================================================================
+// PWC-Net Flow Decoder — Joint Bilateral Smoothing + Confidence
+// Adapted from: Sun et al., "PWC-Net: CNNs for Optical Flow Using Pyramid,
+//                Warping, and Cost Volume" (CVPR 2018)
+//
+// Takes the raw per-pixel motion + correlation output from cost_volume and
+// applies edge-preserving spatial regularisation (joint bilateral filter)
+// inspired by MotionSmooth.hlsl.  Also computes a confidence map from
+// correlation quality, uniqueness, and neighbourhood consistency.
+//
+// Inputs  (from cost_volume):
+//   costVolume.xy  = raw displacement (half-res pixels)
+//   costVolume.z   = best ZNCC correlation
+//   costVolume.w   = uniqueness (best − 2nd-best)
+//
+// Outputs:
+//   flowOut      (RG16F)  — smoothed motion vector (half-res pixels)
+//   confidenceOut (R16F)  — per-pixel confidence ∈ [0.03, 0.99]
+// ============================================================================
+
+precision highp float;
+
+// ============================================================================
+// Descriptor Bindings  (must match pipeline layout)
+// ============================================================================
+
+layout(binding = 0) uniform sampler2D costVolume;      // from cost_volume stage
+layout(binding = 1) uniform sampler2D feat0_level0;    // prev features (edge stopping)
+layout(binding = 2) uniform sampler2D feat1_level0;    // curr features
+layout(binding = 3) uniform sampler2D flowPrev;        // temporal prediction (unused iter 0)
+
+layout(binding = 4, rg16f)  uniform writeonly image2D flowOut;
+layout(binding = 5, r16f)   uniform writeonly image2D confidenceOut;
+
+// ============================================================================
+// Push Constants  (56 bytes — matches C++ struct)
+// ============================================================================
+
+layout(push_constant) uniform PushConstants {
+    vec4  costVolumeSize;  // w, h, 1/w, 1/h  (half-res)
+    vec4  srcSize;         // full-res (w, h, 1/w, 1/h)
+    int   level;
+    int   searchRange;
+    int   isLastLevel;
+    int   iteration;
+    float flowScale;
+    float confidenceScale;
+} pc;
+
+// ============================================================================
+// Bilateral filter parameters (adaptive, mirror MotionSmooth.hlsl)
+// ============================================================================
+
+#define KERNEL_R_SMOOTH 3     // radius for smooth regions
+#define KERNEL_R_EDGE   2     // radius near edges
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+vec2 halfUV(vec2 px) {
+    return (px + 0.5) * pc.costVolumeSize.zw;
+}
+
+// ============================================================================
+layout(local_size_x = 16, local_size_y = 16) in;
+
+void main() {
+    ivec2 pixelPos = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 outSize  = ivec2(pc.costVolumeSize.xy);
+
+    if (pixelPos.x >= outSize.x || pixelPos.y >= outSize.y) return;
+
+    vec2 uv = halfUV(vec2(pixelPos));
+
+    // ---- Sample centre pixel from cost volume ----------------------------
+    vec4 cv     = texture(costVolume, uv);
+    vec2 mvC    = cv.xy;                       // raw motion
+    float corrC = cv.z;                        // correlation
+    float uniqC = cv.w;                        // uniqueness
+
+    // ---- Edge strength from feature luma (channel 0) ---------------------
+    vec2 tx = pc.costVolumeSize.zw;
+    float lumaL = texture(feat0_level0, uv + vec2(-tx.x, 0.0)).x;
+    float lumaR = texture(feat0_level0, uv + vec2( tx.x, 0.0)).x;
+    float lumaU = texture(feat0_level0, uv + vec2(0.0, -tx.y)).x;
+    float lumaD = texture(feat0_level0, uv + vec2(0.0,  tx.y)).x;
+    float lumaC = texture(feat0_level0, uv).x;
+
+    float edgeStr = abs(lumaR - lumaL) + abs(lumaD - lumaU);
+
+    // ---- Adapt bilateral parameters to edge strength ----------------------
+    bool  nearEdge = edgeStr > 0.12;
+    int   kR       = nearEdge ? KERNEL_R_EDGE : KERNEL_R_SMOOTH;
+    float sigmaS   = nearEdge ? 1.2 : 3.0;
+    float sigmaL   = nearEdge ? 0.025 : 0.10;
+    float sigmaM   = nearEdge ? 1.8 : 5.0;
+    float confPow  = 1.5;        // exponent for neighbour confidence weight
+
+    float invSigS2 = 1.0 / (2.0 * sigmaS * sigmaS);
+    float invSigL2 = 1.0 / (2.0 * sigmaL * sigmaL);
+    float invSigM2 = 1.0 / (2.0 * sigmaM * sigmaM);
+
+    // ---- Joint bilateral filtering of motion vectors ----------------------
+    vec2  sumMV   = vec2(0.0);
+    float sumW    = 0.0;
+    float sumCorr = 0.0;
+    float sumConf = 0.0;       // for blended confidence
+    float motionConsistency = 0.0;
+    float nNeighbours = 0.0;
+
+    for (int dy = -kR; dy <= kR; dy++) {
+        for (int dx = -kR; dx <= kR; dx++) {
+            vec2 nUV = halfUV(vec2(pixelPos) + vec2(float(dx), float(dy)));
+            nUV = clamp(nUV, vec2(0.001), vec2(0.999));
+
+            vec4  nCV   = texture(costVolume, nUV);
+            vec2  mvN   = nCV.xy;
+            float corrN = nCV.z;
+            float uniqN = nCV.w;
+            float lumaN = texture(feat0_level0, nUV).x;
+
+            // Spatial weight (Gaussian)
+            float dist2 = float(dx * dx + dy * dy);
+            float wS = exp(-dist2 * invSigS2);
+
+            // Luma edge-stopping weight
+            float dL = lumaC - lumaN;
+            float wL = exp(-dL * dL * invSigL2);
+
+            // Motion coherence weight
+            vec2 dmv = mvC - mvN;
+            float wM = exp(-dot(dmv, dmv) * invSigM2);
+
+            // Confidence of neighbour
+            float nConf = (corrN + 1.0) * 0.5;  // map [-1,1]→[0,1]
+            nConf *= (0.3 + 0.7 * clamp(uniqN * 3.0, 0.0, 1.0));
+            float wC = 0.2 + 0.8 * pow(clamp(nConf, 0.0, 1.0), confPow);
+
+            float w = wS * wL * wM * wC;
+            sumMV  += mvN * w;
+            sumW   += w;
+            sumCorr += corrN * w;
+            sumConf += nConf * w;
+
+            // Consistency check (how well does this neighbour agree?)
+            if (dx != 0 || dy != 0) {
+                float agree = exp(-dot(dmv, dmv) * 0.5);
+                motionConsistency += agree;
+                nNeighbours += 1.0;
+            }
+        }
+    }
+
+    vec2  smoothMV   = sumMV / max(sumW, 1e-6);
+    float smoothCorr = sumCorr / max(sumW, 1e-6);
+    float blendedConf = sumConf / max(sumW, 1e-6);
+    motionConsistency /= max(nNeighbours, 1.0);
+
+    // ---- Edge preservation: blend back towards original near edges --------
+    float preserve = clamp(
+        ((corrC + 1.0) * 0.5) * smoothstep(0.08, 0.25, edgeStr),
+        0.0, 0.5);
+    vec2 finalMV = mix(smoothMV, mvC, preserve);
+
+    // ---- Confidence computation -------------------------------------------
+    float matchQuality = (smoothCorr + 1.0) * 0.5;                // base from ZNCC
+    float uniqueFactor = 0.3 + 0.7 * clamp(uniqC * 3.0, 0.0, 1.0);
+    float texWeight    = clamp(texture(feat0_level0, uv).w * 3.0, 0.0, 1.0); // variance
+    float consistFactor = 0.4 + 0.6 * motionConsistency;
+
+    float confidence = matchQuality * uniqueFactor
+                     * mix(0.5, 1.0, texWeight)
+                     * consistFactor;
+
+    // Static pixel floor
+    float mvMag2 = dot(finalMV, finalMV);
+    float lumaDiff = abs(lumaC - texture(feat1_level0, uv).x);
+    if (mvMag2 < 0.25 && lumaDiff < 0.02) {
+        confidence = max(confidence, 0.92);
+    }
+
+    confidence = clamp(confidence * pc.confidenceScale, 0.03, 0.99);
+
+    // Scale flow
+    finalMV *= pc.flowScale;
+
+    // ---- Write outputs ---------------------------------------------------
+    imageStore(flowOut, pixelPos, vec4(finalMV, 0.0, 0.0));
+    imageStore(confidenceOut, pixelPos, vec4(confidence, 0.0, 0.0, 0.0));
+}

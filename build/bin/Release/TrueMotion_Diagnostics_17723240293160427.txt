@@ -1,0 +1,43 @@
+=== True Motion Fidelity Engine Diagnostics ===
+Capture Backend: WGC
+WGC Captured Frames: 12
+WGC Dropped Frames: 0
+Force WGC: No
+Render GPU: AMD Radeon RX 6700
+DXGI Outputs Available: Yes
+System Monitor Fallback: No
+Monitor Refresh Rate: 180 Hz
+Monitor Max Hz: 180 Hz
+Capture FPS: 0.9189
+Actual Capture Rate: 0.490464 FPS
+Output FPS: 0.72932 FPS
+Frame Interval Avg: 1.78434 ms
+Frame Interval Min: 0.0222227 ms
+Frame Interval Max: 2.18888 ms
+Frame Jitter: 2.16666 ms
+Frame Count: 12
+
+=== Last 60 Frame Intervals (ms) ===
+0.0222227
+1.82778
+1.83333
+1.91667
+2.18888
+1.93889
+2.1
+2.03889
+1.97777
+1.74444
+2.03889
+
+=== System Information ===
+Windows Version: 6.2
+Build Number: 9200
+Admin Rights: No
+
+=== Capture Configuration ===
+Interpolation: Enabled
+Output Multiplier: 2x
+Pacing Delay Factor: 0.9
+Motion Model: Adaptive
+Minimal Motion Pipeline: Disabled

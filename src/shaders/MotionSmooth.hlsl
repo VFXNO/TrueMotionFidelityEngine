@@ -42,17 +42,17 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     float lD = LumaIn.Load(int3(clamp(pos + int2( 0, 1), int2(0,0), maxPos), 0));
     float edgeStr = abs(lR - lL) + abs(lD - lU);
 
-    // Sigma parameters for the bilateral filter
-    float sigmaSpatial = lerp(2.5, 1.0, saturate(edgeStr * edgeScale));
-    float sigmaLuma    = lerp(0.08, 0.03, saturate(edgeStr * edgeScale));
-    float sigmaMotion  = lerp(4.0, 1.5, saturate(edgeStr * edgeScale));
+    // Sigma parameters for the bilateral filter - improved for quality
+    float sigmaSpatial = lerp(3.0, 1.2, saturate(edgeStr * edgeScale));
+    float sigmaLuma    = lerp(0.10, 0.025, saturate(edgeStr * edgeScale));
+    float sigmaMotion  = lerp(5.0, 1.8, saturate(edgeStr * edgeScale));
 
     float invSigmaSpatial2 = 1.0 / (2.0 * sigmaSpatial * sigmaSpatial);
     float invSigmaLuma2    = 1.0 / (2.0 * sigmaLuma * sigmaLuma);
     float invSigmaMotion2  = 1.0 / (2.0 * sigmaMotion * sigmaMotion);
 
-    // Adaptive kernel radius: smaller near edges
-    int kernelR = (edgeStr > 0.15) ? 1 : 2;
+    // Adaptive kernel radius: larger for quality, smaller near edges
+    int kernelR = (edgeStr > 0.12) ? 2 : 3;
 
     float2 sumMV   = float2(0, 0);
     float  sumConf = 0;
